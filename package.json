@@ -1,6 +1,6 @@
 {
   "name": "react-app-server",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "license": "MIT",
   "bin": {
     "rs": "./bin/rs-bin.js"
