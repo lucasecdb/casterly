@@ -133,7 +133,7 @@ const getBaseWebpackConfig = (options?: Options): Configuration => {
     mode: webpackMode,
     name: isServer ? 'server' : 'client',
     target: isServer ? 'node' : 'web',
-    devtool: dev && !isServer ? 'cheap-module-source-map' : false,
+    devtool: dev ? 'cheap-module-source-map' : false,
     context: paths.appPath,
     externals,
     entry: {
