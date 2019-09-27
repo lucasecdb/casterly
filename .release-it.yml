@@ -1,9 +1,9 @@
 hooks:
-  after:bump
-    - yarn update-changelog
+  after:bump: yarn update-changelog
 git:
   tagName: 'v${version}'
   tagAnnotation: 'Release v${version}'
   commitMessage: 'Release v${version}'
 npm:
   publish: true
+  access: public
