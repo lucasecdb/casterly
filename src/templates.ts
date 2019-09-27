@@ -51,12 +51,8 @@ export const ok = (args?: TemplateInput) => {
   ${styles.map(srcToPreloadStyle).join('\n')}
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="theme-color" content="#2962ff">
-  <link rel="manifest" href="/manifest.json">
   ${getHeadTags(head)}
-  <style>html,body{height: 100%;}body{overscroll-behavior-y:none;}</style>
   ${styles.map(srcToLinkTag).join('\n')}
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Libre+Franklin:300,400,500,600|Material+Icons">
   ${scripts.map(srcToScriptTag).join('\n')}
 </head>
 <body ${bodyAttributes}>
@@ -69,27 +65,7 @@ export const ok = (args?: TemplateInput) => {
 </html>`
 }
 
-interface ErrorInput {
-  err: Error
-  logs: string[]
-  errors: string[]
-  warnings: string[]
-}
-
-const logsOrMessage = (logs: string[], defaultMessage = '') => {
-  if (logs.length) {
-    return logs.join('\n')
-  }
-
-  return defaultMessage
-}
-
-export const error = ({
-  err,
-  logs = [],
-  errors = [],
-  warnings = [],
-}: ErrorInput) => `<!DOCTYPE html>
+export const errorPage = (err: Error) => `<!DOCTYPE html>
 <html>
 <head>
   <meta name="viewport" content="width=device-width" />
@@ -105,18 +81,6 @@ export const error = ({
   <div class="bg-light-red ph4 white w-100 overflow-x-auto">
     <h1>${err.message}</h1>
     <pre>${err.stack}</pre>
-  </div>
-  <div class="mt4 pa3 w-100 log">
-    Logs:
-    <pre>${logsOrMessage(logs, 'No normal logs were logged.')}</pre>
-  </div>
-  <div class="bg-light-yellow pa3 w-100 log">
-    Warnings:
-    <pre>${logsOrMessage(warnings, 'No warnings were logged.')}</pre>
-  </div>
-  <div class="pa3 w-100 log">
-    Errors:
-    <pre>${logsOrMessage(errors, 'No errors were logged.')}</pre>
   </div>
 </body>
 </html>`

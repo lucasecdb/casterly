@@ -4,7 +4,7 @@ import * as path from 'path'
 import { promisify } from 'util'
 
 import * as Log from './output/log'
-import { error, ok } from './templates'
+import { errorPage, ok } from './templates'
 import { appDist, appDistServer } from '../config/paths'
 import {
   ASSET_MANIFEST_FILE,
@@ -102,7 +102,7 @@ const handleRender = async (req: Request, res: Response) => {
     Log.error('An error ocurred while trying to server-side render')
     console.error(err)
 
-    res.write(error({ err, logs: [], errors: [], warnings: [] }))
+    res.write(errorPage(err))
   } finally {
     res.end()
   }
