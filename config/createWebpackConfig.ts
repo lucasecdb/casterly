@@ -221,7 +221,7 @@ const getBaseWebpackConfig = (options?: Options): Configuration => {
                 ],
                 plugins: [
                   ...baseBabelOptions.plugins,
-                  !isServer && dev && require.resolve('react-hot-loader/babel'),
+                  !isServer && dev && 'react-hot-loader/babel',
                 ].filter(Boolean),
               },
             },
