@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Connect to chrome devtools inspector using the `inspector` node package.
 
+### Changed
+- Update proxy middleware to use config from the app's `package.json`.
+
+### Removed
+- Custom config added in template response, it should be configured in userland.
+
 ## [0.1.3] - 2019-09-27
 ### Fixed
 - Error when running `rs build` of invalid call to `map`.
