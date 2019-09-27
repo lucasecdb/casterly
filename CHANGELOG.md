@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Fixed
-- Sass imports not working (`File to import not found or unreadable: @material/animation/functions.`).
+- Sass imports not working (`File to import not found or unreadable`).
 - Error when statically linking the package (`Error: Cannot find module 'react-hot-loader/babel'`).
 
 ## [0.1.1] - 2019-09-27
