@@ -25,7 +25,6 @@ const serverDistFolder = path.join(distFolder, 'server')
 
 const dotenv = resolveApp('.env')
 const appPath = resolveApp('.')
-const rootPath = resolveApp('../..')
 const appDist = distFolder
 const appDistServer = serverDistFolder
 const appDistPublic = path.join(distFolder, 'public')
@@ -38,7 +37,14 @@ const appSrc = resolveApp('src')
 const appTsConfig = resolveApp('tsconfig.json')
 const yarnLockFile = resolveApp('yarn.lock')
 const appNodeModules = resolveApp('node_modules')
-const rootNodeModules = path.resolve(rootPath, 'node_modules')
+
+const splittedAppPath = [''].concat(appPath.split(path.sep))
+const appNodePath: string[] = []
+
+for (let i = splittedAppPath.length - 1; i > 0; i--) {
+  appNodePath.push(path.join(splittedAppPath.join(path.sep), 'node_modules'))
+  splittedAppPath.pop()
+}
 
 export {
   dotenv,
@@ -55,6 +61,6 @@ export {
   appTsConfig,
   yarnLockFile,
   appNodeModules,
+  appNodePath,
   moduleFileExtensions,
-  rootNodeModules,
 }
