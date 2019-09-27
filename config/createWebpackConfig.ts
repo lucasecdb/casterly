@@ -44,10 +44,7 @@ const getBaseWebpackConfig = (options?: Options): Configuration => {
   const sassLoaderConfig = {
     loader: 'sass-loader',
     options: {
-      includePaths: [
-        path.resolve('node_modules'),
-        path.resolve('../../node_modules'),
-      ],
+      includePaths: require.main.paths,
     },
   }
 
