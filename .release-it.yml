@@ -1,10 +1,10 @@
-scripts:
-  beforeStage:
+hooks:
+  after:bump
     - yarn update-changelog
     - yarn update-versions
 git:
-  tagName: 'v${version}',
-  tagAnnotation: 'Release v${version}',
+  tagName: 'v${version}'
+  tagAnnotation: 'Release v${version}'
   commitMessage: 'Release v${version}'
 npm:
   publish: true
