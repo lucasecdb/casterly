@@ -95,7 +95,11 @@ const getBaseWebpackConfig = (options?: Options): Configuration => {
     ? nodeExternals({
         // include material and packages with "esm" in their path in the server
         // bundle because these files are es6 modules, and we need babel to compile them
-        whitelist: [/^@material(?:\/|\\{1,2})/, /esm(?:\.|\/|\\\\{1,2})/],
+        whitelist: [
+          /^@material(?:\/|\\{1,2})/,
+          /esm(?:\.|\/|\\\\{1,2})/,
+          /^@apollo(?:\/|\\{1,2})/,
+        ],
       })
     : undefined
 
