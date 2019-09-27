@@ -44,7 +44,7 @@ const getBaseWebpackConfig = (options?: Options): Configuration => {
   const sassLoaderConfig = {
     loader: 'sass-loader',
     options: {
-      includePaths: require.main.paths,
+      includePaths: paths.appNodePath,
     },
   }
 
@@ -340,8 +340,10 @@ const getBaseWebpackConfig = (options?: Options): Configuration => {
       // If you require a missing module and then `npm install` it, you still have
       // to restart the development server for Webpack to discover it. This plugin
       // makes the discovery automatic so you don't have to restart.
-      dev && new WatchMissingNodeModulesPlugin(paths.appNodeModules),
-      dev && new WatchMissingNodeModulesPlugin(paths.rootNodeModules),
+      ...(dev &&
+        paths.appNodePath.map(
+          nodeModulesPath => new WatchMissingNodeModulesPlugin(nodeModulesPath)
+        )),
       !isServer &&
         new ForkTsCheckerPlugin({
           typescript: require.resolve('typescript', {
