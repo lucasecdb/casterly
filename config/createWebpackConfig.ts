@@ -1,5 +1,5 @@
 import path from 'path'
-import webpack, { Configuration } from 'webpack'
+import webpack, { Configuration, ExternalsElement } from 'webpack'
 // @ts-ignore
 import ExtractCssChunks from 'extract-css-chunks-webpack-plugin'
 import CaseSensitivePathsPlugin from 'case-sensitive-paths-webpack-plugin'
@@ -9,7 +9,7 @@ import ManifestPlugin from 'webpack-manifest-plugin'
 // @ts-ignore
 import ModuleNotFoundPlugin from 'react-dev-utils/ModuleNotFoundPlugin'
 import ForkTsCheckerPlugin from 'fork-ts-checker-webpack-plugin'
-import nodeExternals from 'webpack-node-externals'
+import resolve from 'resolve'
 
 import ChunkNamesPlugin from './webpack/plugins/ChunkNamesPlugin'
 import RequireCacheHotReloaderPlugin from './webpack/plugins/RequireCacheHotReloaderPlugin'
@@ -34,6 +34,15 @@ const cssRegex = /\.global\.css$/
 const cssModuleRegex = /\.css$/
 const sassRegex = /\.global\.(scss|sass)$/
 const sassModuleRegex = /\.(scss|sass)$/
+
+const resolveRequest = (request: string, issuer: string) => {
+  const basedir =
+    issuer.endsWith(path.posix.sep) || issuer.endsWith(path.win32.sep)
+      ? issuer
+      : path.dirname(issuer)
+
+  return resolve.sync(request, { basedir })
+}
 
 const getBaseWebpackConfig = (options?: Options): Configuration => {
   const { isServer = false, dev = false } = options || {}
@@ -91,16 +100,72 @@ const getBaseWebpackConfig = (options?: Options): Configuration => {
   const chunkFilename = dev ? '[name]' : '[name].[contenthash]'
   const extractedCssFilename = dev ? '[name]' : '[name].[contenthash:8]'
 
-  const externals = isServer
-    ? nodeExternals({
-        // include material and packages with "esm" in their path in the server
-        // bundle because these files are es6 modules, and we need babel to compile them
-        whitelist: [
-          /^@material(?:\/|\\{1,2})/,
-          /esm(?:\.|\/|\\\\{1,2})/,
-          /^@apollo(?:\/|\\{1,2})/,
-        ],
-      })
+  const externals: ExternalsElement[] | undefined = isServer
+    ? [
+        (context, request, callbackFn) => {
+          // make typescript happy because this function
+          // can be called without arguments
+          const callback = (callbackFn as unknown) as (
+            error?: any,
+            result?: any
+          ) => void
+
+          let res: string | undefined
+
+          try {
+            // Resolve the import with the webpack provided context, this
+            // ensures we're resolving the correct version when multiple
+            // exist.
+            res = resolveRequest(request, `${context}/`)
+          } catch (_) {
+            // If the request cannot be resolved, we need to tell webpack to
+            // "bundle" it so that webpack shows an error (that it cannot be
+            // resolved).
+            return callback()
+          }
+
+          // Same as above, if the request cannot be resolved we need to have
+          // webpack "bundle" it so it surfaces the not found error.
+          if (!res) {
+            callback()
+          }
+
+          // Bundled Node.js code is relocated without its node_modules tree.
+          // This means we need to make sure its request resolves to the same
+          // package that'll be available at runtime. If it's not identical,
+          // we need to bundle the code (even if it _should_ be external).
+          let baseRes
+          try {
+            baseRes = resolveRequest(request, `${dir}/`)
+          } catch (_) {
+            // ignore me
+          }
+
+          // Same as above: if the package, when required from the root,
+          // would be different from what the real resolution would use, we
+          // cannot externalize it.
+          if (baseRes !== res) {
+            return callback()
+          }
+
+          // Webpack itself has to be compiled because it doesn't always use module relative paths
+          if (
+            res.match(/node_modules[/\\]webpack/) ||
+            res.match(/node_modules[/\\]css-loader/)
+          ) {
+            return callback()
+          }
+
+          // Anything else that is standard JavaScript within `node_modules`
+          // can be externalized.
+          if (res.match(/node_modules[/\\].*\.js$/)) {
+            return callback(undefined, `commonjs ${request}`)
+          }
+
+          // Default behavior: bundle the code!
+          callback()
+        },
+      ]
     : undefined
 
   const baseBabelOptions = {
