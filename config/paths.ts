@@ -5,6 +5,10 @@ const appDirectory = fs.realpathSync(process.cwd())
 const resolveApp = (relativePath: string) =>
   path.resolve(appDirectory, relativePath)
 
+const serverDirectory = path.resolve(__dirname, '..')
+const resolveServer = (relativePath: string) =>
+  path.resolve(serverDirectory, relativePath)
+
 const moduleFileExtensions = ['mjs', 'js', 'json', 'jsx', 'ts', 'tsx']
 
 // Resolve file paths in the same order as webpack
@@ -46,6 +50,8 @@ for (let i = splittedAppPath.length - 1; i > 0; i--) {
   splittedAppPath.pop()
 }
 
+const serverClientJs = resolveServer('src/client/index.js')
+
 export {
   dotenv,
   appPath,
@@ -63,4 +69,5 @@ export {
   appNodeModules,
   appNodePath,
   moduleFileExtensions,
+  serverClientJs,
 }
