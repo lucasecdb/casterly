@@ -70,7 +70,9 @@ const getBaseWebpackConfig = async (
   const sassLoaderConfig = {
     loader: 'sass-loader',
     options: {
-      includePaths: paths.appNodePath,
+      sassOptions: {
+        includePaths: paths.appNodePath,
+      },
     },
   }
 
@@ -197,6 +199,7 @@ const getBaseWebpackConfig = async (
     babelrc: false,
     presets: [
       require.resolve('@babel/preset-env'),
+      require.resolve('@babel/preset-react'),
       require.resolve('@babel/preset-typescript'),
     ],
     plugins: [
