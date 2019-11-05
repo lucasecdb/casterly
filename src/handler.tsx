@@ -2,12 +2,13 @@ import { Request, Response } from 'express'
 import * as fs from 'fs'
 import * as path from 'path'
 import React, { StrictMode } from 'react'
-import ReactDOM from 'react-dom/server'
+import { renderToString } from 'react-dom/server'
 import { Helmet } from 'react-helmet'
 import { promisify } from 'util'
 
+import Document from './components/Document'
 import * as Log from './output/log'
-import { errorPage, ok } from './templates'
+import { errorPage } from './templates'
 import { appDist, appDistServer } from '../config/paths'
 import {
   ASSET_MANIFEST_FILE,
@@ -36,7 +37,7 @@ function interopDefault(mod: any) {
 }
 
 async function defaultRenderFn({ container }: RenderOptions) {
-  return { markup: ReactDOM.renderToString(container) }
+  return { markup: renderToString(container) }
 }
 
 const readFile = promisify(fs.readFile)
@@ -79,10 +80,10 @@ const handleRender = async (req: Request, res: Response) => {
   try {
     if (renderClient) {
       res.write(
-        ok({
-          scripts: clientAssetScripts,
-          styles,
-        })
+        '<!doctype html>' +
+          renderToString(
+            <Document scripts={clientAssetScripts} styles={styles} />
+          )
       )
     } else {
       const createRootComponent = (await import(serverAssetScript).then(
@@ -104,13 +105,13 @@ const handleRender = async (req: Request, res: Response) => {
         server: true,
       })
 
-      const root = (
+      const appRoot = (
         <StrictMode>
           <Component />
         </StrictMode>
       )
 
-      const renderResult = await renderFn({ container: root })
+      const renderResult = await renderFn({ container: appRoot })
 
       const head = Helmet.rewind()
 
@@ -120,13 +121,16 @@ const handleRender = async (req: Request, res: Response) => {
         })
       } else {
         res.write(
-          ok({
-            markup: renderResult.markup,
-            head,
-            scripts: clientAssetScripts,
-            state: renderResult.state,
-            styles,
-          })
+          '<!doctype html>' +
+            renderToString(
+              <Document
+                markup={renderResult.markup}
+                state={renderResult.state}
+                head={head}
+                scripts={clientAssetScripts}
+                styles={styles}
+              />
+            )
         )
       }
     }
