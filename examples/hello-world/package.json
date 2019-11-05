@@ -4,9 +4,14 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
+  "scripts": {
+    "dev": "rs dev",
+    "start": "rs start",
+    "build": "rs build"
+  },
   "dependencies": {
     "react": "^16.11.0",
-    "react-dom": "^16.11.0",
-    "react-app-server": "latest"
+    "react-app-server": "file:../../.",
+    "react-dom": "^16.11.0"
   }
 }
