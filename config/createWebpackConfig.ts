@@ -23,6 +23,7 @@ import * as paths from './paths'
 import {
   ASSET_MANIFEST_FILE,
   STATIC_CHUNKS_PATH,
+  STATIC_COMPONENTS_PATH,
   STATIC_MEDIA_PATH,
   STATIC_RUNTIME_HOT,
   STATIC_RUNTIME_MAIN,
@@ -198,6 +199,8 @@ const getBaseWebpackConfig = (options?: Options): Configuration => {
     cacheCompression: false,
   }
 
+  const appPath = path.join(STATIC_COMPONENTS_PATH, 'index')
+
   return {
     mode: webpackMode,
     name: isServer ? 'server' : 'client',
@@ -209,7 +212,12 @@ const getBaseWebpackConfig = (options?: Options): Configuration => {
       ...(dev && !isServer
         ? { [STATIC_RUNTIME_HOT]: 'webpack-hot-middleware/client' }
         : {}),
-      [STATIC_RUNTIME_MAIN]: !isServer ? paths.appIndexJs : paths.appStartJs,
+      ...(!isServer
+        ? {
+            [STATIC_RUNTIME_MAIN]: paths.serverClientJs,
+          }
+        : {}),
+      [appPath]: paths.appIndexJs,
     },
     output: {
       publicPath: '/',

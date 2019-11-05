@@ -59,7 +59,7 @@ export const ok = (args?: TemplateInput) => {
   ${getNoScriptTags(head)}
   <div id="root">${markup}</div>
   <script nonce>
-    __APOLLO_STATE__ = ${serialize(state || {}, { isJSON: true })}
+    __STATE__ = ${serialize(state || {}, { isJSON: true })}
   </script>
 </body>
 </html>`

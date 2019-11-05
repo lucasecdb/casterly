@@ -13,6 +13,7 @@
     "start": "NODE_ENV=development node dist/server/start-dev.js",
     "start-prod": "NODE_ENV=production node dist/server/start.js",
     "build": "tsc",
+    "build-watch": "tsc --watch",
     "lint": "tsc --noEmit --pretty && yarn eslint --ext ts src config bin scripts",
     "release": "release-it",
     "update-changelog": "node ./scripts/update-changelog.js"
@@ -78,7 +79,9 @@
     "@types/http-proxy-middleware": "^0.19.2",
     "@types/node": "^12.7.8",
     "@types/node-fetch": "^2.5.0",
+    "@types/react": "^16.9.11",
     "@types/react-dev-utils": "^9.0.1",
+    "@types/react-dom": "^16.9.3",
     "@types/react-helmet": "^5.0.11",
     "@types/serialize-javascript": "^1.5.0",
     "@types/terser-webpack-plugin": "^1.2.1",
