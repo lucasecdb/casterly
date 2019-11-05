@@ -199,7 +199,6 @@ const getBaseWebpackConfig = async (
     babelrc: false,
     presets: [
       require.resolve('@babel/preset-env'),
-      require.resolve('@babel/preset-react'),
       require.resolve('@babel/preset-typescript'),
     ],
     plugins: [
