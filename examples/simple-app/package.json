@@ -1,0 +1,12 @@
+{
+  "name": "simple-app",
+  "private": true,
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "react": "^16.11.0",
+    "react-dom": "^16.11.0",
+    "react-app-server": "latest"
+  }
+}
