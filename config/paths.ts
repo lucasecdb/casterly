@@ -9,13 +9,18 @@ const serverDirectory = path.resolve(__dirname, '..')
 const resolveServer = (relativePath: string) =>
   path.resolve(serverDirectory, relativePath)
 
-const moduleFileExtensions = ['mjs', 'js', 'json', 'jsx', 'ts', 'tsx']
+const moduleFileExtensions = ['mjs', 'js', 'json', 'jsx']
+
+const typescriptFileExtensions = ['ts', 'tsx']
 
 // Resolve file paths in the same order as webpack
 const resolveModule = (resolveFn = resolveApp, filePath: string) => {
-  const extension = moduleFileExtensions.find(extension =>
-    fs.existsSync(resolveFn(`${filePath}.${extension}`))
-  )
+  let extension = undefined
+  ;[moduleFileExtensions, typescriptFileExtensions].forEach(extensions => {
+    extension = extensions.find(extension =>
+      fs.existsSync(resolveFn(`${filePath}.${extension}`))
+    )
+  })
 
   if (extension) {
     return resolveFn(`${filePath}.${extension}`)
@@ -69,5 +74,6 @@ export {
   appNodeModules,
   appNodePath,
   moduleFileExtensions,
+  typescriptFileExtensions,
   serverClientJs,
 }

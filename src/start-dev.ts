@@ -11,7 +11,7 @@ import { logStore } from './output/logger'
 
 const PORT = 3000
 
-const start = () => {
+const start = async () => {
   try {
     inspector.open()
     console.log(
@@ -34,7 +34,8 @@ const start = () => {
   const app = express()
 
   proxyMiddleware.set(app)
-  webpackMiddleware.set(app)
+
+  await webpackMiddleware.set(app)
 
   app.use(server)
 
