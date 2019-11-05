@@ -68,6 +68,7 @@ async function build(
         })
       } else {
         messages = formatWebpackMessages(
+          // @ts-ignore
           stats.toJson({ all: false, warnings: true, errors: true })
         )
       }
@@ -173,6 +174,7 @@ export default function startBuild() {
 
         console.log('File sizes after gzip:\n')
         printFileSizesAfterBuild(
+          // @ts-ignore
           clientStats,
           previousFileSizes,
           paths.appDist,
