@@ -120,6 +120,8 @@ const getBaseWebpackConfig = async (
 
   const useTypescript = typescriptPath && (await fileExists(paths.appTsConfig))
 
+  const hasServiceWorker = await fileExists(paths.appServiceWorker)
+
   const chunkFilename = dev ? '[name]' : '[name].[contenthash]'
   const extractedCssFilename = dev ? '[name]' : '[name].[contenthash:8]'
 
@@ -430,7 +432,7 @@ const getBaseWebpackConfig = async (
       dev && new RequireCacheHotReloaderPlugin(),
       !isServer && new BuildManifestPlugin(),
       isServer && new PagesManifestPlugin(),
-      !isServer && createWorkboxPlugin({ dev, isServer }),
+      !isServer && hasServiceWorker && createWorkboxPlugin({ dev, isServer }),
       // Fix dynamic imports on server bundle
       isServer && new SSRImportPlugin(),
       // This gives some necessary context to module not found errors, such as
