@@ -23,7 +23,7 @@ const Document: React.FC<Props> = ({
   const bodyAttributes = (head && head.bodyAttributes.toComponent()) || {}
 
   return (
-    <html {...htmlAttributes}>
+    <html {...htmlAttributes} inputMode={undefined}>
       <head>
         {styles.map(src => (
           <link key={src} rel="prefetch" href={src} as="style" />
@@ -47,7 +47,7 @@ const Document: React.FC<Props> = ({
           <script key={src} src={src} defer />
         ))}
       </head>
-      <body {...bodyAttributes}>
+      <body {...bodyAttributes} inputMode={undefined}>
         {head && head.noscript && head.noscript.toComponent()}
         <div id="root" dangerouslySetInnerHTML={{ __html: markup }} />
         <script
