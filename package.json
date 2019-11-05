@@ -66,7 +66,6 @@
     "webpack": "^4.41.0",
     "webpack-dev-middleware": "^3.7.1",
     "webpack-hot-middleware": "^2.25.0",
-    "webpack-manifest-plugin": "^2.1.2",
     "workbox-webpack-plugin": "^5.0.0-beta.0"
   },
   "devDependencies": {
