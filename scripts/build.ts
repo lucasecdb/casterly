@@ -34,12 +34,19 @@ const measureFileSizesBeforeBuild = FileSizeReporter.measureFileSizesBeforeBuild
 const printFileSizesAfterBuild = FileSizeReporter.printFileSizesAfterBuild
 
 // Create the production build and print the deployment instructions.
-function build(previousFileSizes: OpaqueFileSizes, writeStatsJson = false) {
+async function build(
+  previousFileSizes: OpaqueFileSizes,
+  writeStatsJson = false
+): Promise<{
+  stats: Stats
+  previousFileSizes: OpaqueFileSizes
+  warnings: string[]
+}> {
   console.log('Creating an optimized production build...')
 
   const compiler: MultiCompiler = webpack([
-    getBaseWebpackConfig(),
-    getBaseWebpackConfig({ isServer: true }),
+    await getBaseWebpackConfig(),
+    await getBaseWebpackConfig({ isServer: true }),
   ])
 
   return new Promise<{

@@ -9,6 +9,7 @@ import ModuleScopePlugin from 'react-dev-utils/ModuleScopePlugin'
 import ModuleNotFoundPlugin from 'react-dev-utils/ModuleNotFoundPlugin'
 import ForkTsCheckerPlugin from 'fork-ts-checker-webpack-plugin'
 import resolve from 'resolve'
+import fs, { promises as fsp } from 'fs'
 
 import ChunkNamesPlugin from './webpack/plugins/ChunkNamesPlugin'
 import RequireCacheHotReloaderPlugin from './webpack/plugins/RequireCacheHotReloaderPlugin'
@@ -45,7 +46,22 @@ const resolveRequest = (request: string, issuer: string) => {
   return resolve.sync(request, { basedir })
 }
 
-const getBaseWebpackConfig = (options?: Options): Configuration => {
+const fileExists = async (filePath: string) => {
+  try {
+    await fsp.access(filePath, fs.constants.F_OK)
+    return true
+  } catch (err) {
+    if (err.code === 'ENOENT') {
+      return false
+    }
+
+    throw err
+  }
+}
+
+const getBaseWebpackConfig = async (
+  options?: Options
+): Promise<Configuration> => {
   const { isServer = false, dev = false } = options || {}
 
   // Get environment variables to inject into our app.
@@ -97,6 +113,12 @@ const getBaseWebpackConfig = (options?: Options): Configuration => {
   const outputDir = isServer ? 'server' : ''
   const outputPath = path.join(dir, outputDir)
   const webpackMode = dev ? 'development' : 'production'
+
+  const typescriptPath = require.resolve('typescript', {
+    paths: [paths.appNodeModules],
+  })
+
+  const useTypescript = typescriptPath && (await fileExists(paths.appTsConfig))
 
   const chunkFilename = dev ? '[name]' : '[name].[contenthash]'
   const extractedCssFilename = dev ? '[name]' : '[name].[contenthash:8]'
@@ -249,7 +271,12 @@ const getBaseWebpackConfig = (options?: Options): Configuration => {
       modules: ['node_modules'].concat(
         process.env.NODE_PATH.split(path.delimiter).filter(Boolean)
       ),
-      extensions: paths.moduleFileExtensions.map(ext => `.${ext}`),
+      extensions: [
+        ...(useTypescript
+          ? paths.typescriptFileExtensions.map(ext => '.' + ext)
+          : []),
+        ...paths.moduleFileExtensions.map(ext => `.${ext}`),
+      ],
       plugins: [new ModuleScopePlugin(paths.appSrc, [paths.appPackageJson])],
       alias: {
         'react-dom': dev ? '@hot-loader/react-dom' : 'react-dom',
@@ -423,10 +450,9 @@ const getBaseWebpackConfig = (options?: Options): Configuration => {
           )
         : []),
       !isServer &&
+        useTypescript &&
         new ForkTsCheckerPlugin({
-          typescript: require.resolve('typescript', {
-            paths: [paths.appNodeModules],
-          }),
+          typescript: typescriptPath,
           async: dev,
           useTypescriptIncrementalApi: true,
           checkSyntacticErrors: true,
