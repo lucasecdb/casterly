@@ -14,7 +14,7 @@
     "start-prod": "NODE_ENV=production node dist/server/start.js",
     "build": "tsc",
     "build-watch": "tsc --watch",
-    "lint": "tsc --noEmit --pretty && yarn eslint --ext ts src config bin scripts",
+    "lint": "tsc --noEmit --pretty && yarn eslint --ext ts server config bin scripts",
     "release": "release-it",
     "update-changelog": "node ./scripts/update-changelog.js"
   },
