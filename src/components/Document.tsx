@@ -1,8 +1,9 @@
 /* eslint-disable jsx-a11y/html-has-lang */
 
 import React from 'react'
-import { HelmetData } from 'react-helmet'
 import serialize from 'serialize-javascript'
+
+import { HelmetData } from '../../lib/helmet'
 
 interface Props {
   markup?: string
