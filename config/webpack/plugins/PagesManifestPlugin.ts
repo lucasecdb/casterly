@@ -12,6 +12,10 @@ export default class PagesManifestPlugin implements Plugin {
       for (const chunk of chunks) {
         const pagePath = chunk.name
 
+        if (!pagePath) {
+          continue
+        }
+
         // Write filename, replace any backslashes in path (on windows) with forwardslashes for cross-platform consistency.
         pages[`/${pagePath.replace(/\\/g, '/')}`] = chunk.name.replace(
           /\\/g,
