@@ -11,6 +11,7 @@ const STATIC_RUNTIME_WEBPACK = path.join(STATIC_RUNTIME_PATH, 'webpack')
 const STATIC_RUNTIME_HOT = path.join(STATIC_RUNTIME_PATH, 'hot')
 
 const ASSET_MANIFEST_FILE = 'asset-manifest.json'
+const PAGES_MANIFEST_FILE = 'pages-manifest.json'
 
 export {
   STATIC_FOLDER,
@@ -22,4 +23,5 @@ export {
   STATIC_RUNTIME_WEBPACK,
   STATIC_RUNTIME_HOT,
   ASSET_MANIFEST_FILE,
+  PAGES_MANIFEST_FILE,
 }

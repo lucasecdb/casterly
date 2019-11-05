@@ -5,7 +5,6 @@ import ExtractCssChunks from 'extract-css-chunks-webpack-plugin'
 import CaseSensitivePathsPlugin from 'case-sensitive-paths-webpack-plugin'
 import WatchMissingNodeModulesPlugin from 'react-dev-utils/WatchMissingNodeModulesPlugin'
 import ModuleScopePlugin from 'react-dev-utils/ModuleScopePlugin'
-import ManifestPlugin from 'webpack-manifest-plugin'
 // @ts-ignore
 import ModuleNotFoundPlugin from 'react-dev-utils/ModuleNotFoundPlugin'
 import ForkTsCheckerPlugin from 'fork-ts-checker-webpack-plugin'
@@ -14,6 +13,8 @@ import resolve from 'resolve'
 import ChunkNamesPlugin from './webpack/plugins/ChunkNamesPlugin'
 import RequireCacheHotReloaderPlugin from './webpack/plugins/RequireCacheHotReloaderPlugin'
 import SSRImportPlugin from './webpack/plugins/SSRImportPlugin'
+import BuildManifestPlugin from './webpack/plugins/BuildManifestPlugin'
+import PagesManifestPlugin from './webpack/plugins/PagesManifestPlugin'
 import { Options } from './webpack/types'
 import { getStyleLoaders } from './webpack/styles'
 import { createWorkboxPlugin } from './webpack/workbox'
@@ -21,7 +22,6 @@ import { createOptimizationConfig } from './webpack/optimization'
 import getClientEnvironment from './env'
 import * as paths from './paths'
 import {
-  ASSET_MANIFEST_FILE,
   STATIC_CHUNKS_PATH,
   STATIC_COMPONENTS_PATH,
   STATIC_MEDIA_PATH,
@@ -401,9 +401,8 @@ const getBaseWebpackConfig = (options?: Options): Configuration => {
       // Even though require.cache is server only we have to clear assets from both compilations
       // This is because the client compilation generates the asset manifest that's used on the server side
       dev && new RequireCacheHotReloaderPlugin(),
-      new ManifestPlugin({
-        fileName: ASSET_MANIFEST_FILE,
-      }),
+      !isServer && new BuildManifestPlugin(),
+      isServer && new PagesManifestPlugin(),
       !isServer && createWorkboxPlugin({ dev, isServer }),
       // Fix dynamic imports on server bundle
       isServer && new SSRImportPlugin(),
