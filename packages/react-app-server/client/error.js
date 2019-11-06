@@ -1,6 +1,7 @@
 import React from 'react'
-import { Helmet } from 'react-app-server/helmet'
-import 'tachyons-css/tachyons.css'
+import { Helmet } from 'react-app-server/head'
+
+import 'tachyons/css/tachyons.css'
 
 const ErrorPage = ({ error }) => {
   return (
