@@ -25,6 +25,7 @@ import {
   STATIC_CHUNKS_PATH,
   STATIC_COMPONENTS_PATH,
   STATIC_MEDIA_PATH,
+  STATIC_RUNTIME_ERROR,
   STATIC_RUNTIME_HOT,
   STATIC_RUNTIME_MAIN,
   STATIC_RUNTIME_WEBPACK,
@@ -212,7 +213,10 @@ const getBaseWebpackConfig = async (
     cacheCompression: false,
   }
 
-  const appPath = path.join(STATIC_COMPONENTS_PATH, 'index')
+  const entrypoints = {
+    [path.join(STATIC_COMPONENTS_PATH, 'index')]: paths.appIndexJs,
+    [path.join(STATIC_COMPONENTS_PATH, 'routes')]: paths.appRoutesJs,
+  }
 
   return {
     mode: webpackMode,
@@ -229,8 +233,10 @@ const getBaseWebpackConfig = async (
         ? {
             [STATIC_RUNTIME_MAIN]: paths.serverClientJs,
           }
-        : {}),
-      [appPath]: paths.appIndexJs,
+        : {
+            [STATIC_RUNTIME_ERROR]: paths.serverErrorJs,
+          }),
+      ...entrypoints,
     },
     output: {
       publicPath: '/',

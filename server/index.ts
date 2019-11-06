@@ -4,6 +4,8 @@ import cookieParser from 'cookie-parser'
 // @ts-ignore no types package
 import requestLanguage from 'express-request-language'
 
+import error from './middlewares/error'
+import manifest from './middlewares/manifest'
 import handleRender from './handler'
 
 const DIST_PUBLIC = '.dist/public'
@@ -25,6 +27,9 @@ app.use(
 app.use('/', express.static(DIST_PUBLIC))
 
 app.use('/static', express.static(DIST_STATIC))
+
+app.use(manifest())
+app.use(error())
 
 app.get('/*', handleRender)
 

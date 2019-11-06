@@ -36,7 +36,7 @@ const appDistServer = serverDistFolder
 const appDistPublic = path.join(distFolder, 'public')
 const appPublic = resolveApp('public')
 const appIndexJs = resolveModule(resolveApp, 'src/index')
-const appStartJs = resolveModule(resolveApp, 'src/start')
+const appRoutesJs = resolveModule(resolveApp, 'src/routes')
 const appServiceWorker = resolveModule(resolveApp, 'src/serviceWorker')
 const appPackageJson = resolveApp('package.json')
 const appSrc = resolveApp('src')
@@ -53,6 +53,7 @@ for (let i = splittedAppPath.length - 1; i > 0; i--) {
 }
 
 const serverClientJs = resolveServer('client/index.js')
+const serverErrorJs = resolveServer('client/error.js')
 
 export {
   dotenv,
@@ -62,7 +63,7 @@ export {
   appDistPublic,
   appPublic,
   appIndexJs,
-  appStartJs,
+  appRoutesJs,
   appServiceWorker,
   appPackageJson,
   appSrc,
@@ -73,4 +74,5 @@ export {
   moduleFileExtensions,
   typescriptFileExtensions,
   serverClientJs,
+  serverErrorJs,
 }
