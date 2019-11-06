@@ -17,6 +17,8 @@
     "strictFunctionTypes": true
   },
   "exclude": [
-    "./dist"
+    "**/dist",
+    "./*.d.ts",
+    "./*.js"
   ]
 }
