@@ -52,7 +52,7 @@ for (let i = splittedAppPath.length - 1; i > 0; i--) {
   splittedAppPath.pop()
 }
 
-const serverClientJs = resolveServer('server/client/index.js')
+const serverClientJs = resolveServer('client/index.js')
 
 export {
   dotenv,

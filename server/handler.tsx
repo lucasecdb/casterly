@@ -5,9 +5,9 @@ import React, { StrictMode } from 'react'
 import { renderToString } from 'react-dom/server'
 import { promisify } from 'util'
 
-import Document from './components/Document'
-import * as Log from './output/log'
 import { errorPage } from './templates'
+import Document from '../components/Document'
+import * as Log from '../output/log'
 import { Helmet } from '../lib/helmet'
 import { appDist, appDistServer } from '../config/paths'
 import {

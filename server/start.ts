@@ -1,7 +1,7 @@
 import express from 'express'
 
 import server from './index'
-import * as Log from './output/log'
+import * as Log from '../output/log'
 
 const start = () => {
   const app = express()

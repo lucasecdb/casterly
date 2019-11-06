@@ -4,7 +4,7 @@ import devMiddleware from 'webpack-dev-middleware'
 import hotMiddleware from 'webpack-hot-middleware'
 
 import createWebpackConfig from '../../config/createWebpackConfig'
-import { watchCompilers } from '../output/watcher'
+import { watchCompilers } from '../../output/watcher'
 
 export default {
   set: async (app: Application) => {
