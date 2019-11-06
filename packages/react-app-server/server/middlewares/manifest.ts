@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from 'express'
+import { Middleware } from 'koa'
 import { promises as fsp } from 'fs'
 import * as path from 'path'
 
@@ -8,11 +8,7 @@ import {
   PAGES_MANIFEST_FILE,
 } from '../../config/constants'
 
-const manifest = () => async (
-  _: Request,
-  res: Response,
-  next: NextFunction
-) => {
+const manifest = (): Middleware => async ctx => {
   const assetManifest = await fsp
     .readFile(path.join(appDist, ASSET_MANIFEST_FILE))
     .then(file => file.toString())
@@ -22,10 +18,8 @@ const manifest = () => async (
     path.join(appDistServer, PAGES_MANIFEST_FILE)
   )
 
-  res.locals.assetManifest = assetManifest
-  res.locals.pagesManifest = pagesManifest
-
-  next()
+  ctx.state.assetManifest = assetManifest
+  ctx.state.pagesManifest = pagesManifest
 }
 
 export default manifest

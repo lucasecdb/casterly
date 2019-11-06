@@ -1,7 +1,6 @@
-import { Application } from 'express'
+import Application from 'koa'
 import webpack from 'webpack'
-import devMiddleware from 'webpack-dev-middleware'
-import hotMiddleware from 'webpack-hot-middleware'
+import koaWebpack, { Options } from 'koa-webpack'
 
 import createWebpackConfig from '../../config/createWebpackConfig'
 import { watchCompilers } from '../../output/watcher'
@@ -28,16 +27,32 @@ export default {
 
     watchCompilers(clientCompiler, serverCompiler, useTypescript)
 
+    const devMiddleware: Options['devMiddleware'] = {
+      // @ts-ignore
+      noInfo: true,
+      publicPath: clientConfig.output.publicPath,
+      writeToDisk: true,
+      logLevel: 'silent',
+    }
+
     app.use(
-      devMiddleware(multiCompiler, {
-        // @ts-ignore
-        noInfo: true,
-        publicPath: clientConfig.output.publicPath,
-        writeToDisk: true,
-        logLevel: 'silent',
+      await koaWebpack({
+        compiler: (multiCompiler as unknown) as webpack.Compiler,
+        devMiddleware,
+        hotClient: false,
       })
     )
 
-    app.use(hotMiddleware(clientCompiler, { log: false, heartbeat: 2500 }))
+    app.use(
+      await koaWebpack({
+        compiler: clientCompiler,
+        devMiddleware,
+        hotClient: {
+          logLevel: 'silent',
+          autoConfigure: false,
+          // heartbeat: 2500,
+        },
+      })
+    )
   },
 }
