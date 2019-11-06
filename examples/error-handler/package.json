@@ -1,0 +1,16 @@
+{
+  "name": "error-handler",
+  "private": true,
+  "version": "1.0.0",
+  "license": "MIT",
+  "scripts": {
+    "dev": "rs dev",
+    "start": "rs start",
+    "build": "rs build"
+  },
+  "dependencies": {
+    "react": "^16.11.0",
+    "react-app-server": "../../packages/react-app-server",
+    "react-dom": "^16.11.0"
+  }
+}
