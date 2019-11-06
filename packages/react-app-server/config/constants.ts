@@ -1,29 +1,16 @@
 import path from 'path'
 
-const STATIC_FOLDER = 'static'
-const STATIC_RUNTIME_PATH = path.join(STATIC_FOLDER, 'runtime')
-const STATIC_CHUNKS_PATH = path.join(STATIC_FOLDER, 'chunks')
-const STATIC_MEDIA_PATH = path.join(STATIC_FOLDER, 'media')
-const STATIC_COMPONENTS_PATH = path.join(STATIC_FOLDER, 'components')
+export const STATIC_FOLDER = 'static'
+export const STATIC_RUNTIME_PATH = path.join(STATIC_FOLDER, 'runtime')
+export const STATIC_CHUNKS_PATH = path.join(STATIC_FOLDER, 'chunks')
+export const STATIC_MEDIA_PATH = path.join(STATIC_FOLDER, 'media')
+export const STATIC_COMPONENTS_PATH = path.join(STATIC_FOLDER, 'components')
 
-const STATIC_RUNTIME_ERROR = path.join(STATIC_RUNTIME_PATH, 'error')
-const STATIC_RUNTIME_MAIN = path.join(STATIC_RUNTIME_PATH, 'main')
-const STATIC_RUNTIME_WEBPACK = path.join(STATIC_RUNTIME_PATH, 'webpack')
-const STATIC_RUNTIME_HOT = path.join(STATIC_RUNTIME_PATH, 'hot')
+export const STATIC_RUNTIME_MAIN = path.join(STATIC_RUNTIME_PATH, 'main')
+export const STATIC_RUNTIME_WEBPACK = path.join(STATIC_RUNTIME_PATH, 'webpack')
 
-const ASSET_MANIFEST_FILE = 'asset-manifest.json'
-const PAGES_MANIFEST_FILE = 'pages-manifest.json'
+export const ASSET_MANIFEST_FILE = 'asset-manifest.json'
+export const PAGES_MANIFEST_FILE = 'pages-manifest.json'
 
-export {
-  STATIC_FOLDER,
-  STATIC_CHUNKS_PATH,
-  STATIC_MEDIA_PATH,
-  STATIC_COMPONENTS_PATH,
-  STATIC_RUNTIME_PATH,
-  STATIC_RUNTIME_ERROR,
-  STATIC_RUNTIME_MAIN,
-  STATIC_RUNTIME_WEBPACK,
-  STATIC_RUNTIME_HOT,
-  ASSET_MANIFEST_FILE,
-  PAGES_MANIFEST_FILE,
-}
+// match: static/component/:name
+export const COMPONENT_NAME_REGEX = /^static[/\\]components[/\\](.*)$/

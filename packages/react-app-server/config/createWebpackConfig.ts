@@ -25,8 +25,6 @@ import {
   STATIC_CHUNKS_PATH,
   STATIC_COMPONENTS_PATH,
   STATIC_MEDIA_PATH,
-  STATIC_RUNTIME_ERROR,
-  STATIC_RUNTIME_HOT,
   STATIC_RUNTIME_MAIN,
   STATIC_RUNTIME_WEBPACK,
 } from './constants'
@@ -234,7 +232,7 @@ const getBaseWebpackConfig = async (
             [STATIC_RUNTIME_MAIN]: paths.serverClientJs,
           }
         : {
-            [STATIC_RUNTIME_ERROR]: paths.serverErrorJs,
+            [path.join(STATIC_COMPONENTS_PATH, 'error')]: paths.serverErrorJs,
           }),
       ...entrypoints,
     }),
@@ -276,8 +274,8 @@ const getBaseWebpackConfig = async (
       ],
       plugins: [new ModuleScopePlugin(paths.appSrc, [paths.appPackageJson])],
       alias: {
-        'react-dom': dev ? '@hot-loader/react-dom' : 'react-dom',
-        hooks: path.join(paths.appSrc, 'hooks'),
+        '#app': paths.appSrc,
+        /*hooks: path.join(paths.appSrc, 'hooks'),
         resolvers: path.join(paths.appSrc, 'resolvers'),
         assets: path.join(paths.appSrc, 'assets'),
         utils: path.join(paths.appSrc, 'utils'),
@@ -286,7 +284,7 @@ const getBaseWebpackConfig = async (
         views: path.join(paths.appSrc, 'components', 'views'),
         forms: path.join(paths.appSrc, 'components', 'forms'),
         pages: path.join(paths.appSrc, 'components', 'pages'),
-        routes: path.join(paths.appSrc, 'components', 'routes'),
+        routes: path.join(paths.appSrc, 'components', 'routes'),*/
       },
     },
     module: {

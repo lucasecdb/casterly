@@ -8,13 +8,16 @@ import {
   PAGES_MANIFEST_FILE,
 } from '../../config/constants'
 
-const manifest = (): Middleware => async (ctx, next) => {
-  const assetManifest = await fsp
-    .readFile(path.join(appDist, ASSET_MANIFEST_FILE))
+const readJSON = (filePath: string) =>
+  fsp
+    .readFile(filePath)
     .then(file => file.toString())
     .then(JSON.parse)
 
-  const pagesManifest = await fsp.readFile(
+const manifest = (): Middleware => async (ctx, next) => {
+  const assetManifest = await readJSON(path.join(appDist, ASSET_MANIFEST_FILE))
+
+  const pagesManifest = await readJSON(
     path.join(appDistServer, PAGES_MANIFEST_FILE)
   )
 

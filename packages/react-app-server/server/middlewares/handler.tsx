@@ -8,7 +8,6 @@ import { Helmet } from '../../lib/helmet'
 import { appDistServer } from '../../config/paths'
 import {
   STATIC_COMPONENTS_PATH,
-  STATIC_RUNTIME_HOT,
   STATIC_RUNTIME_MAIN,
   STATIC_RUNTIME_WEBPACK,
 } from '../../config/constants'
@@ -27,11 +26,18 @@ interface RenderOptions {
   container: React.ReactElement
 }
 
+interface RenderResult {
+  markup: string
+  state?: any
+}
+
 function interopDefault(mod: any) {
   return mod.default || mod
 }
 
-async function defaultRenderFn({ container }: RenderOptions) {
+async function defaultRenderFn({
+  container,
+}: RenderOptions): Promise<RenderResult> {
   return { markup: renderToString(container) }
 }
 
@@ -41,18 +47,17 @@ const handleRender = async (ctx: Context) => {
 
   const { assetManifest, pagesManifest } = ctx.state
 
-  const clientAssetScripts = [
+  /*const clientAssetScripts = [
     assetManifest['commons.js'],
     assetManifest[`${STATIC_COMPONENTS_PATH}/index.js`],
     assetManifest[`${STATIC_RUNTIME_WEBPACK}.js`],
     assetManifest[`${STATIC_RUNTIME_MAIN}.js`],
-    assetManifest[`${STATIC_RUNTIME_HOT}.js`],
     assetManifest['styles.js'],
-  ].filter(Boolean)
+  ].filter(Boolean)*/
 
-  const [serverAssetScript] = [
-    pagesManifest[`${STATIC_COMPONENTS_PATH}/index.js`],
-  ].map(relativePath => path.join(appDistServer, relativePath))
+  const clientAssetScripts = assetManifest.components['index']
+
+  const appIndexPath = path.join(appDistServer, pagesManifest['index'])
 
   const styles = Object.keys(assetManifest)
     .filter(path => path.endsWith('.css'))
@@ -67,13 +72,13 @@ const handleRender = async (ctx: Context) => {
       '<!doctype html>' +
       renderToString(<Document scripts={clientAssetScripts} styles={styles} />)
   } else {
-    const createRootComponent = (await import(serverAssetScript).then(
+    const Component = (await import(appIndexPath).then(
       interopDefault
-    )) as (opts: Options) => Promise<any>
+    )) as React.ComponentType
 
     const routerContext: { url?: string } = {}
 
-    const {
+    /*const {
       component: Component,
       renderFn = defaultRenderFn,
     } = await createRootComponent({
@@ -84,7 +89,9 @@ const handleRender = async (ctx: Context) => {
       requestLanguage: '',
       routerContext,
       server: true,
-    })
+    })*/
+
+    const renderFn = defaultRenderFn
 
     const appRoot = (
       <StrictMode>

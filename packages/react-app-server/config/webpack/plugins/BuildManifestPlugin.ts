@@ -3,11 +3,15 @@
 import { Compiler } from 'webpack'
 import { RawSource } from 'webpack-sources'
 
-import { ASSET_MANIFEST_FILE, STATIC_RUNTIME_MAIN } from '../../constants'
+import {
+  ASSET_MANIFEST_FILE,
+  COMPONENT_NAME_REGEX,
+  STATIC_RUNTIME_MAIN,
+} from '../../constants'
 
 interface AssetMap {
   main: string[]
-  pages: {
+  components: {
     [s: string]: string[]
   }
 }
@@ -27,9 +31,17 @@ export default class BuildManifestPlugin {
             ? mainJsChunk.files.filter((file: string) => /\.js$/.test(file))
             : []
 
-        const assetMap: AssetMap = { main: mainJsFiles, pages: {} }
+        const assetMap: AssetMap = { main: mainJsFiles, components: {} }
 
         for (const [, entrypoint] of compilation.entrypoints.entries()) {
+          const result = COMPONENT_NAME_REGEX.exec(entrypoint.name)
+
+          if (!result) {
+            continue
+          }
+
+          const componentName = result[1]
+
           const filesForEntry: string[] = []
 
           for (const file of entrypoint.getFiles()) {
@@ -44,7 +56,10 @@ export default class BuildManifestPlugin {
             filesForEntry.push(file.replace(/\\/g, '/'))
           }
 
-          assetMap.pages[entrypoint.name] = filesForEntry
+          assetMap.components[componentName] = [
+            ...mainJsFiles,
+            ...filesForEntry,
+          ]
         }
 
         compilation.assets[ASSET_MANIFEST_FILE] = new RawSource(
