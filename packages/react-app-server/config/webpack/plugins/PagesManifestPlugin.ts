@@ -1,6 +1,6 @@
 import { Compiler, Plugin } from 'webpack'
 import { RawSource } from 'webpack-sources'
-import { PAGES_MANIFEST_FILE } from '../../constants'
+import { COMPONENT_NAME_REGEX, PAGES_MANIFEST_FILE } from '../../constants'
 
 // This plugin creates a pages-manifest.json from page entrypoints.
 export default class PagesManifestPlugin implements Plugin {
@@ -12,17 +12,18 @@ export default class PagesManifestPlugin implements Plugin {
         const pages: { [page: string]: string } = {}
 
         for (const chunk of chunks) {
-          const pagePath = chunk.name
+          const result = COMPONENT_NAME_REGEX.exec(chunk.name)
 
-          if (!pagePath) {
+          if (!result) {
             continue
           }
 
-          // Write filename, replace any backslashes in path (on windows) with forwardslashes for cross-platform consistency.
-          pages[`/${pagePath.replace(/\\/g, '/')}`] = chunk.name.replace(
-            /\\/g,
-            '/'
-          )
+          const componentName = result[1]
+
+          // Write filename, replace any backslashes in path (on windows)
+          // with forwardslashes for cross-platform consistency.
+          pages[componentName.replace(/\\/g, '/')] =
+            chunk.name.replace(/\\/g, '/') + '.js'
         }
 
         compilation.assets[PAGES_MANIFEST_FILE] = new RawSource(
