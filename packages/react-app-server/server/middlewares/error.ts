@@ -1,16 +1,16 @@
-import { NextFunction, Request, Response } from 'express'
+import { Middleware } from 'koa'
 
 import * as Log from '../../output/log'
 
-const error = () => async (_: Request, res: Response, next: NextFunction) => {
+const error = (): Middleware => async (ctx, next) => {
   try {
     await next()
   } catch (err) {
     Log.error('An error ocurred while trying to server-side render')
     console.error(err)
 
-    res.status(500)
-    res.send('Internal Server Error')
+    ctx.status = 500
+    ctx.body = 'Internal Server Error'
   }
 }
 

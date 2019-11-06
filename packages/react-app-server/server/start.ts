@@ -1,12 +1,12 @@
-import express from 'express'
+import Koa from 'koa'
 
-import server from './index'
+import middlewares from './middlewares/index'
 import * as Log from '../output/log'
 
 const start = () => {
-  const app = express()
+  const app = new Koa()
 
-  app.use(server)
+  app.use(middlewares)
 
   app.listen(3000, () => {
     Log.info('Server listening on port 3000')

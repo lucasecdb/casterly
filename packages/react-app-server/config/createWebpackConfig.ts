@@ -225,10 +225,10 @@ const getBaseWebpackConfig = async (
     devtool: dev ? 'cheap-module-source-map' : false,
     context: paths.appPath,
     externals,
-    entry: {
-      ...(dev && !isServer
+    entry: () => ({
+      /*...(dev && !isServer
         ? { [STATIC_RUNTIME_HOT]: 'webpack-hot-middleware/client' }
-        : {}),
+        : {}),*/
       ...(!isServer
         ? {
             [STATIC_RUNTIME_MAIN]: paths.serverClientJs,
@@ -237,7 +237,7 @@ const getBaseWebpackConfig = async (
             [STATIC_RUNTIME_ERROR]: paths.serverErrorJs,
           }),
       ...entrypoints,
-    },
+    }),
     output: {
       publicPath: '/',
       path: outputPath,

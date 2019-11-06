@@ -1,10 +1,10 @@
 /* eslint-disable no-console */
-import express from 'express'
+import Koa from 'koa'
 import inspector from 'inspector'
 import chalk from 'chalk'
 
-import server from './index'
-import proxyMiddleware from './middlewares/proxy'
+import middlewares from './middlewares/index'
+// import proxyMiddleware from './middlewares/proxy'
 import webpackMiddleware from './middlewares/webpack'
 import { logStore } from '../output/logger'
 
@@ -30,13 +30,13 @@ const start = async () => {
     console.error(errorStr)
   }
 
-  const app = express()
+  const app = new Koa()
 
-  proxyMiddleware.set(app)
+  // proxyMiddleware.set(app)
 
   await webpackMiddleware.set(app)
 
-  app.use(server)
+  app.use(middlewares)
 
   logStore.setState({ port: PORT })
 
