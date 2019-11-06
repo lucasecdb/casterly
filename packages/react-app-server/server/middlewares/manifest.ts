@@ -8,7 +8,7 @@ import {
   PAGES_MANIFEST_FILE,
 } from '../../config/constants'
 
-const manifest = (): Middleware => async ctx => {
+const manifest = (): Middleware => async (ctx, next) => {
   const assetManifest = await fsp
     .readFile(path.join(appDist, ASSET_MANIFEST_FILE))
     .then(file => file.toString())
@@ -20,6 +20,8 @@ const manifest = (): Middleware => async ctx => {
 
   ctx.state.assetManifest = assetManifest
   ctx.state.pagesManifest = pagesManifest
+
+  return next()
 }
 
 export default manifest
