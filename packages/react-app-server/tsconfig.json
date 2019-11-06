@@ -6,6 +6,7 @@
     "module": "commonjs",
     "esModuleInterop": true,
     "sourceMap": true,
+    "allowJs": true,
     "noImplicitAny": true,
     "noImplicitThis": true,
     "moduleResolution": "node",
@@ -15,5 +16,9 @@
     "strictBindCallApply": true,
     "strictFunctionTypes": true
   },
-  "exclude": ["dist", "./*.d.ts"]
+  "exclude": [
+    "dist",
+    "./*.d.ts",
+    "./helmet.js"
+  ]
 }
