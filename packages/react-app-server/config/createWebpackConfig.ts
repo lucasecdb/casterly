@@ -275,6 +275,7 @@ const getBaseWebpackConfig = async (
       plugins: [new ModuleScopePlugin(paths.appSrc, [paths.appPackageJson])],
       alias: {
         '#app': paths.appSrc,
+        'react-app-server': paths.serverPath,
         /*hooks: path.join(paths.appSrc, 'hooks'),
         resolvers: path.join(paths.appSrc, 'resolvers'),
         assets: path.join(paths.appSrc, 'assets'),

@@ -6,11 +6,6 @@ import { renderToString } from 'react-dom/server'
 import Document from '../../components/Document'
 import { Helmet } from '../../lib/helmet'
 import { appDistServer } from '../../config/paths'
-import {
-  STATIC_COMPONENTS_PATH,
-  STATIC_RUNTIME_MAIN,
-  STATIC_RUNTIME_WEBPACK,
-} from '../../config/constants'
 
 interface Options {
   requestUrl: string
@@ -46,14 +41,6 @@ const handleRender = async (ctx: Context) => {
     ctx.query.nossr !== undefined && process.env.NODE_ENV !== 'production'
 
   const { assetManifest, pagesManifest } = ctx.state
-
-  /*const clientAssetScripts = [
-    assetManifest['commons.js'],
-    assetManifest[`${STATIC_COMPONENTS_PATH}/index.js`],
-    assetManifest[`${STATIC_RUNTIME_WEBPACK}.js`],
-    assetManifest[`${STATIC_RUNTIME_MAIN}.js`],
-    assetManifest['styles.js'],
-  ].filter(Boolean)*/
 
   const clientAssetScripts = assetManifest.components['index']
 
