@@ -17,8 +17,6 @@
     "strictFunctionTypes": true
   },
   "exclude": [
-    "dist",
-    "./*.d.ts",
-    "./helmet.js"
+    "./dist"
   ]
 }
