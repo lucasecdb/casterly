@@ -94,7 +94,11 @@ buildStore.subscribe(state => {
   logStore.setState(nextState, true)
 })
 
-export function watchCompilers(client: Compiler, server: Compiler) {
+export function watchCompilers(
+  client: Compiler,
+  server: Compiler,
+  hasTypeChecking: boolean
+) {
   buildStore.setState({
     client: { loading: true },
     server: { loading: true },
@@ -189,7 +193,7 @@ export function watchCompilers(client: Compiler, server: Compiler) {
     })
   }
 
-  tapCompiler('client', client, true, status =>
+  tapCompiler('client', client, hasTypeChecking, status =>
     buildStore.setState({ client: status })
   )
   tapCompiler('server', server, false, status =>
