@@ -9,7 +9,6 @@ import ModuleScopePlugin from 'react-dev-utils/ModuleScopePlugin'
 import ModuleNotFoundPlugin from 'react-dev-utils/ModuleNotFoundPlugin'
 import ForkTsCheckerPlugin from 'fork-ts-checker-webpack-plugin'
 import resolve from 'resolve'
-import fs, { promises as fsp } from 'fs'
 
 import ChunkNamesPlugin from './webpack/plugins/ChunkNamesPlugin'
 import RequireCacheHotReloaderPlugin from './webpack/plugins/RequireCacheHotReloaderPlugin'
@@ -30,6 +29,7 @@ import {
   STATIC_RUNTIME_MAIN,
   STATIC_RUNTIME_WEBPACK,
 } from './constants'
+import fileExists from '../utils/fileExists'
 
 // style files regexes
 const cssRegex = /\.global\.css$/
@@ -44,19 +44,6 @@ const resolveRequest = (request: string, issuer: string) => {
       : path.dirname(issuer)
 
   return resolve.sync(request, { basedir })
-}
-
-const fileExists = async (filePath: string) => {
-  try {
-    await fsp.access(filePath, fs.constants.F_OK)
-    return true
-  } catch (err) {
-    if (err.code === 'ENOENT') {
-      return false
-    }
-
-    throw err
-  }
 }
 
 const getBaseWebpackConfig = async (

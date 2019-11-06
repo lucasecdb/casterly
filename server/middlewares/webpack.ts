@@ -5,6 +5,8 @@ import hotMiddleware from 'webpack-hot-middleware'
 
 import createWebpackConfig from '../../config/createWebpackConfig'
 import { watchCompilers } from '../../output/watcher'
+import * as paths from '../../config/paths'
+import fileExists from '../../utils/fileExists'
 
 export default {
   set: async (app: Application) => {
@@ -22,7 +24,9 @@ export default {
 
     const [clientCompiler, serverCompiler] = multiCompiler.compilers
 
-    watchCompilers(clientCompiler, serverCompiler)
+    const useTypescript = await fileExists(paths.appTsConfig)
+
+    watchCompilers(clientCompiler, serverCompiler, useTypescript)
 
     app.use(
       // @ts-ignore
