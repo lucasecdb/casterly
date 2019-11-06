@@ -2,9 +2,9 @@ import { NextFunction, Request, Response } from 'express'
 
 import * as Log from '../../output/log'
 
-const error = () => (_: Request, res: Response, next: NextFunction) => {
+const error = () => async (_: Request, res: Response, next: NextFunction) => {
   try {
-    next()
+    await next()
   } catch (err) {
     Log.error('An error ocurred while trying to server-side render')
     console.error(err)
