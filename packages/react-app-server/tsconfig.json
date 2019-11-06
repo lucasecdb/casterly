@@ -5,7 +5,6 @@
     "outDir": "dist",
     "module": "commonjs",
     "esModuleInterop": true,
-    "allowJs": true,
     "sourceMap": true,
     "noImplicitAny": true,
     "noImplicitThis": true,
@@ -16,9 +15,5 @@
     "strictBindCallApply": true,
     "strictFunctionTypes": true
   },
-  "exclude": [
-    "dist",
-    "./*.d.ts",
-    "*.js"
-  ]
+  "exclude": ["dist", "./*.d.ts"]
 }

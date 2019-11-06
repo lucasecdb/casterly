@@ -2,7 +2,6 @@
   "name": "hello-world",
   "private": true,
   "version": "1.0.0",
-  "main": "index.js",
   "license": "MIT",
   "scripts": {
     "dev": "rs dev",
@@ -11,7 +10,7 @@
   },
   "dependencies": {
     "react": "^16.11.0",
-    "react-app-server": "file:../../.",
+    "react-app-server": "../../packages/react-app-server",
     "react-dom": "^16.11.0"
   }
 }

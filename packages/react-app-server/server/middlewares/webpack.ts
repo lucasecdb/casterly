@@ -29,8 +29,8 @@ export default {
     watchCompilers(clientCompiler, serverCompiler, useTypescript)
 
     app.use(
-      // @ts-ignore
       devMiddleware(multiCompiler, {
+        // @ts-ignore
         noInfo: true,
         publicPath: clientConfig.output.publicPath,
         writeToDisk: true,
@@ -38,7 +38,6 @@ export default {
       })
     )
 
-    // @ts-ignore
     app.use(hotMiddleware(clientCompiler, { log: false, heartbeat: 2500 }))
   },
 }
