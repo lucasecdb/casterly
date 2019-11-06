@@ -6,8 +6,7 @@ import chalk from 'chalk'
 import server from './index'
 import proxyMiddleware from './middlewares/proxy'
 import webpackMiddleware from './middlewares/webpack'
-
-import { logStore } from './output/logger'
+import { logStore } from '../output/logger'
 
 const PORT = 3000
 

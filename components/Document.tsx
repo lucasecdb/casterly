@@ -3,7 +3,7 @@
 import React from 'react'
 import serialize from 'serialize-javascript'
 
-import { HelmetData } from '../../lib/helmet'
+import { HelmetData } from '../lib/helmet'
 
 interface Props {
   markup?: string
