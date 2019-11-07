@@ -1,11 +1,25 @@
 import Application from 'koa'
 import webpack from 'webpack'
 import koaWebpack, { Options } from 'koa-webpack'
+import hotClient, { Options as HotClientOptions } from 'webpack-hot-client'
 
 import createWebpackConfig from '../../config/createWebpackConfig'
 import { watchCompilers } from '../../output/watcher'
 import * as paths from '../../config/paths'
 import fileExists from '../../utils/fileExists'
+
+const configureHotClient = (
+  compiler: webpack.Compiler,
+  options: HotClientOptions
+) => {
+  return new Promise(resolve => {
+    const client = hotClient(compiler, options)
+    // @ts-ignore
+    const { server } = client
+
+    server.on('listening', () => resolve(client))
+  })
+}
 
 export default {
   set: async (app: Application) => {
@@ -35,9 +49,14 @@ export default {
       logLevel: 'silent',
     }
 
+    await configureHotClient(clientCompiler, {
+      logLevel: 'silent',
+      autoConfigure: false,
+    })
+
     app.use(
       await koaWebpack({
-        compiler: (multiCompiler as unknown) as webpack.Compiler,
+        compiler: clientCompiler,
         devMiddleware,
         hotClient: false,
       })
@@ -45,13 +64,9 @@ export default {
 
     app.use(
       await koaWebpack({
-        compiler: clientCompiler,
+        compiler: serverCompiler,
         devMiddleware,
-        hotClient: {
-          logLevel: 'silent',
-          autoConfigure: false,
-          // heartbeat: 2500,
-        },
+        hotClient: false,
       })
     )
   },

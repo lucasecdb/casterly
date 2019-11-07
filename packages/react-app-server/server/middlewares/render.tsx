@@ -1,10 +1,8 @@
 import { Context, Middleware } from 'koa'
-import * as path from 'path'
 import React from 'react'
 import { renderToString } from 'react-dom/server'
 
 import Document from '../../components/Document'
-import { appDistServer } from '../../config/paths'
 import { renderToHTML } from '../utils'
 
 const render = (): Middleware => async (ctx: Context) => {
@@ -17,8 +15,6 @@ const render = (): Middleware => async (ctx: Context) => {
 
   const indexComponentEntrypoint = pagesManifest['index']
 
-  const indexComponentPath = path.join(appDistServer, indexComponentEntrypoint)
-
   const scriptAssets = assets.filter(path => path.endsWith('.js'))
   const styleAssets = assets.filter(path => path.endsWith('.css'))
 
@@ -29,10 +25,16 @@ const render = (): Middleware => async (ctx: Context) => {
   if (renderClient) {
     ctx.body =
       '<!doctype html>' +
-      renderToString(<Document scripts={scriptAssets} styles={styleAssets} />)
+      renderToString(
+        <Document
+          scripts={scriptAssets}
+          styles={styleAssets}
+          componentName="index"
+        />
+      )
   } else {
     const { head, routerContext, markup, state } = await renderToHTML(
-      indexComponentPath
+      indexComponentEntrypoint
     )
 
     if (routerContext.url) {
@@ -48,6 +50,7 @@ const render = (): Middleware => async (ctx: Context) => {
             head={head}
             scripts={scriptAssets}
             styles={styleAssets}
+            componentName="index"
           />
         )
     }

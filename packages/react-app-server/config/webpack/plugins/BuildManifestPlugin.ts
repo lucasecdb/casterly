@@ -6,6 +6,7 @@ import { RawSource } from 'webpack-sources'
 import {
   ASSET_MANIFEST_FILE,
   COMPONENT_NAME_REGEX,
+  STATIC_RUNTIME_HOT,
   STATIC_RUNTIME_MAIN,
 } from '../../constants'
 
@@ -25,13 +26,17 @@ export default class BuildManifestPlugin {
       (compilation, callback) => {
         const { chunks } = compilation
 
-        const mainJsChunk = chunks.find(c => c.name === STATIC_RUNTIME_MAIN)
-        const mainJsFiles: string[] =
-          mainJsChunk && mainJsChunk.files.length > 0
-            ? mainJsChunk.files.filter((file: string) => /\.js$/.test(file))
-            : []
+        const mainJsFiles: string[] = chunks.
+          find(c => c.name === STATIC_RUNTIME_MAIN).
+          files?.
+          filter?.((file: string) => /\.js$/.test(file)) ?? []
 
-        const assetMap: AssetMap = { main: mainJsFiles, components: {} }
+        const hotModuleFiles: string[] = chunks.
+          find(c => c.name === STATIC_RUNTIME_HOT).
+          files?.
+          filter?.((file: string) => /\.js$/.test(file)) ?? []
+
+        const assetMap: AssetMap = { main: mainJsFiles.concat(hotModuleFiles), components: {} }
 
         for (const [, entrypoint] of compilation.entrypoints.entries()) {
           const result = COMPONENT_NAME_REGEX.exec(entrypoint.name)
@@ -58,6 +63,7 @@ export default class BuildManifestPlugin {
 
           assetMap.components[componentName] = [
             ...mainJsFiles,
+            ...hotModuleFiles,
             ...filesForEntry,
           ]
         }

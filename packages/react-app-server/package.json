@@ -71,6 +71,7 @@
     "unistore": "^3.5.1",
     "url-loader": "^2.2.0",
     "webpack": "^4.41.2",
+    "webpack-hot-client": "^4.1.2",
     "workbox-webpack-plugin": "^5.0.0-beta.0"
   },
   "devDependencies": {
@@ -92,6 +93,7 @@
     "@types/serialize-javascript": "^1.5.0",
     "@types/terser-webpack-plugin": "^2.2.0",
     "@types/webpack": "^4.39.8",
+    "@types/webpack-hot-client": "^4.0.0",
     "@types/webpack-manifest-plugin": "^2.1.0",
     "@types/webpack-node-externals": "^1.6.3",
     "@types/workbox-webpack-plugin": "^4.1.0",

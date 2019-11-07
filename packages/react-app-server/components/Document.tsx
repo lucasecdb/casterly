@@ -16,6 +16,7 @@ interface Props {
   scripts?: string[]
   styles?: string[]
   state?: object
+  componentName: string
 }
 
 const Document: React.FC<Props> = ({
@@ -24,9 +25,15 @@ const Document: React.FC<Props> = ({
   styles = [],
   scripts = [],
   markup = '',
+  componentName,
 }) => {
   const htmlAttributes = head?.htmlAttributes?.toComponent?.() ?? {}
   const bodyAttributes = head?.bodyAttributes?.toComponent?.() ?? {}
+
+  const runtimeData = {
+    state,
+    componentName,
+  }
 
   return (
     <html {...htmlAttributes} inputMode={undefined}>
@@ -47,7 +54,6 @@ const Document: React.FC<Props> = ({
         {head?.script?.toComponent?.()}
 
         {styles.map(src => <link key={src} rel="stylesheet" href={src} />)}
-        {scripts.map(src => <script key={src} src={src} defer />)}
       </head>
       <body {...bodyAttributes} inputMode={undefined}>
         {head?.noscript?.toComponent?.()}
@@ -55,9 +61,10 @@ const Document: React.FC<Props> = ({
         <script
           nonce=""
           dangerouslySetInnerHTML={{
-            __html: `__STATE__ = ${serialize(state || {}, { isJSON: true })}`,
+            __html: `__DATA__ = ${serialize(runtimeData, { isJSON: true })}`,
           }}
         />
+        {scripts.map(src => <script key={src} src={src} defer />)}
       </body>
     </html>
   )
