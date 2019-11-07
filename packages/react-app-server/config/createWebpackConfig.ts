@@ -25,6 +25,7 @@ import {
   STATIC_CHUNKS_PATH,
   STATIC_COMPONENTS_PATH,
   STATIC_MEDIA_PATH,
+  STATIC_RUNTIME_HOT,
   STATIC_RUNTIME_MAIN,
   STATIC_RUNTIME_WEBPACK,
 } from './constants'
@@ -237,9 +238,9 @@ const getBaseWebpackConfig = async (
     context: paths.appPath,
     externals,
     entry: () => ({
-      /*...(dev && !isServer
-        ? { [STATIC_RUNTIME_HOT]: 'webpack-hot-middleware/client' }
-        : {}),*/
+      ...(dev && !isServer
+        ? { [STATIC_RUNTIME_HOT]: 'webpack-hot-client/client' }
+        : {}),
       ...(!isServer
         ? {
             [STATIC_RUNTIME_MAIN]: paths.serverClientJs,
@@ -286,6 +287,10 @@ const getBaseWebpackConfig = async (
       plugins: [new ModuleScopePlugin(paths.appSrc, [paths.appPackageJson])],
       alias: {
         '#app': paths.appSrc,
+        'private-client-components': path.join(
+          paths.appDist,
+          STATIC_COMPONENTS_PATH
+        ),
         'react-app-server': paths.serverPath,
         'react-app-server/head': 'react-app-server/dist/server/lib/head.js',
       },

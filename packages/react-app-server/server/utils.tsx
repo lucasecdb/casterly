@@ -34,7 +34,7 @@ interface RenderResult {
   state?: any
 }
 
-export const renderToHTML = async (componentEntrypoint: string) => {
+export const renderToHTML = async (componentEntrypoint: string, props = {}) => {
   const componentPath = path.join(appDistServer, componentEntrypoint)
 
   const Component = (await import(componentPath).then(
@@ -59,7 +59,7 @@ export const renderToHTML = async (componentEntrypoint: string) => {
 
   const appRoot = (
     <StrictMode>
-      <Component />
+      <Component {...props} />
     </StrictMode>
   )
 

@@ -1417,7 +1417,7 @@
     "@types/serve-static" "*"
     "@types/webpack" "*"
 
-"@types/webpack-hot-client@*":
+"@types/webpack-hot-client@*", "@types/webpack-hot-client@^4.0.0":
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/@types/webpack-hot-client/-/webpack-hot-client-4.0.0.tgz#8dc631153a0ae68de202f2e0e4b5b58527e41467"
   integrity sha512-C/2kSW1HKcYkVN1J++HlIyb4LyQX2xSFJu+Epk6BG+2BU9OWWm14QQkJtc6nvwM5mgp64SK83A3Ddr0Uz0/FRQ==
@@ -9674,7 +9674,7 @@ webpack-external-import@^0.0.1-beta.19:
     loadjs "^3.6.1"
     scriptjs "^2.5.9"
 
-webpack-hot-client@^4.1.0:
+webpack-hot-client@^4.1.0, webpack-hot-client@^4.1.2:
   version "4.1.2"
   resolved "https://registry.yarnpkg.com/webpack-hot-client/-/webpack-hot-client-4.1.2.tgz#3088c5533e021dd579fce8428235955248ed6a6c"
   integrity sha512-J0qt5mxEOt9UAQkyQ59Mz0n9Sk4NWKJ4awVE5/idmG2vOHVjseczbY9hbdzHV3NyNllufhN2USvSJK5FUBFbeg==
