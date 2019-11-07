@@ -226,6 +226,7 @@ const getBaseWebpackConfig = async (
   const entrypoints = {
     [path.join(STATIC_COMPONENTS_PATH, 'index')]: paths.appIndexJs,
     [path.join(STATIC_COMPONENTS_PATH, 'routes')]: paths.appRoutesJs,
+    [path.join(STATIC_COMPONENTS_PATH, 'error')]: paths.serverErrorJs,
   }
 
   return {
@@ -243,9 +244,7 @@ const getBaseWebpackConfig = async (
         ? {
             [STATIC_RUNTIME_MAIN]: paths.serverClientJs,
           }
-        : {
-            [path.join(STATIC_COMPONENTS_PATH, 'error')]: paths.serverErrorJs,
-          }),
+        : {}),
       ...entrypoints,
     }),
     output: {
@@ -288,16 +287,7 @@ const getBaseWebpackConfig = async (
       alias: {
         '#app': paths.appSrc,
         'react-app-server': paths.serverPath,
-        /*hooks: path.join(paths.appSrc, 'hooks'),
-        resolvers: path.join(paths.appSrc, 'resolvers'),
-        assets: path.join(paths.appSrc, 'assets'),
-        utils: path.join(paths.appSrc, 'utils'),
-        notification: path.join(paths.appSrc, 'notification'),
-        components: path.join(paths.appSrc, 'components'),
-        views: path.join(paths.appSrc, 'components', 'views'),
-        forms: path.join(paths.appSrc, 'components', 'forms'),
-        pages: path.join(paths.appSrc, 'components', 'pages'),
-        routes: path.join(paths.appSrc, 'components', 'routes'),*/
+        'react-app-server/head': 'react-app-server/dist/server/lib/head.js',
       },
     },
     module: {

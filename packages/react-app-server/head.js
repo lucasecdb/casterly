@@ -1,1 +1,1 @@
-module.exports = require('./dist/lib/helmet.js')
+module.exports = require('./dist/server/lib/head.js')
