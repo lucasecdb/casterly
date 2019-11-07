@@ -1,12 +1,10 @@
-import * as path from 'path'
 import React from 'react'
 import { renderToString } from 'react-dom/server'
 import { Middleware } from 'koa'
 
-import { Head } from '../lib/head'
 import Document from '../../components/Document'
-import * as paths from '../../config/paths'
 import * as Log from '../../output/log'
+import { renderToHTML } from '../utils'
 
 const error = (): Middleware => async (ctx, next) => {
   try {
@@ -15,21 +13,14 @@ const error = (): Middleware => async (ctx, next) => {
     Log.error('An error ocurred while trying to server-side render')
     console.error(err)
 
-    const errorComponentPath = path.join(
-      paths.appDistServer,
-      ctx.state.pagesManifest['error']
-    )
+    const errorComponentEntrypoint = ctx.state.pagesManifest['error']
 
     const assets: string[] = ctx.state.assetManifest.components['error']
 
     const scriptAssets = assets.filter(path => path.endsWith('.js'))
     const styleAssets = assets.filter(path => path.endsWith('.css'))
 
-    const { default: ErrorComponent } = await import(errorComponentPath)
-
-    const markup = renderToString(<ErrorComponent error={err} />)
-
-    const head = Head.rewind()
+    const { head, markup } = await renderToHTML(errorComponentEntrypoint)
 
     ctx.status = 500
     ctx.body =
