@@ -3,8 +3,8 @@ import * as path from 'path'
 import React, { StrictMode } from 'react'
 import { renderToString } from 'react-dom/server'
 
+import { Head } from '../lib/head'
 import Document from '../../components/Document'
-import { Helmet } from '../../lib/helmet'
 import { appDistServer } from '../../config/paths'
 
 interface Options {
@@ -42,13 +42,12 @@ const handleRender = async (ctx: Context) => {
 
   const { assetManifest, pagesManifest } = ctx.state
 
-  const clientAssetScripts = assetManifest.components['index']
+  const assets: string[] = assetManifest.components['index']
 
   const appIndexPath = path.join(appDistServer, pagesManifest['index'])
 
-  const styles = Object.keys(assetManifest)
-    .filter(path => path.endsWith('.css'))
-    .map(path => assetManifest[path])
+  const scriptAssets = assets.filter(path => path.endsWith('.js'))
+  const styleAssets = assets.filter(path => path.endsWith('.css'))
 
   // const language = req.language
 
@@ -57,7 +56,7 @@ const handleRender = async (ctx: Context) => {
   if (renderClient) {
     ctx.body =
       '<!doctype html>' +
-      renderToString(<Document scripts={clientAssetScripts} styles={styles} />)
+      renderToString(<Document scripts={scriptAssets} styles={styleAssets} />)
   } else {
     const Component = (await import(appIndexPath).then(
       interopDefault
@@ -88,7 +87,7 @@ const handleRender = async (ctx: Context) => {
 
     const renderResult = await renderFn({ container: appRoot })
 
-    const head = Helmet.rewind()
+    const head = Head.rewind()
 
     if (routerContext.url) {
       ctx.redirect(routerContext.url)
@@ -101,8 +100,8 @@ const handleRender = async (ctx: Context) => {
             markup={renderResult.markup}
             state={renderResult.state}
             head={head}
-            scripts={clientAssetScripts}
-            styles={styles}
+            scripts={scriptAssets}
+            styles={styleAssets}
           />
         )
     }

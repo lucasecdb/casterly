@@ -41,13 +41,19 @@ export const appSrc = resolveApp('src')
 export const appTsConfig = resolveApp('tsconfig.json')
 export const appNodeModules = resolveApp('node_modules')
 
-const splittedAppPath = [''].concat(appPath.split(path.sep))
-export const appNodePath: string[] = []
+const buildNodePath = (basePath: string) => {
+  const nodePath: string[] = []
+  const splitted = [''].concat(basePath.split(path.sep))
 
-for (let i = splittedAppPath.length - 1; i > 0; i--) {
-  appNodePath.push(path.join(splittedAppPath.join(path.sep), 'node_modules'))
-  splittedAppPath.pop()
+  for (let i = splitted.length - 1; i > 0; i--) {
+    nodePath.push(path.join(splitted.join(path.sep), 'node_modules'))
+    splitted.pop()
+  }
+
+  return nodePath
 }
+
+export const appNodePath = buildNodePath(appPath)
 
 export const serverPath = resolveServer('.')
 export const serverClientJs = resolveServer('client/index.js')

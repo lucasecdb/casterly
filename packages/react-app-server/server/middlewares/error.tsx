@@ -3,7 +3,7 @@ import React from 'react'
 import { renderToString } from 'react-dom/server'
 import { Middleware } from 'koa'
 
-import { Helmet } from '../../lib/helmet'
+import { Head } from '../lib/head'
 import Document from '../../components/Document'
 import * as paths from '../../config/paths'
 import * as Log from '../../output/log'
@@ -20,16 +20,28 @@ const error = (): Middleware => async (ctx, next) => {
       ctx.state.pagesManifest['error']
     )
 
+    const assets: string[] = ctx.state.assetManifest.components['error']
+
+    const scriptAssets = assets.filter(path => path.endsWith('.js'))
+    const styleAssets = assets.filter(path => path.endsWith('.css'))
+
     const { default: ErrorComponent } = await import(errorComponentPath)
 
     const markup = renderToString(<ErrorComponent error={err} />)
 
-    const head = Helmet.rewind()
+    const head = Head.rewind()
 
     ctx.status = 500
     ctx.body =
       '<!doctype html>' +
-      renderToString(<Document markup={markup} head={head} />)
+      renderToString(
+        <Document
+          markup={markup}
+          head={head}
+          scripts={scriptAssets}
+          styles={styleAssets}
+        />
+      )
   }
 }
 

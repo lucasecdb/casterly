@@ -8,7 +8,7 @@
 import React from 'react'
 import serialize from 'serialize-javascript'
 
-import { HelmetData } from '../lib/helmet'
+import { HelmetData } from '../server/lib/head'
 
 interface Props {
   markup?: string
@@ -25,8 +25,8 @@ const Document: React.FC<Props> = ({
   scripts = [],
   markup = '',
 }) => {
-  const htmlAttributes = (head?.htmlAttributes?.toComponent?.()) ?? {}
-  const bodyAttributes = (head?.bodyAttributes?.toComponent?.()) ?? {}
+  const htmlAttributes = head?.htmlAttributes?.toComponent?.() ?? {}
+  const bodyAttributes = head?.bodyAttributes?.toComponent?.() ?? {}
 
   return (
     <html {...htmlAttributes} inputMode={undefined}>

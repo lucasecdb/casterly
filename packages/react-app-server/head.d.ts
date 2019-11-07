@@ -1,2 +1,2 @@
-export * from './dist/lib/helmet'
-export { default } from './dist/lib/helmet'
+export * from './dist/server/lib/head'
+export { default } from './dist/server/lib/head'
