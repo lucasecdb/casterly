@@ -116,12 +116,20 @@ const getBaseWebpackConfig = async (
   const externals: ExternalsElement[] | undefined = isServer
     ? [
         (context, request, callbackFn) => {
+          const excludedModules: string[] = [
+            // add modules that should be transpiled here
+          ]
+
           // make typescript happy because this function
           // can be called without arguments
           const callback = (callbackFn as unknown) as (
             error?: any,
             result?: any
           ) => void
+
+          if (excludedModules.indexOf(request) !== -1) {
+            return callback()
+          }
 
           let res: string | undefined
 
@@ -158,6 +166,10 @@ const getBaseWebpackConfig = async (
           // would be different from what the real resolution would use, we
           // cannot externalize it.
           if (baseRes !== res) {
+            return callback()
+          }
+
+          if (res.match(/react-app-server[/\\]dist[/\\]client[/\\]/)) {
             return callback()
           }
 
