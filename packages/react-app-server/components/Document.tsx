@@ -1,5 +1,10 @@
 /* eslint-disable jsx-a11y/html-has-lang */
 
+// TODO: remove after https://github.com/typescript-eslint/typescript-eslint/pull/1169
+
+/* eslint-disable @typescript-eslint/no-use-before-define */
+/* eslint-disable no-undef */
+
 import React from 'react'
 import serialize from 'serialize-javascript'
 
@@ -16,12 +21,12 @@ interface Props {
 const Document: React.FC<Props> = ({
   head,
   state,
-  styles,
-  scripts,
+  styles = [],
+  scripts = [],
   markup = '',
 }) => {
-  const htmlAttributes = (head && head.htmlAttributes.toComponent()) || {}
-  const bodyAttributes = (head && head.bodyAttributes.toComponent()) || {}
+  const htmlAttributes = (head?.htmlAttributes?.toComponent?.()) ?? {}
+  const bodyAttributes = (head?.bodyAttributes?.toComponent?.()) ?? {}
 
   return (
     <html {...htmlAttributes} inputMode={undefined}>
@@ -35,21 +40,17 @@ const Document: React.FC<Props> = ({
           content="width=device-width, initial-scale=1, shrink-to-fit=no"
         />
 
-        {head.meta && head.meta.toComponent()}
-        {head.title && head.title.toComponent()}
-        {head.link && head.link.toComponent()}
-        {head.base && head.base.toComponent()}
-        {head.script && head.script.toComponent()}
+        {head?.meta?.toComponent?.()}
+        {head?.title?.toComponent?.()}
+        {head?.link?.toComponent?.()}
+        {head?.base?.toComponent?.()}
+        {head?.script?.toComponent?.()}
 
-        {styles.map(src => (
-          <link key={src} rel="stylesheet" href={src} />
-        ))}
-        {scripts.map(src => (
-          <script key={src} src={src} defer />
-        ))}
+        {styles.map(src => <link key={src} rel="stylesheet" href={src} />)}
+        {scripts.map(src => <script key={src} src={src} defer />)}
       </head>
       <body {...bodyAttributes} inputMode={undefined}>
-        {head && head.noscript && head.noscript.toComponent()}
+        {head?.noscript?.toComponent?.()}
         <div id="root" dangerouslySetInnerHTML={{ __html: markup }} />
         <script
           nonce=""
