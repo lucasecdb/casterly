@@ -24,9 +24,11 @@ const error = (): Middleware => async (ctx, next) => {
     const scriptAssets = assets.filter(path => path.endsWith('.js'))
     const styleAssets = assets.filter(path => path.endsWith('.css'))
 
-    const { head, markup } = await renderToHTML(errorComponentEntrypoint, {
-      error: err,
-    })
+    const props = {
+      error: { name: err.name, message: err.message, stack: err.stack },
+    }
+
+    const { head, markup } = await renderToHTML(errorComponentEntrypoint, props)
 
     ctx.status = 500
     ctx.body =
@@ -38,6 +40,7 @@ const error = (): Middleware => async (ctx, next) => {
           scripts={scriptAssets}
           styles={styleAssets}
           componentName={ERROR_COMPONENT_NAME}
+          componentProps={props}
         />
       )
   }

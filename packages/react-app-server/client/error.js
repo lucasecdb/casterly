@@ -2,17 +2,35 @@ import React from 'react'
 
 import { Head } from '../server/lib/head'
 
-import 'tachyons/css/tachyons.css'
+const styles = {
+  container: {
+    display: 'flex',
+    flexDirection: 'column',
+    padding: '1rem',
+  },
+  message: {
+    fontSize: '1.25rem',
+    fontWeight: 'bold',
+    fontFamily: 'sans-serif',
+  },
+  stack: {
+    marginTop: '.5rem',
+    color: 'rgba(0, 0, 0, .57)',
+  },
+}
 
 const ErrorPage = ({ error }) => {
   return (
-    <div className="flex flex-column items-center helvetica">
-      <Head title="Rendering Error" />
-      <div className="bg-light-red ph4 white w-100 overflow-x-auto">
-        <h1>{error.message}</h1>
-        <pre>{error.stack}</pre>
+    <>
+      <Head
+        title="Rendering Error"
+        style={[{ cssText: `* { margin: 0; padding: 0; }` }]}
+      />
+      <div style={styles.container}>
+        <h1 style={styles.message}>{error.message}</h1>
+        <pre style={styles.stack}>{error.stack}</pre>
       </div>
-    </div>
+    </>
   )
 }
 
