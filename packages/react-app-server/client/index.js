@@ -1,19 +1,28 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 
-const query = new URLSearchParams(window.location.search)
+import { loadComponent, registerComponent } from './component-loader'
 
-const { componentName } = window.__DATA__
+window.__COMPONENTS = window.__COMPONENTS || []
 
-const shouldHydrate =
-  !query.has('nossr') || process.env.NODE_ENV === 'production'
+const register = ([name, fn]) => registerComponent(name, fn)
 
-const method = shouldHydrate ? 'hydrate' : 'render'
+window.__COMPONENTS.map(register)
+window.__COMPONENTS.push = register
 
-const componentModule = require('private-client-components/' + componentName)
+const start = async () => {
+  const query = new URLSearchParams(window.location.search)
 
-console.log(componentModule)
+  const { componentName, props = {} } = window.__DATA__
 
-const Component = componentModule.default || componentModule
+  const shouldHydrate =
+    !query.has('nossr') || process.env.NODE_ENV === 'production'
 
-ReactDOM[method](<Component />, document.getElementById('root'))
+  const method = shouldHydrate ? 'hydrate' : 'render'
+
+  const { component: Component } = await loadComponent(componentName)
+
+  ReactDOM[method](<Component {...props} />, document.getElementById('root'))
+}
+
+start()

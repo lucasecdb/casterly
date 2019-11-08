@@ -17,6 +17,7 @@ interface Props {
   styles?: string[]
   state?: object
   componentName: string
+  componentProps?: object
 }
 
 const Document: React.FC<Props> = ({
@@ -26,6 +27,7 @@ const Document: React.FC<Props> = ({
   scripts = [],
   markup = '',
   componentName,
+  componentProps,
 }) => {
   const htmlAttributes = head?.htmlAttributes?.toComponent?.() ?? {}
   const bodyAttributes = head?.bodyAttributes?.toComponent?.() ?? {}
@@ -33,6 +35,7 @@ const Document: React.FC<Props> = ({
   const runtimeData = {
     state,
     componentName,
+    props: componentProps,
   }
 
   return (
@@ -52,6 +55,7 @@ const Document: React.FC<Props> = ({
         {head?.link?.toComponent?.()}
         {head?.base?.toComponent?.()}
         {head?.script?.toComponent?.()}
+        {head?.style?.toComponent?.()}
 
         {styles.map(src => <link key={src} rel="stylesheet" href={src} />)}
       </head>

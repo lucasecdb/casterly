@@ -22,6 +22,7 @@ import { createOptimizationConfig } from './webpack/optimization'
 import getClientEnvironment from './env'
 import * as paths from './paths'
 import {
+  COMPONENT_NAME_REGEX,
   STATIC_CHUNKS_PATH,
   STATIC_COMPONENTS_PATH,
   STATIC_MEDIA_PATH,
@@ -44,6 +45,19 @@ const resolveRequest = (request: string, issuer: string) => {
       : path.dirname(issuer)
 
   return resolve.sync(request, { basedir })
+}
+
+const addClientEntrypointLoader = (entrypoint: Record<string, string>) => {
+  return Object.keys(entrypoint).reduce((obj, entrypointName) => {
+    const componentName = COMPONENT_NAME_REGEX.exec(entrypointName)[1]
+
+    const query = `component=${componentName}&absolutePath=${entrypoint[entrypointName]}`
+
+    return {
+      ...obj,
+      [entrypointName]: `client-entrypoint-loader?${query}!`,
+    }
+  }, {})
 }
 
 const getBaseWebpackConfig = async (
@@ -244,9 +258,11 @@ const getBaseWebpackConfig = async (
       ...(!isServer
         ? {
             [STATIC_RUNTIME_MAIN]: paths.serverClientJs,
+            ...addClientEntrypointLoader(entrypoints),
           }
-        : {}),
-      ...entrypoints,
+        : {
+            ...entrypoints,
+          }),
     }),
     output: {
       publicPath: '/',
@@ -293,6 +309,16 @@ const getBaseWebpackConfig = async (
         ),
         'react-app-server': paths.serverPath,
         'react-app-server/head': 'react-app-server/dist/server/lib/head.js',
+      },
+    },
+    resolveLoader: {
+      alias: {
+        'client-entrypoint-loader': path.join(
+          __dirname,
+          'webpack',
+          'loaders',
+          'client-entrypoint-loader'
+        ),
       },
     },
     module: {
