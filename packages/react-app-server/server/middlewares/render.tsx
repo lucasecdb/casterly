@@ -9,11 +9,11 @@ const render = (): Middleware => async (ctx: Context) => {
   const renderClient =
     ctx.query.nossr !== undefined && process.env.NODE_ENV !== 'production'
 
-  const { assetManifest, pagesManifest } = ctx.state
+  const { assetManifest, componentsManifest } = ctx.state
 
   const assets: string[] = assetManifest.components['index']
 
-  const indexComponentEntrypoint = pagesManifest['index']
+  const indexComponentEntrypoint = componentsManifest['index']
 
   const scriptAssets = assets.filter(path => path.endsWith('.js'))
   const styleAssets = assets.filter(path => path.endsWith('.css'))

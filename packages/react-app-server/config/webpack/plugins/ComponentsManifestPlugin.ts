@@ -1,15 +1,15 @@
 import { Compiler, Plugin } from 'webpack'
 import { RawSource } from 'webpack-sources'
-import { COMPONENT_NAME_REGEX, PAGES_MANIFEST_FILE } from '../../constants'
+import { COMPONENTS_MANIFEST_FILE, COMPONENT_NAME_REGEX } from '../../constants'
 
-// This plugin creates a pages-manifest.json from page entrypoints.
-export default class PagesManifestPlugin implements Plugin {
+// This plugin creates a components-manifest.json from page entrypoints.
+export default class ComponentsManifestPlugin implements Plugin {
   apply(compiler: Compiler): void {
     compiler.hooks.emit.tapAsync(
-      'PagesManifestPlugin',
+      'ComponentsManifestPlugin',
       (compilation, callback) => {
         const { chunks } = compilation
-        const pages: { [page: string]: string } = {}
+        const components: { [component: string]: string } = {}
 
         for (const chunk of chunks) {
           const result = COMPONENT_NAME_REGEX.exec(chunk.name)
@@ -22,12 +22,12 @@ export default class PagesManifestPlugin implements Plugin {
 
           // Write filename, replace any backslashes in path (on windows)
           // with forwardslashes for cross-platform consistency.
-          pages[componentName.replace(/\\/g, '/')] =
+          components[componentName.replace(/\\/g, '/')] =
             chunk.name.replace(/\\/g, '/') + '.js'
         }
 
-        compilation.assets[PAGES_MANIFEST_FILE] = new RawSource(
-          JSON.stringify(pages, null, 2)
+        compilation.assets[COMPONENTS_MANIFEST_FILE] = new RawSource(
+          JSON.stringify(components, null, 2)
         )
 
         callback()

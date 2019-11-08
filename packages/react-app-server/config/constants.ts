@@ -11,7 +11,7 @@ export const STATIC_RUNTIME_MAIN = path.join(STATIC_RUNTIME_PATH, 'main')
 export const STATIC_RUNTIME_WEBPACK = path.join(STATIC_RUNTIME_PATH, 'webpack')
 
 export const ASSET_MANIFEST_FILE = 'asset-manifest.json'
-export const PAGES_MANIFEST_FILE = 'pages-manifest.json'
+export const COMPONENTS_MANIFEST_FILE = 'components-manifest.json'
 
 // match: static/component/:name
 export const COMPONENT_NAME_REGEX = /^static[/\\]components[/\\](.*)$/
