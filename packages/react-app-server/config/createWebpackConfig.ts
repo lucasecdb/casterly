@@ -14,7 +14,7 @@ import ChunkNamesPlugin from './webpack/plugins/ChunkNamesPlugin'
 import RequireCacheHotReloaderPlugin from './webpack/plugins/RequireCacheHotReloaderPlugin'
 import SSRImportPlugin from './webpack/plugins/SSRImportPlugin'
 import BuildManifestPlugin from './webpack/plugins/BuildManifestPlugin'
-import PagesManifestPlugin from './webpack/plugins/PagesManifestPlugin'
+import ComponentsManifestPlugin from './webpack/plugins/ComponentsManifestPlugin'
 import { Options } from './webpack/types'
 import { getStyleLoaders } from './webpack/styles'
 import { createWorkboxPlugin } from './webpack/workbox'
@@ -458,7 +458,7 @@ const getBaseWebpackConfig = async (
       // This is because the client compilation generates the asset manifest that's used on the server side
       dev && new RequireCacheHotReloaderPlugin(),
       !isServer && new BuildManifestPlugin(),
-      isServer && new PagesManifestPlugin(),
+      isServer && new ComponentsManifestPlugin(),
       !isServer && hasServiceWorker && createWorkboxPlugin({ dev, isServer }),
       // Fix dynamic imports on server bundle
       isServer && new SSRImportPlugin(),

@@ -5,7 +5,7 @@ import * as path from 'path'
 import { appDist, appDistServer } from '../../config/paths'
 import {
   ASSET_MANIFEST_FILE,
-  PAGES_MANIFEST_FILE,
+  COMPONENTS_MANIFEST_FILE,
 } from '../../config/constants'
 
 const readJSON = (filePath: string) =>
@@ -17,12 +17,12 @@ const readJSON = (filePath: string) =>
 const manifest = (): Middleware => async (ctx, next) => {
   const assetManifest = await readJSON(path.join(appDist, ASSET_MANIFEST_FILE))
 
-  const pagesManifest = await readJSON(
-    path.join(appDistServer, PAGES_MANIFEST_FILE)
+  const componentsManifest = await readJSON(
+    path.join(appDistServer, COMPONENTS_MANIFEST_FILE)
   )
 
   ctx.state.assetManifest = assetManifest
-  ctx.state.pagesManifest = pagesManifest
+  ctx.state.componentsManifest = componentsManifest
 
   return next()
 }

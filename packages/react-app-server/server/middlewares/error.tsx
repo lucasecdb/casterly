@@ -16,7 +16,7 @@ const error = (): Middleware => async (ctx, next) => {
     console.error(err)
 
     const errorComponentEntrypoint =
-      ctx.state.pagesManifest[ERROR_COMPONENT_NAME]
+      ctx.state.componentsManifest[ERROR_COMPONENT_NAME]
 
     const assets: string[] =
       ctx.state.assetManifest.components[ERROR_COMPONENT_NAME]
