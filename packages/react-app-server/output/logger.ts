@@ -23,9 +23,9 @@ export const logStore = createStore<LoggerStoreStatus>({
 let lastStore: LoggerStoreStatus = {} as any
 function hasStoreChanged(nextStore: LoggerStoreStatus) {
   if (
-    [...new Set([...Object.keys(lastStore), ...Object.keys(nextStore)])].every(
-      key => Object.is((lastStore as any)[key], (nextStore as any)[key])
-    )
+    [
+      ...new Set([...Object.keys(lastStore), ...Object.keys(nextStore)]),
+    ].every(key => Object.is((lastStore as any)[key], (nextStore as any)[key]))
   ) {
     return false
   }

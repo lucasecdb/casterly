@@ -57,7 +57,9 @@ const Document: React.FC<Props> = ({
         {head?.script?.toComponent?.()}
         {head?.style?.toComponent?.()}
 
-        {styles.map(src => <link key={src} rel="stylesheet" href={src} />)}
+        {styles.map(src => (
+          <link key={src} rel="stylesheet" href={src} />
+        ))}
       </head>
       <body {...bodyAttributes} inputMode={undefined}>
         {head?.noscript?.toComponent?.()}
@@ -68,7 +70,9 @@ const Document: React.FC<Props> = ({
             __html: `__DATA__ = ${serialize(runtimeData, { isJSON: true })}`,
           }}
         />
-        {scripts.map(src => <script key={src} src={src} defer />)}
+        {scripts.map(src => (
+          <script key={src} src={src} defer />
+        ))}
       </body>
     </html>
   )
