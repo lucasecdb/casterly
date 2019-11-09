@@ -26,19 +26,22 @@ export default class BuildManifestPlugin {
       (compilation, callback) => {
         const { chunks } = compilation
 
-        const mainJsFiles: string[] = chunks.
-          find(c => c.name === STATIC_RUNTIME_MAIN).
-          files?.
-          filter?.((file: string) => /\.js$/.test(file))?.
-          map((file: string) => '/' + file)?? []
+        const mainJsFiles: string[] =
+          chunks
+            .find(c => c.name === STATIC_RUNTIME_MAIN)
+            .files?.filter?.((file: string) => /\.js$/.test(file))
+            ?.map((file: string) => '/' + file) ?? []
 
-        const hotModuleFiles: string[] = chunks.
-          find(c => c.name === STATIC_RUNTIME_HOT).
-          files?.
-          filter?.((file: string) => /\.js$/.test(file))?.
-          map((file: string) => '/' + file)?? []
+        const hotModuleFiles: string[] =
+          chunks
+            .find(c => c.name === STATIC_RUNTIME_HOT)
+            .files?.filter?.((file: string) => /\.js$/.test(file))
+            ?.map((file: string) => '/' + file) ?? []
 
-        const assetMap: AssetMap = { main: mainJsFiles.concat(hotModuleFiles), components: {} }
+        const assetMap: AssetMap = {
+          main: mainJsFiles.concat(hotModuleFiles),
+          components: {},
+        }
 
         for (const [, entrypoint] of compilation.entrypoints.entries()) {
           const result = COMPONENT_NAME_REGEX.exec(entrypoint.name)

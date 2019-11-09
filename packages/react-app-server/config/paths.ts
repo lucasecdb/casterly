@@ -15,9 +15,10 @@ export const typescriptFileExtensions = ['ts', 'tsx']
 
 // Resolve file paths in the same order as webpack
 const resolveModule = (resolveFn = resolveApp, filePath: string) => {
-  const extension = [...moduleFileExtensions, ...typescriptFileExtensions].find(
-    extension => fs.existsSync(resolveFn(`${filePath}.${extension}`))
-  )
+  const extension = [
+    ...moduleFileExtensions,
+    ...typescriptFileExtensions,
+  ].find(extension => fs.existsSync(resolveFn(`${filePath}.${extension}`)))
 
   if (extension) {
     return resolveFn(`${filePath}.${extension}`)
