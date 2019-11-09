@@ -16,10 +16,10 @@ matrix:
       env: TEST_SUIT=lint
       install: yarn install
       script:
-        - yarn lint
+        - yarn workspace react-app-server lint
 
     - node_js: 10
       env: TEST_SUIT=build
       install: yarn install
       script:
-        - yarn build
+        - yarn workspace react-app-server build
