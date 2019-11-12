@@ -1,10 +1,5 @@
 /* eslint-disable jsx-a11y/html-has-lang */
 
-// TODO: remove after https://github.com/typescript-eslint/typescript-eslint/pull/1169
-
-/* eslint-disable @typescript-eslint/no-use-before-define */
-/* eslint-disable no-undef */
-
 import React from 'react'
 import serialize from 'serialize-javascript'
 
