@@ -58,7 +58,7 @@
     "react-hot-loader": "^4.12.14",
     "resolve": "^1.12.0",
     "sass-loader": "^7.2.0",
-    "serialize-javascript": "^1.7.0",
+    "serialize-javascript": "^2.1.1",
     "terser-webpack-plugin": "^1.4.1",
     "unistore": "^3.4.1",
     "url-loader": "^2.1.0",
