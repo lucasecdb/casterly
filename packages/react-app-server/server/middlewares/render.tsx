@@ -1,9 +1,9 @@
 import { Context, Middleware } from 'koa'
-import * as path from 'path'
+// import * as path from 'path'
 import React from 'react'
 import { renderToString } from 'react-dom/server'
 
-import { appDistServer } from '../../config/paths'
+// import { appDistServer } from '../../config/paths'
 import Document from '../../components/Document'
 import { renderToHTML } from '../utils'
 
@@ -17,9 +17,9 @@ const render = (): Middleware => async (ctx: Context) => {
 
   const indexComponentEntrypoint = componentsManifest['index']
 
-  const routesEntrypoint = componentsManifest['routes']
+  // const routesEntrypoint = componentsManifest['routes']
 
-  const routesPath = path.join(appDistServer, routesEntrypoint)
+  // const routesPath = path.join(appDistServer, routesEntrypoint)
 
   const scriptAssets = assets.filter(path => path.endsWith('.js'))
   const styleAssets = assets.filter(path => path.endsWith('.css'))
