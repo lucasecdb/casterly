@@ -494,7 +494,6 @@ const getBaseWebpackConfig = async (
             '!**/src/setupTestsAfterEnv.ts',
           ],
           compilerOptions: { isolatedModules: true, noEmit: true },
-          watch: paths.appSrc,
           silent: true,
           formatter: 'codeframe',
         }),

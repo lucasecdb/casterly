@@ -1,6 +1,7 @@
 import createStore from 'unistore'
 import { Compiler } from 'webpack'
 import ForkTsCheckerPlugin from 'fork-ts-checker-webpack-plugin'
+// @ts-ignore this file doesn't exist anymore
 import { NormalizedMessage } from 'fork-ts-checker-webpack-plugin/lib/NormalizedMessage'
 import { createCodeframeFormatter } from 'fork-ts-checker-webpack-plugin/lib/formatter/codeframeFormatter'
 
@@ -132,7 +133,7 @@ export function watchCompilers(
         `TypecheckReceived-${key}`,
         (diagnostics: NormalizedMessage[], lints: NormalizedMessage[]) => {
           const messages = [...diagnostics, ...lints]
-          const format = (msg: NormalizedMessage) => messageFormatter(msg, true)
+          const format = (msg: NormalizedMessage) => messageFormatter(msg)
 
           const errors = messages
             .filter(msg => msg.severity === 'error')
