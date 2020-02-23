@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "react": "^16.11.0",
-    "react-app-server": "../../packages/react-app-server",
+    "react-app-server": "../../lib",
     "react-dom": "^16.11.0"
   }
 }

@@ -1,1 +1,1 @@
-./packages/react-app-server/README.md
+./lib/README.md
