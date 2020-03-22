@@ -18,6 +18,7 @@ jobs:
         node-version: 12.x
     - name: Run lint
       run: |
-        yarn workspace react-app-server lint
+        yarn
+        yarn lint
       env:
         CI: true
