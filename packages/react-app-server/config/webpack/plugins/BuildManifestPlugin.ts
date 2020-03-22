@@ -28,13 +28,13 @@ export default class BuildManifestPlugin {
 
         const mainJsFiles: string[] =
           chunks
-            .find(c => c.name === STATIC_RUNTIME_MAIN)
+            .find((c) => c.name === STATIC_RUNTIME_MAIN)
             .files?.filter?.((file: string) => /\.js$/.test(file))
             ?.map((file: string) => '/' + file) ?? []
 
         const hotModuleFiles: string[] =
           chunks
-            .find(c => c.name === STATIC_RUNTIME_HOT)
+            .find((c) => c.name === STATIC_RUNTIME_HOT)
             .files?.filter?.((file: string) => /\.js$/.test(file))
             ?.map((file: string) => '/' + file) ?? []
 

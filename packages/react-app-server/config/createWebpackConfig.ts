@@ -284,7 +284,7 @@ const getBaseWebpackConfig = async (
         : `${STATIC_CHUNKS_PATH}/${chunkFilename}.js`,
       hotUpdateMainFilename: 'static/webpack/[hash].hot-update.json',
       hotUpdateChunkFilename: 'static/webpack/[id].[hash].hot-update.js',
-      devtoolModuleFilenameTemplate: info =>
+      devtoolModuleFilenameTemplate: (info) =>
         path.resolve(info.absoluteResourcePath).replace(/\\/g, '/'),
       libraryTarget: isServer ? 'commonjs2' : 'jsonp',
     },
@@ -296,9 +296,9 @@ const getBaseWebpackConfig = async (
       ),
       extensions: [
         ...(useTypescript
-          ? paths.typescriptFileExtensions.map(ext => '.' + ext)
+          ? paths.typescriptFileExtensions.map((ext) => '.' + ext)
           : []),
-        ...paths.moduleFileExtensions.map(ext => `.${ext}`),
+        ...paths.moduleFileExtensions.map((ext) => `.${ext}`),
       ],
       plugins: [new ModuleScopePlugin(paths.appSrc, [paths.appPackageJson])],
       alias: {
@@ -474,7 +474,7 @@ const getBaseWebpackConfig = async (
       // makes the discovery automatic so you don't have to restart.
       ...(dev
         ? paths.appNodePath.map(
-            nodeModulesPath =>
+            (nodeModulesPath) =>
               new WatchMissingNodeModulesPlugin(nodeModulesPath)
           )
         : []),

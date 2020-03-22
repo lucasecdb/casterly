@@ -12,7 +12,7 @@ export const createOptimizationConfig = ({
     parallel: true,
     sourceMap: false,
     cache: true,
-    cacheKeys: keys => {
+    cacheKeys: (keys) => {
       delete keys.path
       return keys
     },

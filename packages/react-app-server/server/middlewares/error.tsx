@@ -21,8 +21,8 @@ const error = (): Middleware => async (ctx, next) => {
     const assets: string[] =
       ctx.state.assetManifest.components[ERROR_COMPONENT_NAME]
 
-    const scriptAssets = assets.filter(path => path.endsWith('.js'))
-    const styleAssets = assets.filter(path => path.endsWith('.css'))
+    const scriptAssets = assets.filter((path) => path.endsWith('.js'))
+    const styleAssets = assets.filter((path) => path.endsWith('.css'))
 
     const props = {
       error: { name: err.name, message: err.message, stack: err.stack },

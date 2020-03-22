@@ -47,7 +47,7 @@ function getWebpackStatusPhase(status: WebpackStatus): WebpackStatusPhase {
 
 const buildStore = createStore<BuildStatusStore>()
 
-buildStore.subscribe(state => {
+buildStore.subscribe((state) => {
   const { client, server } = state
 
   const [{ status }] = [
@@ -124,7 +124,7 @@ export function watchCompilers(
       const tsCheckerHooks = ForkTsCheckerPlugin.getCompilerHooks(compiler)
 
       tsCheckerHooks.serviceBeforeStart.tap(`TypecheckStart-${key}`, () => {
-        tsMessagesPromise = new Promise(resolve => {
+        tsMessagesPromise = new Promise((resolve) => {
           resolveMessagesPromise = resolve
         })
       })
@@ -136,11 +136,11 @@ export function watchCompilers(
           const format = (msg: NormalizedMessage) => messageFormatter(msg)
 
           const errors = messages
-            .filter(msg => msg.severity === 'error')
+            .filter((msg) => msg.severity === 'error')
             .map(format)
 
           const warnings = messages
-            .filter(msg => msg.severity === 'warning')
+            .filter((msg) => msg.severity === 'warning')
             .map(format)
 
           resolveMessagesPromise({
@@ -171,7 +171,7 @@ export function watchCompilers(
       const typePromise = tsMessagesPromise
 
       if (!hasErrors && typePromise) {
-        tsMessagesPromise.then(typeMessages => {
+        tsMessagesPromise.then((typeMessages) => {
           if (typePromise !== tsMessagesPromise) {
             // this is a promise from a previous build, so we
             // shouldn't care about this
@@ -194,10 +194,10 @@ export function watchCompilers(
     })
   }
 
-  tapCompiler('client', client, hasTypeChecking, status =>
+  tapCompiler('client', client, hasTypeChecking, (status) =>
     buildStore.setState({ client: status })
   )
-  tapCompiler('server', server, false, status =>
+  tapCompiler('server', server, false, (status) =>
     buildStore.setState({ server: status })
   )
 }

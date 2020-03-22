@@ -3,7 +3,7 @@
 // Makes the script crash on unhandled rejections instead of silently
 // ignoring them. In the future, promise rejections that are not handled will
 // terminate the Node.js process with a non-zero exit code.
-process.on('unhandledRejection', err => {
+process.on('unhandledRejection', (err) => {
   throw err
 })
 
@@ -140,7 +140,7 @@ export default function startBuild() {
       // This lets us display how much they changed later.
       return measureFileSizesBeforeBuild(paths.appDist)
     })
-    .then(previousFileSizes => {
+    .then((previousFileSizes) => {
       // Remove all content but keep the directory so that
       // if you're in it, you don't end up in Trash
       fs.emptyDirSync(paths.appDist)

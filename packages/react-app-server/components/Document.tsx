@@ -36,7 +36,7 @@ const Document: React.FC<Props> = ({
   return (
     <html {...htmlAttributes} inputMode={undefined}>
       <head>
-        {styles.map(src => (
+        {styles.map((src) => (
           <link key={src} rel="prefetch" href={src} as="style" />
         ))}
         <meta charSet="utf-8" />
@@ -52,7 +52,7 @@ const Document: React.FC<Props> = ({
         {head?.script?.toComponent?.()}
         {head?.style?.toComponent?.()}
 
-        {styles.map(src => (
+        {styles.map((src) => (
           <link key={src} rel="stylesheet" href={src} />
         ))}
       </head>
@@ -65,7 +65,7 @@ const Document: React.FC<Props> = ({
             __html: `__DATA__ = ${serialize(runtimeData, { isJSON: true })}`,
           }}
         />
-        {scripts.map(src => (
+        {scripts.map((src) => (
           <script key={src} src={src} defer />
         ))}
       </body>

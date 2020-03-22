@@ -11,7 +11,7 @@ import {
 const readJSON = (filePath: string) =>
   fsp
     .readFile(filePath)
-    .then(file => file.toString())
+    .then((file) => file.toString())
     .then(JSON.parse)
 
 const manifest = (): Middleware => async (ctx, next) => {
