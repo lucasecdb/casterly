@@ -17,10 +17,7 @@
     "clean": "rimraf dist",
     "ts": "tsc",
     "build": "run-s clean ts",
-    "build-watch": "tsc --watch",
-    "lint": "tsc --noEmit --pretty && yarn eslint --ext ts,tsx .",
-    "release": "release-it",
-    "update-changelog": "node ./scripts/update-changelog.js"
+    "build-watch": "tsc --watch"
   },
   "dependencies": {
     "@babel/core": "^7.8.3",
@@ -78,7 +75,6 @@
     "workbox-webpack-plugin": "^5.0.0-beta.0"
   },
   "devDependencies": {
-    "@lucasecdb/eslint-config": "^0.6.1",
     "@types/case-sensitive-paths-webpack-plugin": "^2.1.3",
     "@types/fs-extra": "^8.0.1",
     "@types/http-proxy-middleware": "^0.19.2",
@@ -104,12 +100,9 @@
     "@types/webpack-manifest-plugin": "^2.1.0",
     "@types/webpack-node-externals": "^1.6.3",
     "@types/workbox-webpack-plugin": "^4.1.0",
-    "eslint": "^6.6.0",
     "npm-run-all": "^4.1.5",
-    "prettier": "^1.19.0",
     "release-it": "^12.4.3",
-    "rimraf": "^3.0.0",
-    "typescript": "^3.7.5"
+    "rimraf": "^3.0.0"
   },
   "peerDependencies": {
     "react": "^16.9.0",
