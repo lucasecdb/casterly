@@ -1,8 +1,7 @@
 {
-  "name": "react-app-server",
-  "license": "MIT",
   "private": true,
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "examples/*"
   ]
 }
