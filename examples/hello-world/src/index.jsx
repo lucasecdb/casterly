@@ -5,7 +5,7 @@ const App = () => {
 
   React.useEffect(() => {
     setInterval(() => {
-      setCounter(prevCounter => prevCounter + 1)
+      setCounter((prevCounter) => prevCounter + 1)
     }, 1000)
   }, [])
 

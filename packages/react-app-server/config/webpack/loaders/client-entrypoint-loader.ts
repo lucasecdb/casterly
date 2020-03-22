@@ -1,7 +1,7 @@
 import { loader } from 'webpack'
 import { getOptions } from 'loader-utils'
 
-const clientEntrypointLoader: loader.Loader = function() {
+const clientEntrypointLoader: loader.Loader = function () {
   const { component, absolutePath } = getOptions(this)
 
   const componentString = JSON.stringify(component)

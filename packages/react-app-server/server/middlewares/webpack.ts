@@ -12,7 +12,7 @@ const configureHotClient = (
   compiler: webpack.Compiler,
   options: HotClientOptions
 ) => {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     const client = hotClient(compiler, options)
     // @ts-ignore
     const { server } = client

@@ -10,7 +10,7 @@ export const registerComponent = (componentName, registerModuleFn) => {
   }
 }
 
-export const loadComponent = componentName => {
+export const loadComponent = (componentName) => {
   return new Promise((resolve, reject) => {
     const cachedComponent = componentCache[componentCache]
 

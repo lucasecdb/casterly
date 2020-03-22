@@ -28,7 +28,7 @@ const dotenvFiles = [
 // that have already been set.  Variable expansion is supported in .env files.
 // https://github.com/motdotla/dotenv
 // https://github.com/motdotla/dotenv-expand
-dotenvFiles.forEach(dotenvFile => {
+dotenvFiles.forEach((dotenvFile) => {
   if (fs.existsSync(dotenvFile)) {
     require('dotenv-expand')(
       require('dotenv').config({
@@ -50,8 +50,8 @@ dotenvFiles.forEach(dotenvFile => {
 const appDirectory = fs.realpathSync(process.cwd())
 process.env.NODE_PATH = (process.env.NODE_PATH || '')
   .split(path.delimiter)
-  .filter(folder => folder && !path.isAbsolute(folder))
-  .map(folder => path.resolve(appDirectory, folder))
+  .filter((folder) => folder && !path.isAbsolute(folder))
+  .map((folder) => path.resolve(appDirectory, folder))
   .join(path.delimiter)
 
 // Grab NODE_ENV and REACT_APP_* environment variables and prepare them to be
@@ -71,7 +71,7 @@ function getClientEnvironment({ isServer = false, worker = false } = {}) {
   }
 
   const raw = Object.keys(process.env)
-    .filter(key => REACT_APP.test(key))
+    .filter((key) => REACT_APP.test(key))
     .reduce((env, key) => {
       env[key] = process.env[key]
       return env

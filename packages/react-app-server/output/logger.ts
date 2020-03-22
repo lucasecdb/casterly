@@ -25,7 +25,9 @@ function hasStoreChanged(nextStore: LoggerStoreStatus) {
   if (
     [
       ...new Set([...Object.keys(lastStore), ...Object.keys(nextStore)]),
-    ].every(key => Object.is((lastStore as any)[key], (nextStore as any)[key]))
+    ].every((key) =>
+      Object.is((lastStore as any)[key], (nextStore as any)[key])
+    )
   ) {
     return false
   }
@@ -34,7 +36,7 @@ function hasStoreChanged(nextStore: LoggerStoreStatus) {
   return true
 }
 
-logStore.subscribe(state => {
+logStore.subscribe((state) => {
   if (!hasStoreChanged(state)) {
     return
   }

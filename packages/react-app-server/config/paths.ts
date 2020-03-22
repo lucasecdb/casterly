@@ -18,7 +18,7 @@ const resolveModule = (resolveFn = resolveApp, filePath: string) => {
   const extension = [
     ...moduleFileExtensions,
     ...typescriptFileExtensions,
-  ].find(extension => fs.existsSync(resolveFn(`${filePath}.${extension}`)))
+  ].find((extension) => fs.existsSync(resolveFn(`${filePath}.${extension}`)))
 
   if (extension) {
     return resolveFn(`${filePath}.${extension}`)

@@ -21,8 +21,8 @@ const render = (): Middleware => async (ctx: Context) => {
 
   // const routesPath = path.join(appDistServer, routesEntrypoint)
 
-  const scriptAssets = assets.filter(path => path.endsWith('.js'))
-  const styleAssets = assets.filter(path => path.endsWith('.css'))
+  const scriptAssets = assets.filter((path) => path.endsWith('.js'))
+  const styleAssets = assets.filter((path) => path.endsWith('.css'))
 
   // const language = req.language
 
