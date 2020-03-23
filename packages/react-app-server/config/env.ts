@@ -21,7 +21,7 @@ const dotenvFiles = [
   // results for everyone
   NODE_ENV !== 'test' && `${paths.dotenv}.local`,
   paths.dotenv,
-].filter(Boolean)
+].filter(Boolean) as string[]
 
 // Load environment variables from .env* files. Suppress warnings using silent
 // if this file is missing. dotenv will never modify any environment variables
@@ -73,7 +73,7 @@ function getClientEnvironment({ isServer = false, worker = false } = {}) {
   const raw = Object.keys(process.env)
     .filter((key) => REACT_APP.test(key))
     .reduce((env, key) => {
-      env[key] = process.env[key]
+      env[key] = process.env[key]!
       return env
     }, baseEnv)
 

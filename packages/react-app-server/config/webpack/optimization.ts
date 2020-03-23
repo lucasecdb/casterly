@@ -1,13 +1,13 @@
-import { Configuration } from 'webpack'
+import { Options } from 'webpack'
 import TerserPlugin, { TerserPluginOptions } from 'terser-webpack-plugin'
 
-import { Options } from './types'
+import { Options as ArgOptions } from './types'
 import { STATIC_RUNTIME_WEBPACK } from '../constants'
 
 export const createOptimizationConfig = ({
   dev,
   isServer,
-}: Options): Configuration['optimization'] => {
+}: ArgOptions): Options.Optimization => {
   const terserPluginConfig: TerserPluginOptions = {
     parallel: true,
     sourceMap: false,
@@ -25,7 +25,7 @@ export const createOptimizationConfig = ({
     }
   }
 
-  const splitChunks: Configuration['optimization']['splitChunks'] = {
+  const splitChunks: Options.SplitChunksOptions = {
     cacheGroups: {
       default: false,
       vendors: false,
@@ -38,7 +38,7 @@ export const createOptimizationConfig = ({
     },
   }
 
-  const config: Configuration['optimization'] = {
+  const config: Options.Optimization = {
     runtimeChunk: {
       name: STATIC_RUNTIME_WEBPACK,
     },

@@ -49,7 +49,7 @@ const resolveRequest = (request: string, issuer: string) => {
 
 const addClientEntrypointLoader = (entrypoint: Record<string, string>) => {
   return Object.keys(entrypoint).reduce((obj, entrypointName) => {
-    const componentName = COMPONENT_NAME_REGEX.exec(entrypointName)[1]
+    const componentName = COMPONENT_NAME_REGEX.exec(entrypointName)![1]
 
     const query = `component=${componentName}&absolutePath=${entrypoint[entrypointName]}`
 
@@ -292,7 +292,7 @@ const getBaseWebpackConfig = async (
     optimization: createOptimizationConfig({ dev, isServer }),
     resolve: {
       modules: ['node_modules'].concat(
-        process.env.NODE_PATH.split(path.delimiter).filter(Boolean)
+        process.env.NODE_PATH!.split(path.delimiter).filter(Boolean)
       ),
       extensions: [
         ...(useTypescript

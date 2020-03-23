@@ -44,7 +44,7 @@ export default {
     const devMiddleware: Options['devMiddleware'] = {
       // @ts-ignore
       noInfo: true,
-      publicPath: clientConfig.output.publicPath,
+      publicPath: clientConfig.output!.publicPath!,
       writeToDisk: true,
       logLevel: 'silent',
     }
