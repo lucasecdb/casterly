@@ -1,25 +1,15 @@
 {
   "compilerOptions": {
     "jsx": "react",
-    "target": "es5",
+    "target": "es2017",
     "outDir": "dist",
-    "module": "commonjs",
+    "module": "esnext",
     "esModuleInterop": true,
-    "downlevelIteration": true,
-    "sourceMap": true,
-    "allowJs": true,
-    "noImplicitAny": true,
-    "noImplicitThis": true,
     "moduleResolution": "node",
-    "skipLibCheck": true,
-    "allowSyntheticDefaultImports": true,
-    "alwaysStrict": true,
-    "strictBindCallApply": true,
-    "strictFunctionTypes": true
+    "strict": true
   },
   "exclude": [
-    "**/dist",
-    "./*.d.ts",
-    "./*.js"
+    "dist",
+    "./*.d.ts"
   ]
 }
