@@ -6,10 +6,8 @@
     "module": "esnext",
     "esModuleInterop": true,
     "moduleResolution": "node",
-    "strict": true
+    "strict": true,
+    "declaration": true
   },
-  "exclude": [
-    "dist",
-    "./*.d.ts"
-  ]
+  "exclude": ["dist", "./*.d.ts"]
 }
