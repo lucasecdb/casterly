@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Changed
 - Removed peer dependency `react-hot-loader`.
+- Upgrade `workbox-webpack-plugin` version to v5 stable.
 
 ## [0.1.6] - 2019-09-28
 ### Changed
