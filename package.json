@@ -18,14 +18,14 @@
     "update-changelog": "node ./scripts/update-changelog.js"
   },
   "dependencies": {
-    "@babel/core": "^7.6.2",
+    "@babel/core": "^7.9.0",
     "@babel/plugin-proposal-class-properties": "^7.5.5",
     "@babel/plugin-syntax-dynamic-import": "^7.2.0",
     "@babel/plugin-transform-destructuring": "^7.6.0",
     "@babel/plugin-transform-runtime": "^7.6.2",
-    "@babel/preset-env": "^7.6.2",
-    "@babel/preset-react": "^7.0.0",
-    "@babel/preset-typescript": "^7.6.0",
+    "@babel/preset-env": "^7.9.5",
+    "@babel/preset-react": "^7.9.4",
+    "@babel/preset-typescript": "^7.9.0",
     "@svgr/webpack": "^4.3.2",
     "babel-core": "^7.0.0-bridge.0",
     "babel-loader": "^8.0.6",
@@ -90,7 +90,7 @@
     "eslint": "^6.4.0",
     "prettier": "^1.18.2",
     "release-it": "^12.4.1",
-    "typescript": "^3.6.3"
+    "typescript": "^3.8.3"
   },
   "peerDependencies": {
     "react": "^16.9.0",
