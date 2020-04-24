@@ -382,6 +382,7 @@ const getBaseWebpackConfig = (options?: Options): Configuration => {
         filename: `${STATIC_CHUNKS_PATH}/${extractedCssFilename}.css`,
         chunkFilename: `${STATIC_CHUNKS_PATH}/${extractedCssFilename}.chunk.css`,
         reloadAll: true,
+        ignoreOrder: true,
       }),
       // This plugin makes sure `output.filename` is used for entry chunks
       new ChunkNamesPlugin(),
