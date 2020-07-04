@@ -1,4 +1,5 @@
 import * as path from 'path'
+
 import { Compiler, Plugin } from 'webpack'
 
 // This plugin exists to fix the relative import for dynamic

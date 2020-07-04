@@ -1,9 +1,9 @@
-import createStore from 'unistore'
-import { Compiler } from 'webpack'
 import ForkTsCheckerPlugin from 'fork-ts-checker-webpack-plugin'
 // @ts-ignore this file doesn't exist anymore
 import { NormalizedMessage } from 'fork-ts-checker-webpack-plugin/lib/NormalizedMessage'
 import { createCodeframeFormatter } from 'fork-ts-checker-webpack-plugin/lib/formatter/CodeframeFormatter'
+import createStore from 'unistore'
+import { Compiler } from 'webpack'
 
 import { LoggerStoreStatus, logStore } from './logger'
 

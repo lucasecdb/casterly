@@ -1,7 +1,7 @@
 import Koa from 'koa'
 
-import middlewares from './middlewares/index'
 import * as Log from '../output/log'
+import middlewares from './middlewares/index'
 
 const start = () => {
   const app = new Koa()

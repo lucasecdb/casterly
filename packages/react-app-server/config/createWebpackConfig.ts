@@ -1,26 +1,17 @@
 import path from 'path'
-import webpack, { Configuration, ExternalsElement } from 'webpack'
+
+import CaseSensitivePathsPlugin from 'case-sensitive-paths-webpack-plugin'
 // @ts-ignore
 import ExtractCssChunks from 'extract-css-chunks-webpack-plugin'
-import CaseSensitivePathsPlugin from 'case-sensitive-paths-webpack-plugin'
-import WatchMissingNodeModulesPlugin from 'react-dev-utils/WatchMissingNodeModulesPlugin'
-import ModuleScopePlugin from 'react-dev-utils/ModuleScopePlugin'
+import ForkTsCheckerPlugin from 'fork-ts-checker-webpack-plugin'
 // @ts-ignore
 import ModuleNotFoundPlugin from 'react-dev-utils/ModuleNotFoundPlugin'
-import ForkTsCheckerPlugin from 'fork-ts-checker-webpack-plugin'
+import ModuleScopePlugin from 'react-dev-utils/ModuleScopePlugin'
+import WatchMissingNodeModulesPlugin from 'react-dev-utils/WatchMissingNodeModulesPlugin'
 import resolve from 'resolve'
+import webpack, { Configuration, ExternalsElement } from 'webpack'
 
-import ChunkNamesPlugin from './webpack/plugins/ChunkNamesPlugin'
-import RequireCacheHotReloaderPlugin from './webpack/plugins/RequireCacheHotReloaderPlugin'
-import SSRImportPlugin from './webpack/plugins/SSRImportPlugin'
-import BuildManifestPlugin from './webpack/plugins/BuildManifestPlugin'
-import ComponentsManifestPlugin from './webpack/plugins/ComponentsManifestPlugin'
-import { Options } from './webpack/types'
-import { getStyleLoaders } from './webpack/styles'
-import { createWorkboxPlugin } from './webpack/workbox'
-import { createOptimizationConfig } from './webpack/optimization'
-import getClientEnvironment from './env'
-import * as paths from './paths'
+import fileExists from '../utils/fileExists'
 import {
   COMPONENT_NAME_REGEX,
   STATIC_CHUNKS_PATH,
@@ -30,7 +21,17 @@ import {
   STATIC_RUNTIME_MAIN,
   STATIC_RUNTIME_WEBPACK,
 } from './constants'
-import fileExists from '../utils/fileExists'
+import getClientEnvironment from './env'
+import * as paths from './paths'
+import { createOptimizationConfig } from './webpack/optimization'
+import BuildManifestPlugin from './webpack/plugins/BuildManifestPlugin'
+import ChunkNamesPlugin from './webpack/plugins/ChunkNamesPlugin'
+import ComponentsManifestPlugin from './webpack/plugins/ComponentsManifestPlugin'
+import RequireCacheHotReloaderPlugin from './webpack/plugins/RequireCacheHotReloaderPlugin'
+import SSRImportPlugin from './webpack/plugins/SSRImportPlugin'
+import { getStyleLoaders } from './webpack/styles'
+import { Options } from './webpack/types'
+import { createWorkboxPlugin } from './webpack/workbox'
 
 // style files regexes
 const cssRegex = /\.global\.css$/

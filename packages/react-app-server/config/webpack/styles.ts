@@ -1,6 +1,6 @@
-import { Loader } from 'webpack'
 // @ts-ignore
 import ExtractCssChunks from 'extract-css-chunks-webpack-plugin'
+import { Loader } from 'webpack'
 
 import { Options } from './types'
 

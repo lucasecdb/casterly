@@ -1,5 +1,6 @@
-import { Compiler, Plugin } from 'webpack'
 import { realpathSync } from 'fs'
+
+import { Compiler, Plugin } from 'webpack'
 
 function deleteCache(path: string) {
   try {

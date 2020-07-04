@@ -1,11 +1,11 @@
 import Application from 'koa'
-import webpack from 'webpack'
 import koaWebpack, { Options } from 'koa-webpack'
+import webpack from 'webpack'
 import hotClient, { Options as HotClientOptions } from 'webpack-hot-client'
 
 import createWebpackConfig from '../../config/createWebpackConfig'
-import { watchCompilers } from '../../output/watcher'
 import * as paths from '../../config/paths'
+import { watchCompilers } from '../../output/watcher'
 import fileExists from '../../utils/fileExists'
 
 const configureHotClient = (

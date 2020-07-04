@@ -10,9 +10,9 @@ interface Props {
   head?: HelmetData
   scripts?: string[]
   styles?: string[]
-  state?: object
+  state?: Record<string, unknown>
   componentName: string
-  componentProps?: object
+  componentProps?: Record<string, unknown>
 }
 
 const Document: React.FC<Props> = ({
