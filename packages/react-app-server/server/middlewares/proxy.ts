@@ -1,5 +1,5 @@
 import express, { Application } from 'express'
-import proxy from 'http-proxy-middleware'
+import { createProxyMiddleware } from 'http-proxy-middleware'
 
 import * as paths from '../../config/paths'
 
@@ -10,7 +10,7 @@ export default {
     if (appPackageJson.proxy) {
       app.use(
         appPackageJson.proxy.path,
-        proxy({
+        createProxyMiddleware({
           ...appPackageJson.proxy.config,
           logLevel: 'silent',
         })
