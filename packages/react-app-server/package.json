@@ -95,7 +95,7 @@
     "@types/react-router-dom": "^5.1.2",
     "@types/serialize-javascript": "^1.5.0",
     "@types/terser-webpack-plugin": "^2.2.0",
-    "@types/webpack": "^4.39.8",
+    "@types/webpack": "^4.41.18",
     "@types/webpack-hot-client": "^4.0.0",
     "@types/webpack-manifest-plugin": "^2.1.0",
     "@types/webpack-node-externals": "^1.6.3",
