@@ -1,6 +1,6 @@
+import { Middleware } from 'koa'
 import React from 'react'
 import { renderToString } from 'react-dom/server'
-import { Middleware } from 'koa'
 
 import Document from '../../components/Document'
 import * as Log from '../../output/log'

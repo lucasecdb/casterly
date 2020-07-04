@@ -1,12 +1,13 @@
 /* eslint-disable no-console */
-import Koa from 'koa'
 import inspector from 'inspector'
-import chalk from 'chalk'
 
+import chalk from 'chalk'
+import Koa from 'koa'
+
+import { logStore } from '../output/logger'
 import middlewares from './middlewares/index'
 // import proxyMiddleware from './middlewares/proxy'
 import webpackMiddleware from './middlewares/webpack'
-import { logStore } from '../output/logger'
 
 const PORT = 3000
 

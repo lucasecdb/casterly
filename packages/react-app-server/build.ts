@@ -1,34 +1,33 @@
 /* eslint-disable no-console */
 
-// Makes the script crash on unhandled rejections instead of silently
-// ignoring them. In the future, promise rejections that are not handled will
-// terminate the Node.js process with a non-zero exit code.
-process.on('unhandledRejection', (err) => {
-  throw err
-})
-
-// Ensure environment variables are read.
 import './config/env'
 
-import chalk from 'chalk'
-import fs from 'fs-extra'
-import webpack, { MultiCompiler, Stats, compilation } from 'webpack'
 // @ts-ignore
 import bfj from 'bfj'
-import checkRequiredFiles from 'react-dev-utils/checkRequiredFiles'
-import formatWebpackMessages from 'react-dev-utils/formatWebpackMessages'
+import chalk from 'chalk'
+import fs from 'fs-extra'
 import FileSizeReporter, {
   OpaqueFileSizes,
 } from 'react-dev-utils/FileSizeReporter'
-import printBuildError from 'react-dev-utils/printBuildError'
-
-import getBaseWebpackConfig from './config/createWebpackConfig'
-import * as paths from './config/paths'
-
 // We require that you explicitly set browsers and do not fall back to
 // browserslist defaults.
 // @ts-ignore
 import { checkBrowsers } from 'react-dev-utils/browsersHelper'
+import checkRequiredFiles from 'react-dev-utils/checkRequiredFiles'
+import formatWebpackMessages from 'react-dev-utils/formatWebpackMessages'
+import printBuildError from 'react-dev-utils/printBuildError'
+import webpack, { MultiCompiler, Stats, compilation } from 'webpack'
+
+import getBaseWebpackConfig from './config/createWebpackConfig'
+import * as paths from './config/paths'
+
+// Makes the script crash on unhandled rejections instead of silently
+// ignoring them. In the future, promise rejections that are not handled will
+// terminate the Node.js process with a non-zero exit code.
+// Ensure environment variables are read.
+process.on('unhandledRejection', (err) => {
+  throw err
+})
 
 const measureFileSizesBeforeBuild = FileSizeReporter.measureFileSizesBeforeBuild
 const printFileSizesAfterBuild = FileSizeReporter.printFileSizesAfterBuild
@@ -189,7 +188,7 @@ export default function startBuild() {
       }
     )
     .catch((err: Error) => {
-      if (err && err.message) {
+      if (err?.message) {
         console.log(err.message)
       }
       process.exit(1)

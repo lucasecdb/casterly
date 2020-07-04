@@ -1,9 +1,10 @@
 import * as path from 'path'
+
 import React, { StrictMode } from 'react'
 import { renderToString } from 'react-dom/server'
 
-import { Head } from './lib/head'
 import { appDistServer } from '../config/paths'
+import { Head } from './lib/head'
 
 interface Options {
   requestUrl: string
@@ -11,7 +12,7 @@ interface Options {
   cookie?: string
   userAgent: string
   requestLanguage: string
-  routerContext: object
+  routerContext: Record<string, unknown>
   server: boolean
 }
 

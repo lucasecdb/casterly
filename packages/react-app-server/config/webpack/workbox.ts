@@ -1,9 +1,9 @@
 import webpack from 'webpack'
 import { InjectManifest } from 'workbox-webpack-plugin'
 
-import { Options } from './types'
 import getClientEnvironment from '../env'
 import * as paths from '../paths'
+import { Options } from './types'
 
 const JS_CSS_REGEX = /\.(?:js|css)$/
 const SOURCE_MAP_REGEX = /\.(?:map)$/

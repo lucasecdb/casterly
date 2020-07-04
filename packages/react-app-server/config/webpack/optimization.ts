@@ -1,8 +1,8 @@
-import { Options } from 'webpack'
 import TerserPlugin, { TerserPluginOptions } from 'terser-webpack-plugin'
+import { Options } from 'webpack'
 
-import { Options as ArgOptions } from './types'
 import { STATIC_RUNTIME_WEBPACK } from '../constants'
+import { Options as ArgOptions } from './types'
 
 export const createOptimizationConfig = ({
   dev,
@@ -53,7 +53,7 @@ export const createOptimizationConfig = ({
 
   splitChunks.chunks = 'all'
   splitChunks.cacheGroups = {
-    ...(splitChunks.cacheGroups as object),
+    ...(splitChunks.cacheGroups as Record<string, unknown>),
     react: {
       name: 'commons',
       chunks: 'all',

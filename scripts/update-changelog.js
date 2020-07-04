@@ -10,9 +10,9 @@ const CHANGELOG_FILENAME = 'CHANGELOG.md'
 const UNRELEASED_SECTION = '## [Unreleased]'
 
 const getVersion = () => {
-  const package = require('../package.json')
+  const pkg = require('../package.json')
 
-  return package.version
+  return pkg.version
 }
 
 const update = async () => {

@@ -1,5 +1,6 @@
 {
   "extends": "@lucasecdb",
+  "root": true,
   "env": {
     "es6": true,
     "browser": true,
@@ -7,10 +8,8 @@
     "jest": true
   },
   "rules": {
-    "no-underscore-dangle": "off",
-    "@typescript-eslint/camelcase": "off",
     "@typescript-eslint/no-explicit-any": "off",
-    "@typescript-eslint/ban-ts-ignore": "off",
+    "@typescript-eslint/ban-ts-comment": "off",
     "@typescript-eslint/no-var-requires": "off",
     "react/no-unescaped-entities": "off",
     "require-atomic-updates": "off"

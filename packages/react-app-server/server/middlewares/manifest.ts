@@ -1,12 +1,13 @@
-import { Middleware } from 'koa'
 import { promises as fsp } from 'fs'
 import * as path from 'path'
 
-import { appDist, appDistServer } from '../../config/paths'
+import { Middleware } from 'koa'
+
 import {
   ASSET_MANIFEST_FILE,
   COMPONENTS_MANIFEST_FILE,
 } from '../../config/constants'
+import { appDist, appDistServer } from '../../config/paths'
 
 const readJSON = (filePath: string) =>
   fsp

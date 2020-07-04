@@ -1,5 +1,5 @@
-import { loader } from 'webpack'
 import { getOptions } from 'loader-utils'
+import { loader } from 'webpack'
 
 const clientEntrypointLoader: loader.Loader = function () {
   const { component, absolutePath } = getOptions(this)

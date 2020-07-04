@@ -1,5 +1,6 @@
 import { Compiler, Plugin } from 'webpack'
 import { RawSource } from 'webpack-sources'
+
 import { COMPONENTS_MANIFEST_FILE, COMPONENT_NAME_REGEX } from '../../constants'
 
 // This plugin creates a components-manifest.json from page entrypoints.
