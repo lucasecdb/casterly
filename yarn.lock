@@ -8801,7 +8801,7 @@ rc@^1.2.8:
     koa-helmet "^5.2.0"
     koa-static "^5.0.0"
     koa-webpack "^5.2.4"
-    loader-utils "^1.2.3"
+    loader-utils "^2.0.0"
     node-sass "^4.13.0"
     optimize-css-assets-webpack-plugin "^5.0.3"
     postcss-flexbugs-fixes "^4.1.0"
