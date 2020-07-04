@@ -60,7 +60,7 @@
     "postcss-safe-parser": "^4.0.1",
     "react-dev-utils": "^10.2.1",
     "react-helmet": "^6.1.0",
-    "react-hot-loader": "^4.12.14",
+    "react-hot-loader": "^4.12.21",
     "react-router": "^5.1.2",
     "react-router-config": "^5.1.1",
     "react-router-dom": "^5.2.0",
