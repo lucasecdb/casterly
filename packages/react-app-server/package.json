@@ -44,7 +44,7 @@
     "file-loader": "^6.0.0",
     "fork-ts-checker-webpack-plugin": "^4.0.1",
     "fs-extra": "^8.1.0",
-    "http-proxy-middleware": "^0.20.0",
+    "http-proxy-middleware": "^1.0.4",
     "ignore-loader": "^0.1.2",
     "koa": "^2.11.0",
     "koa-compose": "^4.1.0",
