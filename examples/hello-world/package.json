@@ -10,7 +10,19 @@
   },
   "dependencies": {
     "react": "^16.11.0",
-    "react-app-server": "file:../../packages/react-app-server",
+    "react-app-server": "../../packages/react-app-server",
     "react-dom": "^16.11.0"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   }
 }
