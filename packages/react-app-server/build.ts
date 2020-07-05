@@ -113,6 +113,10 @@ async function build(
 }
 
 function copyPublicFolder() {
+  if (!fs.existsSync(paths.appPublic)) {
+    return
+  }
+
   fs.copySync(paths.appPublic, paths.appDistPublic, {
     dereference: true,
   })
