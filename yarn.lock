@@ -1861,10 +1861,10 @@
     "@types/webpack-sources" "*"
     source-map "^0.6.0"
 
-"@types/workbox-webpack-plugin@^5.1.1":
-  version "5.1.1"
-  resolved "https://registry.yarnpkg.com/@types/workbox-webpack-plugin/-/workbox-webpack-plugin-5.1.1.tgz#1875dc5d778d4a744c70c05351bfa9e9092da1ec"
-  integrity sha512-Hk4tmYWzl9kVFKRZVVgY6FvG9KnSdF2e4/vT9eYx93IqHXENSP4beo/C9vZXVQKi+Gev/pIp/HZ8WjNYVjew8A==
+"@types/workbox-webpack-plugin@^5.1.2":
+  version "5.1.2"
+  resolved "https://registry.yarnpkg.com/@types/workbox-webpack-plugin/-/workbox-webpack-plugin-5.1.2.tgz#083fd5834be31cdd6481110224de63a6c514feb2"
+  integrity sha512-iy5DUPeD/qUW0y2ifVM8E1K+/QOrlcJY4mljU9vu+eZN8n1aQSP3dTjMxin2l31M3A8btcTezbdEzIOul1G+nA==
 
 "@types/ws@*":
   version "7.2.3"
