@@ -67,7 +67,7 @@
     "resolve": "^1.12.0",
     "sass-loader": "^9.0.2",
     "serialize-javascript": "^4.0.0",
-    "terser-webpack-plugin": "^3.0.7",
+    "terser-webpack-plugin": "^3.0.8",
     "unistore": "^3.5.2",
     "url-loader": "^4.1.0",
     "webpack": "^4.44.0",
