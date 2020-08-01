@@ -19,7 +19,7 @@
   },
   "devDependencies": {
     "@lucasecdb/eslint-config": "^0.10.2",
-    "eslint": "^7.5.0",
+    "eslint": "^7.6.0",
     "husky": "^4.2.5",
     "lint-staged": "^10.2.11",
     "prettier": "^2.0.5",
