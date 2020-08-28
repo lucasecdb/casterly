@@ -41,8 +41,14 @@ export const getStyleLoaders = ({
     loader: require.resolve('css-loader'),
     options: {
       importLoaders: 1 + loaders.length,
-      modules: cssModules,
-      onlyLocals: isServer,
+      modules: cssModules
+        ? {
+            auto: /.*/,
+            localIdentName: dev ? '[path][name]__[local]' : '[hash:base64]',
+            localIdentHashPrefix: 'css',
+            exportOnlyLocals: isServer,
+          }
+        : false,
     },
   }
 
