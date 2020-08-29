@@ -21,14 +21,13 @@
     "@lucasecdb/eslint-config": "^0.11.0",
     "eslint": "^7.7.0",
     "husky": "^4.2.5",
+    "lerna": "^3.22.1",
     "lint-staged": "^10.2.13",
     "prettier": "^2.1.1",
-    "release-it": "^13.7.0",
     "typescript": "^3.9.7"
   },
   "scripts": {
     "lint": "eslint --ext js,jsx,ts,tsx .",
-    "update-changelog": "node ./scripts/update-changelog.js",
-    "release": "release-it"
+    "dev": "yarn --cwd packages/react-app-server dev"
   }
 }
