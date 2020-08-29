@@ -1,18 +1,29 @@
+import path from 'path'
+
 import { Middleware } from 'koa'
 import React from 'react'
 import { renderToString } from 'react-dom/server'
 
 import Document from '../../components/Document'
-import * as Log from '../../output/log'
-import { renderToHTML } from '../utils'
+import { appDistServer } from '../../config/paths'
+import { interopDefault, renderToHTML } from '../utils'
 
 const ERROR_COMPONENT_NAME = 'error'
+
+const resolveErrorComponent = async (entrypoint: string, props = {}) => {
+  const componentPath = path.join(appDistServer, entrypoint)
+
+  const Component = (await import(componentPath).then(
+    interopDefault
+  )) as React.ComponentType
+
+  return <Component {...props} />
+}
 
 const error = (): Middleware => async (ctx, next) => {
   try {
     await next()
   } catch (err) {
-    Log.error('An error ocurred while trying to server-side render')
     console.error(err)
 
     const errorComponentEntrypoint =
@@ -28,9 +39,12 @@ const error = (): Middleware => async (ctx, next) => {
       error: { name: err.name, message: err.message, stack: err.stack },
     }
 
-    const { head, markup } = await renderToHTML(errorComponentEntrypoint, props)
+    const { head, markup } = await renderToHTML(
+      await resolveErrorComponent(errorComponentEntrypoint, props)
+    )
 
     ctx.set('x-robots-tag', 'noindex, nofollow')
+    ctx.set('cache-control', 'no-cache')
 
     ctx.status = 500
     ctx.body =

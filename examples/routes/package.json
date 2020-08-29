@@ -1,0 +1,28 @@
+{
+  "name": "routes",
+  "private": true,
+  "version": "1.0.0",
+  "license": "MIT",
+  "scripts": {
+    "dev": "rs dev",
+    "start": "rs start",
+    "build": "rs build"
+  },
+  "dependencies": {
+    "react": "^16.11.0",
+    "react-app-server": "^0.1.6",
+    "react-dom": "^16.11.0"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

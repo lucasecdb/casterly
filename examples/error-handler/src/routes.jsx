@@ -1,8 +1,10 @@
+import React from 'react'
+
 import App from './index'
 
 export default [
   {
-    component: App,
     path: '/',
+    element: <App />,
   },
 ]
