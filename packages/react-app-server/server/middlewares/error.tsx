@@ -30,6 +30,8 @@ const error = (): Middleware => async (ctx, next) => {
 
     const { head, markup } = await renderToHTML(errorComponentEntrypoint, props)
 
+    ctx.set('x-robots-tag', 'noindex, nofollow')
+
     ctx.status = 500
     ctx.body =
       '<!doctype html>' +

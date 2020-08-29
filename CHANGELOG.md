@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed peer dependency `react-hot-loader`.
 - Upgrade `workbox-webpack-plugin` version to v5 stable.
 
+### Fixed
+- Static assets not served with correct mime-type in production.
+- Error page without `noindex, nofollow` robots rules.
+
 ## [0.1.6] - 2019-09-28
 ### Changed
 - Replaced the usage of `webpack-node-externals` with a custom externals function to avoid duplicate
