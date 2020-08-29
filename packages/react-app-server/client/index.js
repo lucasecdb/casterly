@@ -4,7 +4,7 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import { BrowserRouter as Router, useRoutes } from 'react-router-dom'
 
-import { registerComponent } from './componentLoader'
+import { loadComponent, registerComponent } from './componentLoader'
 
 import routes from '#app/routes'
 
@@ -22,6 +22,20 @@ const start = async () => {
     !query.has('nossr') || process.env.NODE_ENV === 'production'
 
   const method = shouldHydrate ? 'hydrate' : 'render'
+
+  const data = window.__DATA__
+
+  if (data.componentName === 'error') {
+    const { component: ErrorComponent } = await loadComponent(
+      data.componentName
+    )
+
+    ReactDOM[method](
+      <ErrorComponent {...data.props} />,
+      document.getElementById('root')
+    )
+    return
+  }
 
   const Root = () => {
     const element = useRoutes(routes)

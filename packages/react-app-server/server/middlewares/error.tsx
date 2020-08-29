@@ -6,7 +6,6 @@ import { renderToString } from 'react-dom/server'
 
 import Document from '../../components/Document'
 import { appDistServer } from '../../config/paths'
-import * as Log from '../../output/log'
 import { interopDefault, renderToHTML } from '../utils'
 
 const ERROR_COMPONENT_NAME = 'error'
@@ -25,7 +24,6 @@ const error = (): Middleware => async (ctx, next) => {
   try {
     await next()
   } catch (err) {
-    Log.error('An error ocurred while trying to server-side render')
     console.error(err)
 
     const errorComponentEntrypoint =
@@ -46,6 +44,7 @@ const error = (): Middleware => async (ctx, next) => {
     )
 
     ctx.set('x-robots-tag', 'noindex, nofollow')
+    ctx.set('cache-control', 'no-cache')
 
     ctx.status = 500
     ctx.body =
