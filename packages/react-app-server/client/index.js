@@ -1,7 +1,12 @@
+/* @ts-check */
+
 import React from 'react'
 import ReactDOM from 'react-dom'
+import { BrowserRouter as Router, useRoutes } from 'react-router-dom'
 
-import { loadComponent, registerComponent } from './component-loader'
+import { registerComponent } from './componentLoader'
+
+import routes from '#app/routes'
 
 window.__COMPONENTS = window.__COMPONENTS || []
 
@@ -13,16 +18,23 @@ window.__COMPONENTS.push = register
 const start = async () => {
   const query = new URLSearchParams(window.location.search)
 
-  const { componentName, props = {} } = window.__DATA__
-
   const shouldHydrate =
     !query.has('nossr') || process.env.NODE_ENV === 'production'
 
   const method = shouldHydrate ? 'hydrate' : 'render'
 
-  const { component: Component } = await loadComponent(componentName)
+  const Root = () => {
+    const element = useRoutes(routes)
 
-  ReactDOM[method](<Component {...props} />, document.getElementById('root'))
+    return element
+  }
+
+  ReactDOM[method](
+    <Router>
+      <Root />
+    </Router>,
+    document.getElementById('root')
+  )
 }
 
 start()

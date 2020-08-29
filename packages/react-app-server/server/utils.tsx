@@ -1,9 +1,7 @@
-import * as path from 'path'
-
 import React, { StrictMode } from 'react'
 import { renderToString } from 'react-dom/server'
+import { StaticRouter } from 'react-router-dom/server'
 
-import { appDistServer } from '../config/paths'
 import { Head } from './lib/head'
 
 interface Options {
@@ -16,7 +14,7 @@ interface Options {
   server: boolean
 }
 
-function interopDefault(mod: any) {
+export function interopDefault(mod: any) {
   return mod.default || mod
 }
 
@@ -35,12 +33,7 @@ interface RenderResult {
   state?: any
 }
 
-export const renderToHTML = async (componentEntrypoint: string, props = {}) => {
-  const componentPath = path.join(appDistServer, componentEntrypoint)
-
-  const Component = (await import(componentPath).then(
-    interopDefault
-  )) as React.ComponentType
+export const renderToHTML = async (element: JSX.Element, path?: string) => {
   const routerContext: { url?: string } = {}
 
   /*const {
@@ -60,7 +53,7 @@ export const renderToHTML = async (componentEntrypoint: string, props = {}) => {
 
   const appRoot = (
     <StrictMode>
-      <Component {...props} />
+      <StaticRouter location={path}>{element}</StaticRouter>
     </StrictMode>
   )
 

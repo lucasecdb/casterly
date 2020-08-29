@@ -308,8 +308,6 @@ const getBaseWebpackConfig = async (
           paths.appDist,
           STATIC_COMPONENTS_PATH
         ),
-        'react-app-server': paths.serverPath,
-        'react-app-server/head': 'react-app-server/dist/server/lib/head.js',
       },
     },
     resolveLoader: {
