@@ -1,18 +1,51 @@
+import * as path from 'path'
+
 import compose from 'koa-compose'
 import helmet from 'koa-helmet'
-import serve from 'koa-static'
 
+import { appDist, appDistPublic } from '../../config/paths'
+import { serveStatic } from '../serveStatic'
 import error from './error'
 import manifest from './manifest'
+import matchRoute from './matchRoute'
 import render from './render'
-
-const DIST_PUBLIC = '.dist/public'
-const DIST_STATIC = '.dist/static'
+import status from './status'
 
 export default compose([
   helmet(),
-  serve(DIST_PUBLIC, { root: '/' }),
-  serve(DIST_STATIC, { root: '/static' }),
+  status,
+  matchRoute<{ path: string }>({
+    route: '/:path*',
+    fn: async (ctx, params, next) => {
+      try {
+        await serveStatic(
+          ctx.req,
+          ctx.res,
+          path.join(appDistPublic, ...(params.path || []))
+        )
+      } catch (err) {
+        if (err.code === 'ENOENT') {
+          return next()
+        }
+
+        throw err
+      }
+    },
+  }),
+  matchRoute<{ path: string }>({
+    route: '/static/:path*',
+    fn: async (ctx, params) => {
+      try {
+        await serveStatic(
+          ctx.req,
+          ctx.res,
+          path.join(appDist, 'static', ...(params.path || []))
+        )
+      } catch {
+        ctx.status = 404
+      }
+    },
+  }),
   manifest(),
   error(),
   render(),

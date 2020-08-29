@@ -25,6 +25,7 @@ const ErrorPage = ({ error }) => {
       <Head
         title="Rendering Error"
         style={[{ cssText: `* { margin: 0; padding: 0; }` }]}
+        meta={[{ name: 'robot', content: 'noindex, nofollow' }]}
       />
       <div style={styles.container}>
         <h1 style={styles.message}>{error.message}</h1>
