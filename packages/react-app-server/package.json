@@ -82,7 +82,7 @@
     "@types/koa": "^2.11.4",
     "@types/koa-compose": "^3.2.4",
     "@types/koa-helmet": "^5.2.0",
-    "@types/koa-webpack": "^5.0.1",
+    "@types/koa-webpack": "^6.0.0",
     "@types/loader-utils": "^2.0.1",
     "@types/node": "^14.6.2",
     "@types/node-fetch": "^2.5.7",
