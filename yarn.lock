@@ -2473,10 +2473,10 @@
     "@types/helmet" "*"
     "@types/koa" "*"
 
-"@types/koa-webpack@^5.0.1":
-  version "5.0.1"
-  resolved "https://registry.yarnpkg.com/@types/koa-webpack/-/koa-webpack-5.0.1.tgz#dd239c0d1e352cae206c8cd0fc308329abc0c20f"
-  integrity sha512-OXijJpzQw+qHdvWDy/GaEEM8D4JZ6u7b1kpbmDKLs+Lyo4OXCstKiGj4jOdwN3ANQag6fhIklGQ5enURWVphUw==
+"@types/koa-webpack@^6.0.0":
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/@types/koa-webpack/-/koa-webpack-6.0.0.tgz#984640e80f3fa5ab5970ba5e72531c36443fa28b"
+  integrity sha512-xGHGYRSAUkUmOn6ct1tZl6V4HGSMbaVQvs6B150h9uNp21s+ZAocmpgROXrMuguXNy8dezGyoCPE6r/gpWcFSA==
   dependencies:
     "@types/koa" "*"
     "@types/webpack" "*"
