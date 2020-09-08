@@ -4,16 +4,6 @@ import { StaticRouter } from 'react-router-dom/server'
 
 import { Head } from './lib/head'
 
-interface Options {
-  requestUrl: string
-  requestHost: string
-  cookie?: string
-  userAgent: string
-  requestLanguage: string
-  routerContext: Record<string, unknown>
-  server: boolean
-}
-
 export function interopDefault(mod: any) {
   return mod.default || mod
 }
