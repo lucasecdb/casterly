@@ -2,6 +2,7 @@ import Application from 'koa'
 import koaWebpack, { Options } from 'koa-webpack'
 import webpack from 'webpack'
 import hotClient, { Options as HotClientOptions } from 'webpack-hot-client'
+import {} from 'webpack-dev-middleware'
 
 import createWebpackConfig from '../../config/createWebpackConfig'
 import * as paths from '../../config/paths'
@@ -12,9 +13,8 @@ const configureHotClient = (
   compiler: webpack.Compiler,
   options: HotClientOptions
 ) => {
-  return new Promise((resolve) => {
+  return new Promise<hotClient.Client>((resolve) => {
     const client = hotClient(compiler, options)
-    // @ts-ignore
     const { server } = client
 
     server.on('listening', () => resolve(client))
@@ -49,9 +49,23 @@ export default {
       logLevel: 'silent',
     }
 
-    await configureHotClient(clientCompiler, {
+    const hotClient = await configureHotClient(clientCompiler, {
       logLevel: 'silent',
       autoConfigure: false,
+    })
+
+    await new Promise<webpack.MultiWatching>((resolve, reject) => {
+      const watcher = multiCompiler.watch(
+        // @ts-ignore
+        [clientConfig.watchOptions, serverConfig.watchOptions],
+        (err) => {
+          if (err) {
+            return reject(err)
+          }
+
+          resolve(watcher)
+        }
+      )
     })
 
     app.use(

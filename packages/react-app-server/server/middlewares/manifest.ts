@@ -1,4 +1,4 @@
-import { promises as fsp } from 'fs'
+import * as fs from 'fs'
 import * as path from 'path'
 
 import { Middleware } from 'koa'
@@ -9,11 +9,10 @@ import {
 } from '../../config/constants'
 import { appDist, appDistServer } from '../../config/paths'
 
-const readJSON = (filePath: string) =>
-  fsp
-    .readFile(filePath)
-    .then((file) => file.toString())
-    .then(JSON.parse)
+const readJSON = (filePath: string) => {
+  const file = fs.readFileSync(filePath)
+  return JSON.parse(file.toString())
+}
 
 const manifest = (): Middleware => async (ctx, next) => {
   const assetManifest = await readJSON(path.join(appDist, ASSET_MANIFEST_FILE))

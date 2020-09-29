@@ -1,5 +1,3 @@
-/* eslint-disable no-console */
-
 import './config/env'
 
 // @ts-ignore

@@ -1,14 +1,27 @@
-import Koa from 'koa'
+import { createServer } from 'http'
 
 import * as Log from '../output/log'
-import middlewares from './middlewares/index'
+import { AppServer } from './appServer'
+// import middlewares from './middlewares/index'
 
 const start = () => {
-  const app = new Koa()
+  const app = new AppServer()
 
-  app.use(middlewares)
+  const server = createServer(app.getRequestHandler())
 
-  app.listen(3000, () => {
+  return new Promise((resolve, reject) => {
+    server.on('error', reject)
+    server.on('listening', resolve)
+
+    server.listen(3000)
+    // app.use(middlewares)
+
+    /*
+    app.listen(3000, () => {
+      Log.info('Server listening on port 3000')
+    })
+  */
+  }).then(() => {
     Log.info('Server listening on port 3000')
   })
 }

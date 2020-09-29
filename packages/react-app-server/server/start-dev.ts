@@ -1,25 +1,16 @@
-/* eslint-disable no-console */
+import { createServer } from 'http'
 import inspector from 'inspector'
 
 import chalk from 'chalk'
-import Koa from 'koa'
 
 import { logStore } from '../output/logger'
-import middlewares from './middlewares/index'
-// import proxyMiddleware from './middlewares/proxy'
-import webpackMiddleware from './middlewares/webpack'
+import { DevServer } from './devServer'
 
 const PORT = 3000
 
 const start = async () => {
   try {
     inspector.open()
-    console.log(
-      chalk`
-{dim
-  {green Debugger started on ${inspector.url()}}
-}`.trim()
-    )
   } catch (err) {
     const errorStr = chalk`
 {dim
@@ -31,17 +22,17 @@ const start = async () => {
     console.error(errorStr)
   }
 
-  const app = new Koa()
+  const app = new DevServer()
+  const server = createServer(app.getRequestHandler())
 
-  // proxyMiddleware.set(app)
+  return new Promise((resolve, reject) => {
+    server.on('error', reject)
+    server.on('listening', resolve)
 
-  await webpackMiddleware.set(app)
-
-  app.use(middlewares)
-
-  logStore.setState({ port: PORT })
-
-  app.listen(PORT)
+    server.listen(3000)
+  }).then(() => {
+    logStore.setState({ port: PORT })
+  })
 }
 
 export default start

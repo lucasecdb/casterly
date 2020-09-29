@@ -1,9 +1,10 @@
-import { Middleware, Next, ParameterizedContext } from 'koa'
+import { IncomingMessage, ServerResponse } from 'http'
+
 import { Key, pathToRegexp, regexpToFunction } from 'path-to-regexp'
 
 interface MatchRouteOptions<T> {
   route: string
-  fn: (ctx: ParameterizedContext, params: T, next: Next) => Promise<any>
+  fn: (req: IncomingMessage, res: ServerResponse, params: T) => Promise<any>
 }
 
 export default function matchRoute<
@@ -17,15 +18,15 @@ export default function matchRoute<
   })
   const match = regexpToFunction<T>(matcherRegex, keys)
 
-  const middleware: Middleware = (ctx, next) => {
-    const result = match(ctx.path)
+  const routeHandler = async (req: IncomingMessage, res: ServerResponse) => {
+    const result = match(req.url ?? '')
 
     if (!result) {
-      return next()
+      return
     }
 
-    return fn(ctx, result.params, next)
+    await fn(req, res, result.params)
   }
 
-  return middleware
+  return routeHandler
 }
