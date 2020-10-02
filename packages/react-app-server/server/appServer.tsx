@@ -34,19 +34,23 @@ const resolveErrorComponent = async (entrypoint: string, props = {}) => {
   return <Component {...props} />
 }
 
+export interface ServerOptions {
+  dev?: boolean
+}
+
 export class AppServer {
-  private assetManifest
-  private componentsManifest
+  private _assetManifest
+  private _componentsManifest
 
-  constructor() {
-    const assetManifest = readJSON(path.join(appDist, ASSET_MANIFEST_FILE))
+  constructor(opts: ServerOptions = {}) {
+    const { dev = false } = opts
 
-    const componentsManifest = readJSON(
-      path.join(appDistServer, COMPONENTS_MANIFEST_FILE)
-    )
-
-    this.assetManifest = assetManifest
-    this.componentsManifest = componentsManifest
+    if (!dev) {
+      this._assetManifest = readJSON(path.join(appDist, ASSET_MANIFEST_FILE))
+      this._componentsManifest = readJSON(
+        path.join(appDistServer, COMPONENTS_MANIFEST_FILE)
+      )
+    }
   }
 
   public getRequestHandler() {
@@ -55,8 +59,6 @@ export class AppServer {
 
   protected async handleRequest(req: IncomingMessage, res: ServerResponse) {
     res.statusCode = 200
-
-    console.log('handling request for', req.url)
 
     let shouldContinue = true
 
@@ -119,16 +121,22 @@ export class AppServer {
     }
   }
 
+  protected getComponentsManifest = () => this._componentsManifest
+
+  protected getAssetManifest = () => this._assetManifest
+
   private renderError = async (
     _: IncomingMessage,
     res: ServerResponse,
     err: Error
   ) => {
-    const errorComponentEntrypoint = this.componentsManifest[
+    const errorComponentEntrypoint = this.getComponentsManifest()[
       ERROR_COMPONENT_NAME
     ]
 
-    const assets: string[] = this.assetManifest.components[ERROR_COMPONENT_NAME]
+    const assets: string[] = this.getAssetManifest().components[
+      ERROR_COMPONENT_NAME
+    ]
 
     const scriptAssets = assets.filter((path) => path.endsWith('.js'))
     const styleAssets = assets.filter((path) => path.endsWith('.css'))
@@ -169,7 +177,9 @@ export class AppServer {
         'nossr'
       ) && process.env.NODE_ENV !== 'production'
 
-    const { assetManifest, componentsManifest } = this
+    const assetManifest = this.getAssetManifest()
+    const componentsManifest = this.getComponentsManifest()
+
     const assets: string[] = assetManifest.components['index']
 
     const routesEntrypoint = componentsManifest['routes']

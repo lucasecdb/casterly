@@ -1,14 +1,30 @@
 import { IncomingMessage, ServerResponse } from 'http'
+import * as path from 'path'
 
 import webpack from 'webpack'
+import devMiddleware, {
+  Options,
+  WebpackDevMiddleware,
+} from 'webpack-dev-middleware'
 import hotClient, { Options as HotClientOptions } from 'webpack-hot-client'
 import WebpackHotMiddleware from 'webpack-hot-middleware'
 
+import {
+  ASSET_MANIFEST_FILE,
+  COMPONENTS_MANIFEST_FILE,
+} from '../config/constants'
 import createWebpackConfig from '../config/createWebpackConfig'
 import * as paths from '../config/paths'
 import { watchCompilers } from '../output/watcher'
 import fileExists from '../utils/fileExists'
 import { AppServer } from './appServer'
+
+type NextFunction = (err?: any) => void
+export type NextHandleFunction = (
+  req: IncomingMessage,
+  res: ServerResponse,
+  next: NextFunction
+) => void
 
 const configureHotClient = (
   compiler: webpack.Compiler,
@@ -26,12 +42,15 @@ export class DevServer extends AppServer {
   private serverReady?: Promise<void>
   private setServerReady?: () => void
 
-  private middlewares: any[] = []
+  private middlewares: NextHandleFunction[] = []
   private hotClient: hotClient.Client | null = null
   private watcher: webpack.MultiWatching | null = null
+  private devMiddleware:
+    | (WebpackDevMiddleware & NextHandleFunction)
+    | null = null
 
   constructor() {
-    super()
+    super({ dev: true })
 
     this.initDevServer()
   }
@@ -59,15 +78,13 @@ export class DevServer extends AppServer {
 
     watchCompilers(clientCompiler, serverCompiler, useTypescript)
 
-    /*
-    const devMiddleware: WebpackDevMiddleware.Options = {
+    const devMiddlewareOptions: Options = {
       // @ts-ignore
       noInfo: true,
       publicPath: clientConfig.output!.publicPath!,
       writeToDisk: true,
       logLevel: 'silent',
     }
-    */
 
     this.hotClient = await configureHotClient(clientCompiler, {
       logLevel: 'silent',
@@ -90,9 +107,19 @@ export class DevServer extends AppServer {
       }
     )
 
+    this.devMiddleware = devMiddleware(multiCompiler, devMiddlewareOptions)
+
     this.middlewares = [WebpackHotMiddleware(clientCompiler)]
 
-    this.setServerReady?.()
+    this.setServerReady!()
+  }
+
+  protected getAssetManifest = () => {
+    return require(path.join(paths.appDist, ASSET_MANIFEST_FILE))
+  }
+
+  protected getComponentsManifest = () => {
+    return require(path.join(paths.appDistServer, COMPONENTS_MANIFEST_FILE))
   }
 
   protected async handleRequest(req: IncomingMessage, res: ServerResponse) {
@@ -101,7 +128,7 @@ export class DevServer extends AppServer {
     for (const middleware of this.middlewares) {
       // eslint-disable-next-line no-await-in-loop
       await new Promise((resolve, reject) => {
-        middleware(req, res, (err: any) => {
+        middleware(req, res, (err) => {
           if (err) {
             return reject(err)
           }
