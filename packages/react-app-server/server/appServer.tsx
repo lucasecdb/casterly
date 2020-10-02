@@ -120,7 +120,7 @@ export class AppServer {
   }
 
   private renderError = async (
-    req: IncomingMessage,
+    _: IncomingMessage,
     res: ServerResponse,
     err: Error
   ) => {

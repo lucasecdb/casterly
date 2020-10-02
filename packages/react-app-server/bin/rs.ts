@@ -2,8 +2,8 @@
 
 const commands: { [command: string]: () => Promise<void> } = {
   build: async () => await import('../build').then((i) => i.default()),
-  start: async () => await import('../server/start').then((i) => i.default()),
-  dev: async () => await import('../server/start-dev').then((i) => i.default()),
+  start: async () => await import('../cli/start').then((i) => i.default()),
+  dev: async () => await import('../cli/start-dev').then((i) => i.default()),
 }
 
 const command = process.argv[2]

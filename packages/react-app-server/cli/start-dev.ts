@@ -4,7 +4,7 @@ import inspector from 'inspector'
 import chalk from 'chalk'
 
 import { logStore } from '../output/logger'
-import { DevServer } from './devServer'
+import { DevServer } from '../server/devServer'
 
 const PORT = 3000
 
