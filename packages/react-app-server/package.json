@@ -92,7 +92,7 @@
     "@types/react-helmet": "^6.1.0",
     "@types/send": "^0.14.5",
     "@types/serialize-javascript": "^4.0.0",
-    "@types/terser-webpack-plugin": "^4.1.0",
+    "@types/terser-webpack-plugin": "^5.0.0",
     "@types/webpack": "^4.41.18",
     "@types/webpack-hot-client": "^4.0.0",
     "@types/webpack-manifest-plugin": "^2.1.0",
