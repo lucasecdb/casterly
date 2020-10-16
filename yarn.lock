@@ -2503,10 +2503,10 @@
   dependencies:
     "@types/koa" "*"
 
-"@types/koa-helmet@^5.2.0":
-  version "5.2.0"
-  resolved "https://registry.yarnpkg.com/@types/koa-helmet/-/koa-helmet-5.2.0.tgz#38e6cd62c8dfc3e0700ca5b77453462ed8d145dd"
-  integrity sha512-1A7pa8hsveRWVQiLqdvM2XXpztp2Dms7CtpMcMtzojxetHauSR8CXzuNLa1mP8vrekOqwu1i0Wk3WfVzQXxjgA==
+"@types/koa-helmet@^6.0.0":
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/@types/koa-helmet/-/koa-helmet-6.0.0.tgz#c4e27ce156f62a03561a207dc53d5372f80bfe68"
+  integrity sha512-uRweArZKDSnsTBFoM2fvDNMHwzSUX7ClJSbKmwzDiDu07+eIPOjoZCLPKgKGiurURwcSn9G0EZ7xlQrqj2z7PQ==
   dependencies:
     "@types/helmet" "*"
     "@types/koa" "*"
