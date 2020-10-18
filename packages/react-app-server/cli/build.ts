@@ -1,4 +1,4 @@
-import './config/env'
+import '../config/env'
 
 // @ts-ignore
 import bfj from 'bfj'
@@ -16,8 +16,8 @@ import formatWebpackMessages from 'react-dev-utils/formatWebpackMessages'
 import printBuildError from 'react-dev-utils/printBuildError'
 import webpack, { MultiCompiler, Stats, compilation } from 'webpack'
 
-import getBaseWebpackConfig from './config/createWebpackConfig'
-import * as paths from './config/paths'
+import getBaseWebpackConfig from '../config/createWebpackConfig'
+import * as paths from '../config/paths'
 
 // Makes the script crash on unhandled rejections instead of silently
 // ignoring them. In the future, promise rejections that are not handled will
