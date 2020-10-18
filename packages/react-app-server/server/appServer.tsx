@@ -105,12 +105,8 @@ export class AppServer {
       await routeMatch(req, res)
 
       if (!shouldContinue) {
-        break
+        return
       }
-    }
-
-    if (!shouldContinue) {
-      return
     }
 
     try {
