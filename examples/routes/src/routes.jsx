@@ -1,5 +1,4 @@
-import React from 'react'
-
+import NotFound from './NotFound'
 import OtherPage from './OtherPage'
 import App from './index'
 
@@ -11,5 +10,9 @@ export default [
   {
     element: <OtherPage />,
     path: '/other-page',
+  },
+  {
+    element: <NotFound />,
+    path: '*',
   },
 ]

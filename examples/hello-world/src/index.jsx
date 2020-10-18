@@ -1,9 +1,9 @@
-import React from 'react'
+import { useEffect, useState } from 'react'
 
 const App = () => {
-  const [counter, setCounter] = React.useState(0)
+  const [counter, setCounter] = useState(0)
 
-  React.useEffect(() => {
+  useEffect(() => {
     setInterval(() => {
       setCounter((prevCounter) => prevCounter + 1)
     }, 1000)

@@ -13,7 +13,9 @@
     "@typescript-eslint/no-var-requires": "off",
     "react/no-unescaped-entities": "off",
     "require-atomic-updates": "off",
-    "no-console": "off"
+    "no-console": "off",
+    "react/jsx-uses-react": "off",
+    "react/react-in-jsx-scope": "off"
   },
   "settings": {
     "react": {

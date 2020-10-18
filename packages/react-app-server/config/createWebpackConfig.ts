@@ -8,10 +8,12 @@ import ForkTsCheckerPlugin from 'fork-ts-checker-webpack-plugin'
 import ModuleNotFoundPlugin from 'react-dev-utils/ModuleNotFoundPlugin'
 import ModuleScopePlugin from 'react-dev-utils/ModuleScopePlugin'
 import WatchMissingNodeModulesPlugin from 'react-dev-utils/WatchMissingNodeModulesPlugin'
-import resolve from 'resolve'
+import semver from 'semver'
 import webpack, { Configuration, ExternalsElement } from 'webpack'
 
+import { getDependencyVersion } from '../utils/dependencies'
 import fileExists from '../utils/fileExists'
+import resolveRequest from '../utils/resolveRequest'
 import {
   COMPONENT_NAME_REGEX,
   STATIC_CHUNKS_PATH,
@@ -39,18 +41,9 @@ const cssModuleRegex = /\.css$/
 const sassRegex = /\.global\.(scss|sass)$/
 const sassModuleRegex = /\.(scss|sass)$/
 
-const resolveRequest = (request: string, issuer: string) => {
-  const basedir =
-    issuer.endsWith(path.posix.sep) || issuer.endsWith(path.win32.sep)
-      ? issuer
-      : path.dirname(issuer)
-
-  return resolve.sync(request, { basedir })
-}
-
 const addClientEntrypointLoader = (entrypoint: Record<string, string>) => {
   return Object.keys(entrypoint).reduce((obj, entrypointName) => {
-    const componentName = COMPONENT_NAME_REGEX.exec(entrypointName)![1]
+    const [, componentName] = COMPONENT_NAME_REGEX.exec(entrypointName)!
 
     const query = `component=${componentName}&absolutePath=${entrypoint[entrypointName]}`
 
@@ -64,7 +57,7 @@ const addClientEntrypointLoader = (entrypoint: Record<string, string>) => {
 const getBaseWebpackConfig = async (
   options?: Options
 ): Promise<Configuration> => {
-  const { isServer = false, dev = false } = options || {}
+  const { isServer = false, dev = false } = options ?? {}
 
   // Get environment variables to inject into our app.
   const env = getClientEnvironment({ isServer })
@@ -117,6 +110,10 @@ const getBaseWebpackConfig = async (
   const outputDir = isServer ? 'server' : ''
   const outputPath = path.join(dir, outputDir)
   const webpackMode = dev ? 'development' : 'production'
+
+  const reactVersion = await getDependencyVersion(paths.appPath, 'react')
+  const hasJsxRuntime =
+    reactVersion != null && semver.satisfies(reactVersion, '^16.4.0 || >=17')
 
   const typescriptPath = require.resolve('typescript', {
     paths: [paths.appNodeModules],
@@ -349,7 +346,12 @@ const getBaseWebpackConfig = async (
                 ...baseBabelOptions,
                 presets: [
                   ...baseBabelOptions.presets,
-                  require.resolve('@babel/preset-react'),
+                  [
+                    require.resolve('@babel/preset-react'),
+                    {
+                      runtime: hasJsxRuntime ? 'automatic' : 'classic',
+                    },
+                  ],
                 ],
                 plugins: [
                   ...baseBabelOptions.plugins,
@@ -448,7 +450,6 @@ const getBaseWebpackConfig = async (
       }),
       // This plugin makes sure `output.filename` is used for entry chunks
       new ChunkNamesPlugin(),
-      new webpack.NoEmitOnErrorsPlugin(),
       // Makes some environment variables available to the JS code, for example:
       // if (process.env.NODE_ENV === 'development') { ... }. See `./env.ts`.
       new webpack.DefinePlugin(env.stringified),
