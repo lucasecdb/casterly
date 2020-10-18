@@ -1,4 +1,6 @@
+import chalk from 'chalk'
 import createStore from 'unistore'
+import { Stats } from 'webpack'
 
 import * as Log from './log'
 
@@ -7,7 +9,14 @@ type WebpackState =
   | {
       loading: false
       typeChecking: boolean
-      errors: string[] | null
+      errors:
+        | {
+            message: string
+            loc: string
+            moduleName: string
+            moduleIdentifier: string
+          }[]
+        | null
       warnings: string[] | null
     }
 
@@ -55,7 +64,12 @@ logStore.subscribe((state) => {
   }
 
   if (state.errors && state.errors.length > 0) {
-    Log.error(state.errors[0])
+    const error = state.errors[0]
+
+    const { message, moduleName, loc } = error
+
+    Log.error(chalk`{bold ${moduleName}}:{dim ${loc}}\n\n  ${message}`)
+
     return
   }
 

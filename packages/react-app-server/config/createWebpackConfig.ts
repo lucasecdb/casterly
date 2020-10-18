@@ -1,25 +1,20 @@
 import path from 'path'
 
 import CaseSensitivePathsPlugin from 'case-sensitive-paths-webpack-plugin'
-// @ts-ignore
-import ExtractCssChunks from 'extract-css-chunks-webpack-plugin'
 import ForkTsCheckerPlugin from 'fork-ts-checker-webpack-plugin'
 // @ts-ignore
-import ModuleNotFoundPlugin from 'react-dev-utils/ModuleNotFoundPlugin'
-import ModuleScopePlugin from 'react-dev-utils/ModuleScopePlugin'
-import WatchMissingNodeModulesPlugin from 'react-dev-utils/WatchMissingNodeModulesPlugin'
+import MiniCssExtractPlugin from 'mini-css-extract-plugin'
 import semver from 'semver'
-import webpack, { Configuration, ExternalsElement } from 'webpack'
+import webpack, { Compiler, Configuration } from 'webpack'
 
 import { getDependencyVersion } from '../utils/dependencies'
 import fileExists from '../utils/fileExists'
+import { filterBoolean } from '../utils/filterBoolean'
 import resolveRequest from '../utils/resolveRequest'
 import {
-  COMPONENT_NAME_REGEX,
   STATIC_CHUNKS_PATH,
   STATIC_COMPONENTS_PATH,
   STATIC_MEDIA_PATH,
-  STATIC_RUNTIME_HOT,
   STATIC_RUNTIME_MAIN,
   STATIC_RUNTIME_WEBPACK,
 } from './constants'
@@ -27,7 +22,6 @@ import getClientEnvironment from './env'
 import * as paths from './paths'
 import { createOptimizationConfig } from './webpack/optimization'
 import BuildManifestPlugin from './webpack/plugins/BuildManifestPlugin'
-import ChunkNamesPlugin from './webpack/plugins/ChunkNamesPlugin'
 import ComponentsManifestPlugin from './webpack/plugins/ComponentsManifestPlugin'
 import RequireCacheHotReloaderPlugin from './webpack/plugins/RequireCacheHotReloaderPlugin'
 import SSRImportPlugin from './webpack/plugins/SSRImportPlugin'
@@ -40,19 +34,6 @@ const cssRegex = /\.global\.css$/
 const cssModuleRegex = /\.css$/
 const sassRegex = /\.global\.(scss|sass)$/
 const sassModuleRegex = /\.(scss|sass)$/
-
-const addClientEntrypointLoader = (entrypoint: Record<string, string>) => {
-  return Object.keys(entrypoint).reduce((obj, entrypointName) => {
-    const [, componentName] = COMPONENT_NAME_REGEX.exec(entrypointName)!
-
-    const query = `component=${componentName}&absolutePath=${entrypoint[entrypointName]}`
-
-    return {
-      ...obj,
-      [entrypointName]: `client-entrypoint-loader?${query}!`,
-    }
-  }, {})
-}
 
 const getBaseWebpackConfig = async (
   options?: Options
@@ -119,16 +100,20 @@ const getBaseWebpackConfig = async (
     paths: [paths.appNodeModules],
   })
 
-  const useTypescript = typescriptPath && (await fileExists(paths.appTsConfig))
+  const useTypescript =
+    !!typescriptPath && (await fileExists(paths.appTsConfig))
 
   const hasServiceWorker = await fileExists(paths.appServiceWorker)
 
   const chunkFilename = dev ? '[name]' : '[name].[contenthash]'
   const extractedCssFilename = dev ? '[name]' : '[name].[contenthash:8]'
 
-  const externals: ExternalsElement[] | undefined = isServer
+  const externals = isServer
     ? [
-        (context, request, callbackFn) => {
+        (
+          { context, request }: { context: string; request: string },
+          callbackFn: any
+        ) => {
           const excludedModules: string[] = [
             // add modules that should be transpiled here
           ]
@@ -228,16 +213,12 @@ const getBaseWebpackConfig = async (
       require.resolve('@babel/plugin-syntax-dynamic-import'),
       require.resolve('babel-plugin-macros'),
     ],
-    // This is a feature of `babel-loader` for webpack (not Babel itself).
-    // It enables caching results in ./node_modules/.cache/babel-loader/
-    // directory for faster rebuilds.
-    cacheDirectory: true,
+    cacheDirectory: path.join(paths.appDist, 'cache', 'webpack'),
     // Don't waste time on Gzipping the cache
     cacheCompression: false,
   }
 
   const entrypoints = {
-    [path.join(STATIC_COMPONENTS_PATH, 'index')]: paths.appIndexJs,
     [path.join(STATIC_COMPONENTS_PATH, 'routes')]: paths.appRoutesJs,
     [path.join(STATIC_COMPONENTS_PATH, 'error')]: paths.serverErrorJs,
   }
@@ -250,41 +231,35 @@ const getBaseWebpackConfig = async (
     context: paths.appPath,
     externals,
     entry: () => ({
-      ...(dev && !isServer
-        ? { [STATIC_RUNTIME_HOT]: 'webpack-hot-client/client' }
-        : {}),
-      ...(!isServer
-        ? {
-            [STATIC_RUNTIME_MAIN]: paths.serverClientJs,
-            ...addClientEntrypointLoader(entrypoints),
-          }
-        : {
-            ...entrypoints,
-          }),
+      ...entrypoints,
+      ...(!isServer ? { [STATIC_RUNTIME_MAIN]: paths.serverClientJs } : null),
     }),
+    watchOptions: {
+      ignored: ['**/.git/**', '**/node_modules/**', '**/.dist/**'],
+    },
     output: {
       publicPath: '/',
       path: outputPath,
-      // @ts-ignore
-      filename: ({ chunk }: { chunk: { name: string } }) => {
+      filename: ({ chunk }) => {
         // Use `[name]-[contenthash].js` in production
         if (
           !dev &&
-          (chunk.name === STATIC_RUNTIME_MAIN ||
-            chunk.name === STATIC_RUNTIME_WEBPACK)
+          (chunk?.name === STATIC_RUNTIME_MAIN ||
+            chunk?.name === STATIC_RUNTIME_WEBPACK)
         ) {
-          return `${chunk.name}-[contenthash].js`
+          return `${chunk?.name ?? ''}-[contenthash].js`
         }
         return '[name].js'
       },
       chunkFilename: isServer
         ? `${chunkFilename}.js`
         : `${STATIC_CHUNKS_PATH}/${chunkFilename}.js`,
-      hotUpdateMainFilename: 'static/webpack/[hash].hot-update.json',
-      hotUpdateChunkFilename: 'static/webpack/[id].[hash].hot-update.js',
-      devtoolModuleFilenameTemplate: (info) =>
+      hotUpdateMainFilename: 'static/webpack/[fullhash].hot-update.json',
+      hotUpdateChunkFilename: 'static/webpack/[id].[fullhash].hot-update.js',
+      devtoolModuleFilenameTemplate: (info: any) =>
         path.resolve(info.absoluteResourcePath).replace(/\\/g, '/'),
-      libraryTarget: isServer ? 'commonjs2' : 'jsonp',
+      library: isServer ? undefined : '_RS',
+      libraryTarget: isServer ? 'commonjs2' : 'assign',
     },
     performance: { hints: false },
     optimization: createOptimizationConfig({ dev, isServer }),
@@ -298,23 +273,8 @@ const getBaseWebpackConfig = async (
           : []),
         ...paths.moduleFileExtensions.map((ext) => `.${ext}`),
       ],
-      plugins: [new ModuleScopePlugin(paths.appSrc, [paths.appPackageJson])],
       alias: {
-        '#app': paths.appSrc,
-        'private-client-components': path.join(
-          paths.appDist,
-          STATIC_COMPONENTS_PATH
-        ),
-      },
-    },
-    resolveLoader: {
-      alias: {
-        'client-entrypoint-loader': path.join(
-          __dirname,
-          'webpack',
-          'loaders',
-          'client-entrypoint-loader'
-        ),
+        _app: paths.appSrc,
       },
     },
     module: {
@@ -441,15 +401,13 @@ const getBaseWebpackConfig = async (
       ],
     },
     plugins: [
-      new ExtractCssChunks({
+      new MiniCssExtractPlugin({
         // Options similar to the same options in webpackOptions.output
         // both options are optional
-        filename: `${STATIC_CHUNKS_PATH}/${extractedCssFilename}.css`,
-        chunkFilename: `${STATIC_CHUNKS_PATH}/${extractedCssFilename}.chunk.css`,
-        reloadAll: true,
-      }),
-      // This plugin makes sure `output.filename` is used for entry chunks
-      new ChunkNamesPlugin(),
+        filename: `${extractedCssFilename}.css`,
+        chunkFilename: `${extractedCssFilename}.chunk.css`,
+        ignoreOrder: true,
+      }) as { apply: (compiler: Compiler) => void },
       // Makes some environment variables available to the JS code, for example:
       // if (process.env.NODE_ENV === 'development') { ... }. See `./env.ts`.
       new webpack.DefinePlugin(env.stringified),
@@ -462,22 +420,10 @@ const getBaseWebpackConfig = async (
       !isServer && hasServiceWorker && createWorkboxPlugin({ dev, isServer }),
       // Fix dynamic imports on server bundle
       isServer && new SSRImportPlugin(),
-      // This gives some necessary context to module not found errors, such as
-      // the requesting resource.
-      dev && new ModuleNotFoundPlugin(paths.appPath),
       // Watcher doesn't work well if you mistype casing in a path so we use
       // a plugin that prints an error when you attempt to do this.
       // See https://github.com/facebook/create-react-app/issues/240
       dev && new CaseSensitivePathsPlugin(),
-      // If you require a missing module and then `npm install` it, you still have
-      // to restart the development server for Webpack to discover it. This plugin
-      // makes the discovery automatic so you don't have to restart.
-      ...(dev
-        ? paths.appNodePath.map(
-            (nodeModulesPath) =>
-              new WatchMissingNodeModulesPlugin(nodeModulesPath)
-          )
-        : []),
       !isServer &&
         useTypescript &&
         new ForkTsCheckerPlugin({
@@ -497,15 +443,7 @@ const getBaseWebpackConfig = async (
           silent: true,
           formatter: 'codeframe',
         }),
-    ].filter(Boolean),
-    node: !isServer && {
-      dgram: 'empty',
-      fs: 'empty',
-      net: 'empty',
-      tls: 'empty',
-      // eslint-disable-next-line
-      child_process: 'empty',
-    },
+    ].filter(filterBoolean),
   }
 }
 

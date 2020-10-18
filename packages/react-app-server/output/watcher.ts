@@ -1,14 +1,17 @@
-import ForkTsCheckerPlugin from 'fork-ts-checker-webpack-plugin'
-// @ts-ignore this file doesn't exist anymore
-import { NormalizedMessage } from 'fork-ts-checker-webpack-plugin/lib/NormalizedMessage'
-import { createCodeframeFormatter } from 'fork-ts-checker-webpack-plugin/lib/formatter/CodeframeFormatter'
 import createStore from 'unistore'
 import { Compiler } from 'webpack'
 
 import { LoggerStoreStatus, logStore } from './logger'
 
 interface CompilerDiagnostics {
-  errors: string[] | null
+  errors:
+    | {
+        message: string
+        moduleName: string
+        moduleIdentifier: string
+        loc: string
+      }[]
+    | null
   warnings: string[] | null
 }
 
@@ -111,55 +114,19 @@ export function watchCompilers(
     enableTypecheck: boolean,
     onEvent: (status: WebpackStatus) => void
   ) {
-    let tsMessagesPromise: Promise<CompilerDiagnostics>
-
     compiler.hooks.invalid.tap(`BuildInvalid-${key}`, () => {
       onEvent({ loading: true })
     })
 
-    if (enableTypecheck) {
-      const messageFormatter = createCodeframeFormatter({})
-      let resolveMessagesPromise: (diagnostics: CompilerDiagnostics) => void
-
-      const tsCheckerHooks = ForkTsCheckerPlugin.getCompilerHooks(compiler)
-
-      tsCheckerHooks.serviceBeforeStart.tap(`TypecheckStart-${key}`, () => {
-        tsMessagesPromise = new Promise((resolve) => {
-          resolveMessagesPromise = resolve
-        })
-      })
-
-      tsCheckerHooks.receive.tap(
-        `TypecheckReceived-${key}`,
-        (diagnostics: NormalizedMessage[], lints: NormalizedMessage[]) => {
-          const messages = [...diagnostics, ...lints]
-          const format = (msg: NormalizedMessage) => messageFormatter(msg)
-
-          const errors = messages
-            .filter((msg) => msg.severity === 'error')
-            .map(format)
-
-          const warnings = messages
-            .filter((msg) => msg.severity === 'warning')
-            .map(format)
-
-          resolveMessagesPromise({
-            errors,
-            warnings,
-          })
-        }
-      )
-    }
-
-    compiler.hooks.done.tap(`BuildDone-${key}`, (stats: any) => {
+    compiler.hooks.done.tap(`BuildDone-${key}`, (stats) => {
       const { errors, warnings } = stats.toJson({
         all: false,
         warnings: true,
         errors: true,
       })
 
-      const hasErrors = errors && errors.length
-      const hasWarnings = warnings && warnings.length
+      const hasErrors = !!errors?.length
+      const hasWarnings = !!warnings?.length
 
       onEvent({
         loading: false,
@@ -167,30 +134,6 @@ export function watchCompilers(
         warnings: hasWarnings ? warnings : null,
         typeChecking: enableTypecheck,
       })
-
-      const typePromise = tsMessagesPromise
-
-      if (!hasErrors && typePromise) {
-        tsMessagesPromise.then((typeMessages) => {
-          if (typePromise !== tsMessagesPromise) {
-            // this is a promise from a previous build, so we
-            // shouldn't care about this
-            return
-          }
-
-          stats.compilation.errors.push(...(typeMessages.errors || []))
-          stats.compilation.warnings.push(...(typeMessages.warnings || []))
-
-          onEvent({
-            loading: false,
-            typeChecking: false,
-            errors: typeMessages.errors,
-            warnings: hasWarnings
-              ? [...warnings, ...(typeMessages.warnings || [])]
-              : typeMessages.warnings,
-          })
-        })
-      }
     })
   }
 

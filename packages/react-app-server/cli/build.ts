@@ -1,5 +1,7 @@
 import '../config/env'
 
+import util from 'util'
+
 // @ts-ignore
 import bfj from 'bfj'
 import chalk from 'chalk'
@@ -14,7 +16,7 @@ import { checkBrowsers } from 'react-dev-utils/browsersHelper'
 import checkRequiredFiles from 'react-dev-utils/checkRequiredFiles'
 import formatWebpackMessages from 'react-dev-utils/formatWebpackMessages'
 import printBuildError from 'react-dev-utils/printBuildError'
-import webpack, { MultiCompiler, Stats, compilation } from 'webpack'
+import webpack, { MultiCompiler } from 'webpack'
 
 import getBaseWebpackConfig from '../config/createWebpackConfig'
 import * as paths from '../config/paths'
@@ -34,11 +36,7 @@ const printFileSizesAfterBuild = FileSizeReporter.printFileSizesAfterBuild
 async function build(
   previousFileSizes: OpaqueFileSizes,
   writeStatsJson = false
-): Promise<{
-  stats: Stats
-  previousFileSizes: OpaqueFileSizes
-  warnings: string[]
-}> {
+) {
   console.log('Creating an optimized production build...')
 
   const compiler: MultiCompiler = webpack([
@@ -46,68 +44,60 @@ async function build(
     await getBaseWebpackConfig({ isServer: true }),
   ])
 
-  return new Promise<{
-    stats: Stats
-    previousFileSizes: OpaqueFileSizes
-    warnings: string[]
-  }>((resolve, reject) => {
-    compiler.run((err, stats) => {
-      let messages
-      if (err) {
-        if (!err.message) {
-          return reject(err)
-        }
-        messages = formatWebpackMessages({
-          _showErrors: true,
-          _showWarnings: true,
-          errors: [err.message],
-          warnings: [],
-        })
-      } else {
-        messages = formatWebpackMessages(
-          // @ts-ignore
-          stats.toJson({ all: false, warnings: true, errors: true })
-        )
-      }
-      if (messages.errors.length) {
-        // Only keep the first error. Others are often indicative
-        // of the same problem, but confuse the reader with noise.
-        if (messages.errors.length > 1) {
-          messages.errors.length = 1
-        }
-        return reject(new Error(messages.errors.join('\n\n')))
-      }
-      if (
-        process.env.CI &&
-        (typeof process.env.CI !== 'string' ||
-          process.env.CI.toLowerCase() !== 'false') &&
-        messages.warnings.length
-      ) {
-        console.log(
-          chalk.yellow(
-            '\nTreating warnings as errors because process.env.CI = true.\n' +
-              'Most CI servers set it automatically.\n'
-          )
-        )
-        return reject(new Error(messages.warnings.join('\n\n')))
-      }
+  const run = util.promisify(compiler.run)
 
-      const resolveArgs = {
-        stats,
-        previousFileSizes,
-        warnings: messages.warnings,
-      }
+  let stats: ReturnType<typeof run> extends Promise<infer U> ? U : never
+  let messages
 
-      if (writeStatsJson) {
-        return bfj
-          .write(paths.appDist + '/bundle-stats.json', stats.toJson())
-          .then(() => resolve(resolveArgs))
-          .catch((error: string) => reject(new Error(error)))
-      }
-
-      return resolve(resolveArgs)
+  try {
+    stats = await run.call(compiler)
+    messages = formatWebpackMessages(
+      // @ts-ignore
+      stats.toJson({ all: false, warnings: true, errors: true })
+    )
+  } catch (err) {
+    if (!err.message) {
+      throw err
+    }
+    messages = formatWebpackMessages({
+      _showErrors: true,
+      _showWarnings: true,
+      errors: [err.message],
+      warnings: [],
     })
-  })
+  }
+  if (messages.errors.length) {
+    // Only keep the first error. Others are often indicative
+    // of the same problem, but confuse the reader with noise.
+    if (messages.errors.length > 1) {
+      messages.errors.length = 1
+    }
+    throw new Error(messages.errors.join('\n\n'))
+  }
+  if (
+    process.env.CI &&
+    (typeof process.env.CI !== 'string' ||
+      process.env.CI.toLowerCase() !== 'false') &&
+    messages.warnings.length
+  ) {
+    console.log(
+      chalk.yellow(
+        '\nTreating warnings as errors because process.env.CI = true.\n' +
+          'Most CI servers set it automatically.\n'
+      )
+    )
+    throw new Error(messages.warnings.join('\n\n'))
+  }
+
+  if (writeStatsJson) {
+    await bfj.write(paths.appDist + '/bundle-stats.json', stats?.toJson())
+  }
+
+  return {
+    stats: stats!,
+    previousFileSizes,
+    warnings: messages.warnings,
+  }
 }
 
 function copyPublicFolder() {
@@ -169,9 +159,7 @@ export default function startBuild() {
           console.log(chalk.green('Compiled successfully.\n'))
         }
 
-        const [
-          clientStats,
-        ] = ((stats as unknown) as compilation.MultiStats).stats
+        const [clientStats] = stats.stats
 
         console.log('File sizes after gzip:\n')
         printFileSizesAfterBuild(

@@ -1,7 +1,6 @@
 // based on https://github.com/zeit/next.js/blob/canary/packages/next/build/webpack/plugins/build-manifest-plugin.ts
 
-import { Compiler } from 'webpack'
-import { RawSource } from 'webpack-sources'
+import { Compilation, Compiler, sources } from 'webpack'
 
 import {
   ASSET_MANIFEST_FILE,
@@ -9,6 +8,8 @@ import {
   STATIC_RUNTIME_HOT,
   STATIC_RUNTIME_MAIN,
 } from '../../constants'
+
+const { RawSource } = sources
 
 interface AssetMap {
   main: string[]
@@ -21,64 +22,66 @@ interface AssetMap {
 // It has a mapping of "entry" filename to real filename. Because the real filename can be hashed in production
 export default class BuildManifestPlugin {
   apply(compiler: Compiler) {
-    compiler.hooks.emit.tapAsync(
-      'BuildManifestPlugin',
-      (compilation, callback) => {
-        const { chunks } = compilation
+    compiler.hooks.make.tap('BuildManifestPlugin', (compilation) => {
+      compilation.hooks.processAssets.tap(
+        {
+          name: 'BuildManifestPlugin',
+          stage: Compilation.PROCESS_ASSETS_STAGE_ADDITIONS,
+        },
+        (assets) => {
+          const { namedChunks } = compilation
 
-        const mainJsFiles: string[] =
-          chunks
-            .find((c) => c.name === STATIC_RUNTIME_MAIN)
-            ?.files?.filter?.((file: string) => /\.js$/.test(file))
-            ?.map((file: string) => '/' + file) ?? []
+          const mainJsFiles: string[] =
+            Array.from(namedChunks.get(STATIC_RUNTIME_MAIN)?.files ?? [])
+              .filter((file: string) => /\.js$/.test(file))
+              .map((file: string) => '/' + file) ?? []
 
-        const hotModuleFiles: string[] =
-          chunks
-            .find((c) => c.name === STATIC_RUNTIME_HOT)
-            ?.files?.filter?.((file: string) => /\.js$/.test(file))
-            ?.map((file: string) => '/' + file) ?? []
+          const hotModuleFiles: string[] =
+            Array.from(namedChunks.get(STATIC_RUNTIME_HOT)?.files ?? [])
+              .filter((file: string) => /\.js$/.test(file))
+              .map((file: string) => '/' + file) ?? []
 
-        const assetMap: AssetMap = {
-          main: mainJsFiles.concat(hotModuleFiles),
-          components: {},
-        }
-
-        for (const [, entrypoint] of compilation.entrypoints.entries()) {
-          const result = COMPONENT_NAME_REGEX.exec(entrypoint.name)
-
-          if (!result) {
-            continue
+          const assetMap: AssetMap = {
+            main: mainJsFiles.concat(hotModuleFiles),
+            components: {},
           }
 
-          const componentName = result[1]
+          for (const [, entrypoint] of compilation.entrypoints.entries()) {
+            const result = COMPONENT_NAME_REGEX.exec(entrypoint.name)
 
-          const filesForEntry: string[] = []
-
-          for (const file of entrypoint.getFiles()) {
-            if (/\.map$/.test(file) || /\.hot-update\.js$/.test(file)) {
+            if (!result) {
               continue
             }
 
-            if (!/\.js$/.test(file) && !/\.css$/.test(file)) {
-              continue
+            const componentName = result[1]
+
+            const filesForEntry: string[] = []
+
+            for (const file of entrypoint.getFiles()) {
+              if (/\.map$/.test(file) || /\.hot-update\.js$/.test(file)) {
+                continue
+              }
+
+              if (!/\.js$/.test(file) && !/\.css$/.test(file)) {
+                continue
+              }
+
+              filesForEntry.push('/' + file.replace(/\\/g, '/'))
             }
 
-            filesForEntry.push('/' + file.replace(/\\/g, '/'))
+            assetMap.components[componentName] = [
+              ...mainJsFiles,
+              ...hotModuleFiles,
+              ...filesForEntry,
+            ]
           }
 
-          assetMap.components[componentName] = [
-            ...mainJsFiles,
-            ...hotModuleFiles,
-            ...filesForEntry,
-          ]
+          assets[ASSET_MANIFEST_FILE] = new RawSource(
+            JSON.stringify(assetMap, null, 2),
+            true
+          )
         }
-
-        compilation.assets[ASSET_MANIFEST_FILE] = new RawSource(
-          JSON.stringify(assetMap, null, 2)
-        )
-
-        callback()
-      }
-    )
+      )
+    })
   }
 }

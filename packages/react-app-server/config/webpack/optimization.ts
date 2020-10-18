@@ -1,37 +1,31 @@
 import TerserPlugin, { TerserPluginOptions } from 'terser-webpack-plugin'
-import { Options } from 'webpack'
+import { Configuration } from 'webpack'
 
-import { STATIC_RUNTIME_WEBPACK } from '../constants'
+import { STATIC_CHUNKS_PATH, STATIC_RUNTIME_WEBPACK } from '../constants'
 import { Options as ArgOptions } from './types'
 
 export const createOptimizationConfig = ({
   dev,
   isServer,
-}: ArgOptions): Options.Optimization => {
+}: ArgOptions): Configuration['optimization'] => {
   const terserPluginConfig: TerserPluginOptions = {
     parallel: true,
-    sourceMap: false,
-    cache: true,
-    cacheKeys: (keys) => {
-      delete keys.path
-      return keys
-    },
   }
 
   if (isServer) {
     return {
       splitChunks: false,
       minimize: false,
-      noEmitOnErrors: true,
+      emitOnErrors: false,
     }
   }
 
-  const splitChunks: Options.SplitChunksOptions = {
+  const splitChunks: Required<Configuration>['optimization']['splitChunks'] = {
     cacheGroups: {
       default: false,
-      vendors: false,
+      defaultVendors: false,
       styles: {
-        name: 'styles',
+        name: `${STATIC_CHUNKS_PATH}/styles`,
         test: /.(sa|sc|c)ss$/,
         chunks: 'all',
         enforce: true,
@@ -39,19 +33,22 @@ export const createOptimizationConfig = ({
     },
   }
 
-  const config: Options.Optimization = {
+  const config: Required<Configuration>['optimization'] = {
     runtimeChunk: {
       name: STATIC_RUNTIME_WEBPACK,
     },
     splitChunks,
-    noEmitOnErrors: true,
+    emitOnErrors: false,
   }
 
   if (dev) {
     return config
   }
 
-  config.minimizer = [new TerserPlugin(terserPluginConfig)]
+  config.minimizer = [
+    // @ts-ignore
+    new TerserPlugin(terserPluginConfig),
+  ]
 
   splitChunks.chunks = 'all'
   splitChunks.cacheGroups = {

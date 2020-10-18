@@ -1,3 +1,5 @@
+import React from 'react'
+
 import { Head } from '../server/lib/head'
 
 const styles = {
