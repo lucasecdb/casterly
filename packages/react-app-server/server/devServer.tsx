@@ -56,7 +56,7 @@ export class DevServer extends AppServer {
   }
 
   initDevServer = async () => {
-    this.serverReady = new Promise((resolve) => {
+    this.serverReady = new Promise<void>((resolve) => {
       this.setServerReady = resolve
     })
 
@@ -127,7 +127,7 @@ export class DevServer extends AppServer {
 
     for (const middleware of this.middlewares) {
       // eslint-disable-next-line no-await-in-loop
-      await new Promise((resolve, reject) => {
+      await new Promise<void>((resolve, reject) => {
         middleware(req, res, (err) => {
           if (err) {
             return reject(err)
