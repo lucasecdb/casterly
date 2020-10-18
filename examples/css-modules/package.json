@@ -9,9 +9,9 @@
     "build": "rs build"
   },
   "dependencies": {
-    "react": "^16.11.0",
+    "react": "^16.14.0",
     "react-app-server": "^0.1.6",
-    "react-dom": "^16.11.0"
+    "react-dom": "^16.14.0"
   },
   "browserslist": {
     "production": [

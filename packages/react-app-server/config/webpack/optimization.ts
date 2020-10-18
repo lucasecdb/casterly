@@ -22,6 +22,7 @@ export const createOptimizationConfig = ({
     return {
       splitChunks: false,
       minimize: false,
+      noEmitOnErrors: true,
     }
   }
 
@@ -43,6 +44,7 @@ export const createOptimizationConfig = ({
       name: STATIC_RUNTIME_WEBPACK,
     },
     splitChunks,
+    noEmitOnErrors: true,
   }
 
   if (dev) {
