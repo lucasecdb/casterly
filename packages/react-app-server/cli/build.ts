@@ -6,18 +6,14 @@ import util from 'util'
 import bfj from 'bfj'
 import chalk from 'chalk'
 import fs from 'fs-extra'
-import FileSizeReporter, {
-  OpaqueFileSizes,
-} from 'react-dev-utils/FileSizeReporter'
-// We require that you explicitly set browsers and do not fall back to
-// browserslist defaults.
-// @ts-ignore
-import { checkBrowsers } from 'react-dev-utils/browsersHelper'
-import checkRequiredFiles from 'react-dev-utils/checkRequiredFiles'
 import formatWebpackMessages from 'react-dev-utils/formatWebpackMessages'
-import printBuildError from 'react-dev-utils/printBuildError'
 import webpack, { MultiCompiler } from 'webpack'
 
+import {
+  measureFileSizesBeforeBuild,
+  printFileSizesAfterBuild,
+} from '../build/fileSizeReporter'
+import { checkRequiredFiles, printBuildError } from '../build/utils'
 import getBaseWebpackConfig from '../config/createWebpackConfig'
 import * as paths from '../config/paths'
 
@@ -29,12 +25,9 @@ process.on('unhandledRejection', (err) => {
   throw err
 })
 
-const measureFileSizesBeforeBuild = FileSizeReporter.measureFileSizesBeforeBuild
-const printFileSizesAfterBuild = FileSizeReporter.printFileSizesAfterBuild
-
 // Create the production build and print the deployment instructions.
 async function build(
-  previousFileSizes: OpaqueFileSizes,
+  previousFileSizes: { root: string; sizes: Record<string, number> },
   writeStatsJson = false
 ) {
   console.log('Creating an optimized production build...')
@@ -115,8 +108,6 @@ export default function startBuild() {
   const WARN_AFTER_BUNDLE_GZIP_SIZE = 512 * 1024
   const WARN_AFTER_CHUNK_GZIP_SIZE = 1024 * 1024
 
-  const isInteractive = process.stdout.isTTY
-
   // Warn and crash if required files are missing
   if (!checkRequiredFiles([paths.appIndexJs])) {
     process.exit(1)
@@ -125,12 +116,10 @@ export default function startBuild() {
   // Process CLI arguments
   const argv = process.argv.slice(3)
   const writeStatsJson = argv.indexOf('--stats') !== -1
-  ;(checkBrowsers(paths.appPath, isInteractive) as Promise<void>)
-    .then(() => {
-      // First, read the current file sizes in build directory.
-      // This lets us display how much they changed later.
-      return measureFileSizesBeforeBuild(paths.appDist)
-    })
+
+  // First, read the current file sizes in build directory.
+  // This lets us display how much they changed later.
+  measureFileSizesBeforeBuild(paths.appDist)
     .then((previousFileSizes) => {
       // Remove all content but keep the directory so that
       // if you're in it, you don't end up in Trash
@@ -163,7 +152,6 @@ export default function startBuild() {
 
         console.log('File sizes after gzip:\n')
         printFileSizesAfterBuild(
-          // @ts-ignore
           clientStats,
           previousFileSizes,
           paths.appDist,
