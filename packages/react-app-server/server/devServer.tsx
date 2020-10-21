@@ -2,6 +2,7 @@ import { IncomingMessage, ServerResponse } from 'http'
 import * as path from 'path'
 
 import webpack, { MultiCompiler } from 'webpack'
+// @ts-ignore: TODO: typings incompatible with webpack 5
 import whm from 'webpack-hot-middleware'
 
 import {

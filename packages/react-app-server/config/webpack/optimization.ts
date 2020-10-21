@@ -1,3 +1,4 @@
+// @ts-ignore: TODO: typings incompatible with webpack 5
 import TerserPlugin, { TerserPluginOptions } from 'terser-webpack-plugin'
 import { Configuration } from 'webpack'
 

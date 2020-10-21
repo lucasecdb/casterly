@@ -1,5 +1,6 @@
 import path from 'path'
 
+// @ts-ignore: typings not up-to-date
 import CaseSensitivePathsPlugin from 'case-sensitive-paths-webpack-plugin'
 import ForkTsCheckerPlugin from 'fork-ts-checker-webpack-plugin'
 // @ts-ignore
@@ -427,20 +428,26 @@ const getBaseWebpackConfig = async (
       !isServer &&
         useTypescript &&
         new ForkTsCheckerPlugin({
-          typescript: typescriptPath,
+          typescript: {
+            typescriptPath,
+            mode: 'write-references',
+            diagnosticOptions: {
+              syntactic: true,
+            },
+            configFile: paths.appTsConfig,
+            configOverwrite: {
+              compilerOptions: {
+                isolatedModules: true,
+                noEmit: true,
+                incremental: true,
+              },
+            },
+          },
           async: dev,
-          useTypescriptIncrementalApi: true,
-          checkSyntacticErrors: true,
-          tsconfig: paths.appTsConfig,
-          reportFiles: [
-            '**',
-            '!**/__tests__/**',
-            '!**/?(*.)(spec|test).*',
-            '!**/src/setupTests.ts',
-            '!**/src/setupTestsAfterEnv.ts',
-          ],
-          compilerOptions: { isolatedModules: true, noEmit: true },
-          silent: true,
+          logger: {
+            infrastructure: 'silent',
+            issues: 'silent',
+          },
           formatter: 'codeframe',
         }),
     ].filter(filterBoolean),

@@ -6,13 +6,13 @@ import util from 'util'
 import bfj from 'bfj'
 import chalk from 'chalk'
 import fs from 'fs-extra'
-import formatWebpackMessages from 'react-dev-utils/formatWebpackMessages'
 import webpack, { MultiCompiler } from 'webpack'
 
 import {
   measureFileSizesBeforeBuild,
   printFileSizesAfterBuild,
 } from '../build/fileSizeReporter'
+import { formatWebpackMessages } from '../build/formatWebpackMessages'
 import { checkRequiredFiles, printBuildError } from '../build/utils'
 import getBaseWebpackConfig from '../config/createWebpackConfig'
 import * as paths from '../config/paths'
@@ -52,8 +52,6 @@ async function build(
       throw err
     }
     messages = formatWebpackMessages({
-      _showErrors: true,
-      _showWarnings: true,
       errors: [err.message],
       warnings: [],
     })

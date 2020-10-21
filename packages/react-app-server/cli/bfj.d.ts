@@ -1,6 +1,11 @@
 declare module 'bfj' {
-  declare function write(
-    path: string,
-    json?: Record<string, unknown>
-  ): Promise<void>
+  function write(path: string, json?: Record<string, unknown>): Promise<void>
+
+  type Bfj = {
+    write: typeof write
+  }
+
+  const bfj: Bfj
+
+  export default bfj
 }
