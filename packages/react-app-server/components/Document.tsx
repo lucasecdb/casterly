@@ -11,7 +11,6 @@ interface Props {
   scripts?: string[]
   styles?: string[]
   state?: Record<string, unknown>
-  componentName: string
   componentProps?: Record<string, unknown>
 }
 
@@ -21,7 +20,6 @@ const Document: React.FC<Props> = ({
   styles = [],
   scripts = [],
   markup = '',
-  componentName,
   componentProps,
 }) => {
   const htmlAttributes = head?.htmlAttributes?.toComponent?.() ?? {}
@@ -29,7 +27,6 @@ const Document: React.FC<Props> = ({
 
   const runtimeData = {
     state,
-    componentName,
     props: componentProps,
   }
 

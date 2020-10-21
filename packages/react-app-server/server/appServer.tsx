@@ -158,7 +158,6 @@ export class AppServer {
         head={head}
         scripts={scriptAssets}
         styles={styleAssets}
-        componentName={ERROR_COMPONENT_NAME}
         componentProps={props}
       />
     ).pipe(res)
@@ -176,7 +175,7 @@ export class AppServer {
     const assetManifest = this.getAssetManifest()
     const componentsManifest = this.getComponentsManifest()
 
-    const assets: string[] = assetManifest.components['index']
+    const assets: string[] = assetManifest.components['routes']
 
     const routesEntrypoint = componentsManifest['routes']
     const routesPath = path.join(appDistServer, routesEntrypoint)
@@ -192,11 +191,7 @@ export class AppServer {
     if (renderClient) {
       res.write('<!doctype html>')
       renderToNodeStream(
-        <Document
-          scripts={scriptAssets}
-          styles={styleAssets}
-          componentName="index"
-        />
+        <Document scripts={scriptAssets} styles={styleAssets} />
       ).pipe(res)
     } else {
       const Root = () => {
@@ -221,7 +216,6 @@ export class AppServer {
             head={head}
             scripts={scriptAssets}
             styles={styleAssets}
-            componentName="index"
           />
         ).pipe(res)
       }
