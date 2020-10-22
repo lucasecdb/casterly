@@ -73,7 +73,7 @@ export class DevServer extends AppServer {
       )
     })
 
-    this.middlewares = [whm(clientCompiler), whm(serverCompiler)]
+    this.middlewares = [whm(clientCompiler)]
 
     this.setServerReady!()
   }

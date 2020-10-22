@@ -5,7 +5,6 @@ import { Compilation, Compiler, sources } from 'webpack'
 import {
   ASSET_MANIFEST_FILE,
   COMPONENT_NAME_REGEX,
-  STATIC_RUNTIME_HOT,
   STATIC_RUNTIME_MAIN,
 } from '../../constants'
 
@@ -36,13 +35,8 @@ export default class BuildManifestPlugin {
               .filter((file: string) => /\.js$/.test(file))
               .map((file: string) => '/' + file) ?? []
 
-          const hotModuleFiles: string[] =
-            Array.from(namedChunks.get(STATIC_RUNTIME_HOT)?.files ?? [])
-              .filter((file: string) => /\.js$/.test(file))
-              .map((file: string) => '/' + file) ?? []
-
           const assetMap: AssetMap = {
-            main: mainJsFiles.concat(hotModuleFiles),
+            main: mainJsFiles,
             components: {},
           }
 
@@ -71,7 +65,6 @@ export default class BuildManifestPlugin {
 
             assetMap.components[componentName] = [
               ...mainJsFiles,
-              ...hotModuleFiles,
               ...filesForEntry,
             ]
           }
