@@ -394,7 +394,7 @@ const getBaseWebpackConfig = async (
               exclude: [/\.(js|mjs|jsx)$/, /\.html$/, /\.json$/],
               loader: require.resolve('file-loader'),
               options: {
-                name: 'static/media/[name].[hash:8].[ext]',
+                name: `${STATIC_MEDIA_PATH}/[name].[hash:8].[ext]`,
               },
             },
           ],

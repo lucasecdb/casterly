@@ -32,7 +32,7 @@ export default class BuildManifestPlugin {
 
           const mainJsFiles: string[] =
             Array.from(namedChunks.get(STATIC_RUNTIME_MAIN)?.files ?? [])
-              .filter((file: string) => /\.js$/.test(file))
+              .filter((file: string) => /(?<!\.hot-update)\.js$/.test(file))
               .map((file: string) => '/' + file) ?? []
 
           const assetMap: AssetMap = {

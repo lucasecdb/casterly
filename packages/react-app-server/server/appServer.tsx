@@ -65,13 +65,9 @@ export class AppServer {
     const matches = [
       matchRoute<{ path: string }>({
         route: '/:path*',
-        fn: async (req, res, params) => {
+        fn: async (req, res, _, url) => {
           try {
-            await serveStatic(
-              req,
-              res,
-              path.join(appDistPublic, ...(params.path || []))
-            )
+            await serveStatic(req, res, path.join(appDistPublic, url.pathname))
             shouldContinue = false
           } catch (err) {
             if (err.code === 'ENOENT') {
@@ -84,13 +80,9 @@ export class AppServer {
       }),
       matchRoute<{ path: string }>({
         route: '/static/:path*',
-        fn: async (req, res, params) => {
+        fn: async (req, res, _, url) => {
           try {
-            await serveStatic(
-              req,
-              res,
-              path.join(appDist, 'static', ...(params.path || []))
-            )
+            await serveStatic(req, res, path.join(appDist, url.pathname))
           } catch {
             res.statusCode = 404
           } finally {
@@ -167,11 +159,6 @@ export class AppServer {
     req: IncomingMessage,
     res: ServerResponse
   ) => {
-    const renderClient =
-      new URLSearchParams(parseUrl(req.url!).search ?? undefined).has(
-        'nossr'
-      ) && process.env.NODE_ENV !== 'production'
-
     const assetManifest = this.getAssetManifest()
     const componentsManifest = this.getComponentsManifest()
 
@@ -188,37 +175,31 @@ export class AppServer {
 
     res.setHeader('Content-Type', 'text/html')
 
-    if (renderClient) {
+    const Root = () => {
+      const element = useRoutes(appRoutes)
+      return element
+    }
+
+    const { head, routerContext, markup, state } = await renderToHTML(
+      <Root />,
+      req.url ?? '/'
+    )
+
+    if (routerContext.url) {
+      res.statusCode = 302
+      res.setHeader('location', routerContext.url)
+    } else {
+      res.statusCode = 200
       res.write('<!doctype html>')
       renderToNodeStream(
-        <Document scripts={scriptAssets} styles={styleAssets} />
+        <Document
+          markup={markup}
+          state={state}
+          head={head}
+          scripts={scriptAssets}
+          styles={styleAssets}
+        />
       ).pipe(res)
-    } else {
-      const Root = () => {
-        const element = useRoutes(appRoutes)
-        return element
-      }
-      const { head, routerContext, markup, state } = await renderToHTML(
-        <Root />,
-        req.url ?? '/'
-      )
-
-      if (routerContext.url) {
-        res.statusCode = 302
-        res.setHeader('location', routerContext.url)
-      } else {
-        res.statusCode = 200
-        res.write('<!doctype html>')
-        renderToNodeStream(
-          <Document
-            markup={markup}
-            state={state}
-            head={head}
-            scripts={scriptAssets}
-            styles={styleAssets}
-          />
-        ).pipe(res)
-      }
     }
   }
 }

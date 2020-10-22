@@ -5,6 +5,7 @@ const log = (...messages) => {
 class HMRClient {
   constructor() {
     this.es = null
+    this.lastHash = null
 
     window.addEventListener('beforeunload', this.close)
   }
@@ -53,6 +54,15 @@ class HMRClient {
     setTimeout(this.init, 1000)
   }
 
+  isUpdated = (hash) => {
+    if (hash) {
+      this.lastHash = hash
+    }
+
+    // eslint-disable-next-line no-undef
+    return this.lastHash === __webpack_hash__
+  }
+
   processMessage = (message) => {
     switch (message.action) {
       case 'building': {
@@ -69,7 +79,11 @@ class HMRClient {
           applyUpdate = false
         }
 
-        if (applyUpdate && module.hot.status() === 'idle') {
+        if (
+          !this.isUpdated(message.hash) &&
+          applyUpdate &&
+          module.hot.status() === 'idle'
+        ) {
           module.hot
             .check(false)
             .then((outdatedModules) => {
