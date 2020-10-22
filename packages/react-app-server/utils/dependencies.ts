@@ -27,8 +27,8 @@ export const getDependencyVersion = async (
   }
 
   const dependency =
-    packageJson.dependencies[dependencyName] ??
-    packageJson.devDependencies[dependencyName]
+    packageJson.dependencies?.[dependencyName] ??
+    packageJson.devDependencies?.[dependencyName]
 
   if (!dependency) {
     return null

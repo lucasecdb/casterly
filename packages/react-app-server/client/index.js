@@ -5,16 +5,15 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import { BrowserRouter as Router, useRoutes } from 'react-router-dom'
 
-import { loadComponent, registerComponent } from './componentLoader'
-
-window.__COMPONENTS = window.__COMPONENTS || []
-
-const register = ([name, fn]) => registerComponent(name, fn)
-
-window.__COMPONENTS.map(register)
-window.__COMPONENTS.push = register
+import { loadComponent } from './componentLoader'
 
 const start = async () => {
+  if (process.env.NODE_ENV === 'development') {
+    const { connectHMR } = require('./hot')
+
+    connectHMR()
+  }
+
   const data = window.__DATA__
 
   if ('error' in (data.props ?? {})) {

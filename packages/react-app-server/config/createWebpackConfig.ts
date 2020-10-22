@@ -1,5 +1,6 @@
 import path from 'path'
 
+import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin'
 // @ts-ignore: typings not up-to-date
 import CaseSensitivePathsPlugin from 'case-sensitive-paths-webpack-plugin'
 import ForkTsCheckerPlugin from 'fork-ts-checker-webpack-plugin'
@@ -17,6 +18,7 @@ import {
   STATIC_COMPONENTS_PATH,
   STATIC_MEDIA_PATH,
   STATIC_RUNTIME_MAIN,
+  STATIC_RUNTIME_PATH,
   STATIC_RUNTIME_WEBPACK,
 } from './constants'
 import getClientEnvironment from './env'
@@ -255,8 +257,8 @@ const getBaseWebpackConfig = async (
       chunkFilename: isServer
         ? `${chunkFilename}.js`
         : `${STATIC_CHUNKS_PATH}/${chunkFilename}.js`,
-      hotUpdateMainFilename: 'static/webpack/[fullhash].hot-update.json',
-      hotUpdateChunkFilename: 'static/webpack/[id].[fullhash].hot-update.js',
+      hotUpdateMainFilename: `${STATIC_RUNTIME_PATH}/[fullhash].hot-update.json`,
+      hotUpdateChunkFilename: '[id].[fullhash].hot-update.js',
       devtoolModuleFilenameTemplate: (info: any) =>
         path.resolve(info.absoluteResourcePath).replace(/\\/g, '/'),
       library: isServer ? undefined : '_RS',
@@ -316,7 +318,7 @@ const getBaseWebpackConfig = async (
                 ],
                 plugins: [
                   ...baseBabelOptions.plugins,
-                  !isServer && dev && 'react-hot-loader/babel',
+                  !isServer && dev && 'react-refresh/babel',
                 ].filter(Boolean),
               },
             },
@@ -412,7 +414,9 @@ const getBaseWebpackConfig = async (
       // Makes some environment variables available to the JS code, for example:
       // if (process.env.NODE_ENV === 'development') { ... }. See `./env.ts`.
       new webpack.DefinePlugin(env.stringified),
+      // Enable HMR for react components
       dev && !isServer && new webpack.HotModuleReplacementPlugin(),
+      dev && !isServer && new ReactRefreshWebpackPlugin(),
       // Even though require.cache is server only we have to clear assets from both compilations
       // This is because the client compilation generates the asset manifest that's used on the server side
       dev && new RequireCacheHotReloaderPlugin(),
