@@ -12240,9 +12240,9 @@ typedarray@^0.0.6:
   integrity sha1-hnrHTjhkGHsdPUfZlqeOxciDB3c=
 
 typescript@^4.1.0-dev.20201018:
-  version "4.1.0-dev.20201021"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.1.0-dev.20201021.tgz#0e12186483bfad5fffd59898c434adc750f3c605"
-  integrity sha512-AysECaeZgcDxcSDtzFq3hBwJ7cCG7md0gWBZIH19UPDcGtJBaAM6F/NCT4LZ4AV2NeGLQtEAGzE53lMq/i5whw==
+  version "4.1.0-dev.20201022"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.1.0-dev.20201022.tgz#fdb3fc78aace3c1f1e7c9e2ab248df458b27d445"
+  integrity sha512-jLWGGSsgH/Mr4BhWMoZNbajQl1szMXWTMC3KTJfmKH6BxxKKd5q1xaYuvYhEIQaucd7TBDHVAcN7E/Cd3wmHaA==
 
 uglify-js@^3.1.4:
   version "3.10.2"
