@@ -55,7 +55,7 @@ export const createOptimizationConfig = ({
   splitChunks.cacheGroups = {
     ...(splitChunks.cacheGroups as Record<string, unknown>),
     react: {
-      name: 'commons',
+      name: `${STATIC_CHUNKS_PATH}/commons`,
       chunks: 'all',
       test: /[\\/]node_modules[\\/](react|react-dom)[\\/]/,
     },
