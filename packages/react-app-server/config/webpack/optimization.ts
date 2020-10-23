@@ -55,9 +55,9 @@ export const createOptimizationConfig = ({
   splitChunks.cacheGroups = {
     ...(splitChunks.cacheGroups as Record<string, unknown>),
     react: {
-      name: `${STATIC_CHUNKS_PATH}/commons`,
+      name: `${STATIC_CHUNKS_PATH}/react`,
       chunks: 'all',
-      test: /[\\/]node_modules[\\/](react|react-dom)[\\/]/,
+      test: /[\\/]node_modules[\\/](react|react-dom|react-is|scheduler)[\\/]/,
     },
   }
 
