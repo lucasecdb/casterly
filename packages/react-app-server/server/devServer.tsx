@@ -73,7 +73,9 @@ export class DevServer extends AppServer {
       )
     })
 
-    this.middlewares = [whm(clientCompiler, { path: '/__webpack-hmr' })]
+    this.middlewares = [
+      whm(clientCompiler, { path: '/__webpack-hmr', log: false }),
+    ]
 
     this.setServerReady!()
   }
