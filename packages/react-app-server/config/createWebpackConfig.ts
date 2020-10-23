@@ -18,7 +18,6 @@ import {
   STATIC_COMPONENTS_PATH,
   STATIC_MEDIA_PATH,
   STATIC_RUNTIME_MAIN,
-  STATIC_RUNTIME_WEBPACK,
   STATIC_WEBPACK_PATH,
 } from './constants'
 import getClientEnvironment from './env'

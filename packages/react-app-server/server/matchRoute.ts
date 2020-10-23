@@ -1,4 +1,5 @@
 import { IncomingMessage, ServerResponse } from 'http'
+import { UrlWithStringQuery, parse as parseUrl } from 'url'
 
 import { Key, pathToRegexp, regexpToFunction } from 'path-to-regexp'
 
@@ -8,7 +9,7 @@ interface MatchRouteOptions<T> {
     req: IncomingMessage,
     res: ServerResponse,
     params: T,
-    url: URL
+    url: UrlWithStringQuery
   ) => Promise<any>
 }
 
@@ -30,7 +31,7 @@ export default function matchRoute<
       return
     }
 
-    await fn(req, res, result.params, new URL(req.url!, 'http://localhost'))
+    await fn(req, res, result.params, parseUrl(req.url!))
   }
 
   return routeHandler

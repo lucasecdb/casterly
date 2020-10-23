@@ -1,7 +1,6 @@
 import * as fs from 'fs'
 import { IncomingMessage, ServerResponse } from 'http'
 import * as path from 'path'
-import { parse as parseUrl } from 'url'
 
 import React from 'react'
 import { renderToNodeStream } from 'react-dom/server'
@@ -67,7 +66,7 @@ export class AppServer {
         route: '/:path*',
         fn: async (req, res, _, url) => {
           try {
-            await serveStatic(req, res, path.join(appDistPublic, url.pathname))
+            await serveStatic(req, res, path.join(appDistPublic, url.pathname!))
             shouldContinue = false
           } catch (err) {
             if (err.code === 'ENOENT') {
@@ -82,7 +81,7 @@ export class AppServer {
         route: '/static/:path*',
         fn: async (req, res, _, url) => {
           try {
-            await serveStatic(req, res, path.join(appDist, url.pathname))
+            await serveStatic(req, res, path.join(appDist, url.pathname!))
           } catch {
             res.statusCode = 404
           } finally {

@@ -1,6 +1,5 @@
 import chalk from 'chalk'
 import createStore from 'unistore'
-import { Stats } from 'webpack'
 
 import * as Log from './log'
 
