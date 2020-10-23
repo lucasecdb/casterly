@@ -18,8 +18,8 @@
     }
   },
   "devDependencies": {
-    "@lucasecdb/eslint-config": "^0.13.0",
-    "eslint": "^7.7.0",
+    "@lucasecdb/eslint-config": "^0.13.1",
+    "eslint": "^7.11.0",
     "husky": "^4.2.5",
     "lerna": "^3.22.1",
     "lint-staged": "^10.2.13",

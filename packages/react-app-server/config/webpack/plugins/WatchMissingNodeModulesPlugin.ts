@@ -1,6 +1,6 @@
-import { Compiler, Plugin } from 'webpack'
+import { Compiler } from 'webpack'
 
-export default class WatchMissingNodeModulesPlugin implements Plugin {
+export default class WatchMissingNodeModulesPlugin {
   private nodeModulesPath: string
 
   public constructor(nodeModulesPath: string) {

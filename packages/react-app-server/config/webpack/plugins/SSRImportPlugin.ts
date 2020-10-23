@@ -1,10 +1,10 @@
 import * as path from 'path'
 
-import { Compiler, Plugin } from 'webpack'
+import { Compiler } from 'webpack'
 
 // This plugin exists to fix the relative import for dynamic
 // imported modules of code that runs on the server-side
-export default class SSRImportPlugin implements Plugin {
+export default class SSRImportPlugin {
   public apply(compiler: Compiler) {
     compiler.hooks.compilation.tap('SSRImportPlugin', (compilation: any) => {
       compilation.mainTemplate.hooks.requireEnsure.tap(

@@ -1,39 +1,41 @@
 // @ts-ignore
-import ExtractCssChunks from 'extract-css-chunks-webpack-plugin'
-import { Loader } from 'webpack'
+import MiniCssExtractPlugin from 'mini-css-extract-plugin'
+import { RuleSetUse } from 'webpack'
 
 import { Options } from './types'
 
 interface StyleOptions extends Options {
   cssModules?: boolean
-  loaders?: Loader[]
+  loaders?: RuleSetUse[]
 }
 
 // common function to get style loaders
 export const getStyleLoaders = ({
-  isServer,
-  dev,
+  isServer = false,
+  dev = false,
   cssModules = false,
   loaders = [],
-}: StyleOptions) => {
+}: StyleOptions): RuleSetUse => {
   const postcssLoader = {
     // Options for PostCSS as we reference these options twice
     // Adds vendor prefixing based on your specified browser support in
     // package.json
     loader: require.resolve('postcss-loader'),
     options: {
-      // Necessary for external CSS imports to work
-      // https://github.com/facebook/create-react-app/issues/2677
-      ident: 'postcss',
-      plugins: () => [
-        require('postcss-flexbugs-fixes'),
-        require('postcss-preset-env')({
-          autoprefixer: {
-            flexbox: 'no-2009',
-          },
-          stage: 3,
-        }),
-      ],
+      postcssOptions: {
+        // Necessary for external CSS imports to work
+        // https://github.com/facebook/create-react-app/issues/2677
+        ident: 'postcss',
+        plugins: [
+          require('postcss-flexbugs-fixes'),
+          require('postcss-preset-env')({
+            autoprefixer: {
+              flexbox: 'no-2009',
+            },
+            stage: 3,
+          }),
+        ],
+      },
     },
   }
 
@@ -58,9 +60,14 @@ export const getStyleLoaders = ({
 
   return [
     !isServer && dev && 'extracted-loader',
-    !isServer && ExtractCssChunks.loader,
+    !isServer && {
+      loader: MiniCssExtractPlugin.loader,
+      options: {
+        modules: cssModules ? {} : undefined,
+      },
+    },
     cssLoader,
     postcssLoader,
     ...loaders,
-  ].filter(Boolean)
+  ].filter(Boolean) as RuleSetUse
 }

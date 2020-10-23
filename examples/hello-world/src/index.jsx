@@ -4,9 +4,13 @@ const App = () => {
   const [counter, setCounter] = useState(0)
 
   useEffect(() => {
-    setInterval(() => {
+    const id = setInterval(() => {
       setCounter((prevCounter) => prevCounter + 1)
     }, 1000)
+
+    return () => {
+      clearInterval(id)
+    }
   }, [])
 
   return (

@@ -1,6 +1,7 @@
 import { realpathSync } from 'fs'
+import path from 'path'
 
-import { Compiler, Plugin } from 'webpack'
+import { Compiler } from 'webpack'
 
 function deleteCache(path: string) {
   try {
@@ -15,29 +16,35 @@ function deleteCache(path: string) {
 }
 
 // This plugin flushes require.cache after emitting the files. Providing 'hot reloading' of server files.
-export default class RequireCacheHotReloader implements Plugin {
-  private prevAssets: any = null
+export default class RequireCacheHotReloader {
+  private prevAssetsOutput = new Set<string>()
+  private currentAssetsOutput = new Set<string>()
 
   public apply(compiler: Compiler) {
-    compiler.hooks.afterEmit.tapAsync(
+    compiler.hooks.assetEmitted.tap(
       'RequireCacheHotReloader',
-      (compilation, callback) => {
-        const { assets } = compilation
-
-        if (this.prevAssets) {
-          for (const f of Object.keys(assets)) {
-            deleteCache(assets[f].existsAt)
-          }
-          for (const f of Object.keys(this.prevAssets)) {
-            if (!assets[f]) {
-              deleteCache(this.prevAssets[f].existsAt)
-            }
-          }
-        }
-        this.prevAssets = assets
-
-        callback()
+      (_, { targetPath }) => {
+        deleteCache(targetPath)
+        this.currentAssetsOutput.add(targetPath)
       }
     )
+
+    compiler.hooks.afterEmit.tap('RequireCacheHotReloader', (compilation) => {
+      const runtimeChunkPath = path.join(
+        compilation.outputOptions.path!,
+        'webpack-runtime.js'
+      )
+
+      deleteCache(runtimeChunkPath)
+
+      for (const outputPath of this.prevAssetsOutput) {
+        if (!this.currentAssetsOutput.has(outputPath)) {
+          deleteCache(outputPath)
+        }
+      }
+
+      this.prevAssetsOutput = new Set(this.currentAssetsOutput)
+      this.currentAssetsOutput.clear()
+    })
   }
 }

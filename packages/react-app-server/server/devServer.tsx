@@ -1,13 +1,9 @@
 import { IncomingMessage, ServerResponse } from 'http'
 import * as path from 'path'
 
-import webpack from 'webpack'
-import devMiddleware, {
-  Options,
-  WebpackDevMiddleware,
-} from 'webpack-dev-middleware'
-import hotClient, { Options as HotClientOptions } from 'webpack-hot-client'
-import WebpackHotMiddleware from 'webpack-hot-middleware'
+import webpack, { MultiCompiler } from 'webpack'
+// @ts-ignore: TODO: typings incompatible with webpack 5
+import whm from 'webpack-hot-middleware'
 
 import {
   ASSET_MANIFEST_FILE,
@@ -26,28 +22,14 @@ export type NextHandleFunction = (
   next: NextFunction
 ) => void
 
-const configureHotClient = (
-  compiler: webpack.Compiler,
-  options: HotClientOptions
-) => {
-  return new Promise<hotClient.Client>((resolve) => {
-    const client = hotClient(compiler, options)
-    const { server } = client
-
-    server.on('listening', () => resolve(client))
-  })
-}
+type MultiWatching = ReturnType<MultiCompiler['watch']>
 
 export class DevServer extends AppServer {
   private serverReady?: Promise<void>
   private setServerReady?: () => void
 
   private middlewares: NextHandleFunction[] = []
-  private hotClient: hotClient.Client | null = null
-  private watcher: webpack.MultiWatching | null = null
-  private devMiddleware:
-    | (WebpackDevMiddleware & NextHandleFunction)
-    | null = null
+  private watcher: MultiWatching | null = null
 
   constructor() {
     super({ dev: true })
@@ -78,38 +60,22 @@ export class DevServer extends AppServer {
 
     watchCompilers(clientCompiler, serverCompiler, useTypescript)
 
-    const devMiddlewareOptions: Options = {
-      // @ts-ignore
-      noInfo: true,
-      publicPath: clientConfig.output!.publicPath!,
-      writeToDisk: true,
-      logLevel: 'silent',
-    }
+    this.watcher = await new Promise<MultiWatching>((resolve, reject) => {
+      const watcher = multiCompiler.watch(
+        [clientConfig.watchOptions!, serverConfig.watchOptions!],
+        (error) => {
+          if (error) {
+            return reject(error)
+          }
 
-    this.hotClient = await configureHotClient(clientCompiler, {
-      logLevel: 'silent',
-      autoConfigure: false,
+          resolve(watcher)
+        }
+      )
     })
 
-    this.watcher = await new Promise<webpack.MultiWatching>(
-      (resolve, reject) => {
-        const watcher = multiCompiler.watch(
-          // @ts-ignore
-          [clientConfig.watchOptions, serverConfig.watchOptions],
-          (err) => {
-            if (err) {
-              return reject(err)
-            }
-
-            resolve(watcher)
-          }
-        )
-      }
-    )
-
-    this.devMiddleware = devMiddleware(multiCompiler, devMiddlewareOptions)
-
-    this.middlewares = [WebpackHotMiddleware(clientCompiler)]
+    this.middlewares = [
+      whm(clientCompiler, { path: '/__webpack-hmr', log: false }),
+    ]
 
     this.setServerReady!()
   }
