@@ -2,6 +2,7 @@ import path from 'path'
 
 export const STATIC_FOLDER = 'static'
 export const STATIC_RUNTIME_PATH = path.join(STATIC_FOLDER, 'runtime')
+export const STATIC_WEBPACK_PATH = path.join(STATIC_FOLDER, 'webpack')
 export const STATIC_CHUNKS_PATH = path.join(STATIC_FOLDER, 'chunks')
 export const STATIC_MEDIA_PATH = path.join(STATIC_FOLDER, 'media')
 export const STATIC_COMPONENTS_PATH = path.join(STATIC_FOLDER, 'components')

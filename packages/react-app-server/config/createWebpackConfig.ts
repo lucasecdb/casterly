@@ -18,8 +18,8 @@ import {
   STATIC_COMPONENTS_PATH,
   STATIC_MEDIA_PATH,
   STATIC_RUNTIME_MAIN,
-  STATIC_RUNTIME_PATH,
   STATIC_RUNTIME_WEBPACK,
+  STATIC_WEBPACK_PATH,
 } from './constants'
 import getClientEnvironment from './env'
 import * as paths from './paths'
@@ -257,7 +257,7 @@ const getBaseWebpackConfig = async (
       chunkFilename: isServer
         ? `${chunkFilename}.js`
         : `${STATIC_CHUNKS_PATH}/${chunkFilename}.js`,
-      hotUpdateMainFilename: `${STATIC_RUNTIME_PATH}/[fullhash].hot-update.json`,
+      hotUpdateMainFilename: `${STATIC_WEBPACK_PATH}/[fullhash].hot-update.json`,
       hotUpdateChunkFilename: '[id].[fullhash].hot-update.js',
       devtoolModuleFilenameTemplate: (info: any) =>
         path.resolve(info.absoluteResourcePath).replace(/\\/g, '/'),
