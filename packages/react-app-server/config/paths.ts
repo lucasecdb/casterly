@@ -14,7 +14,7 @@ export const moduleFileExtensions = ['mjs', 'js', 'json', 'jsx']
 export const typescriptFileExtensions = ['ts', 'tsx']
 
 // Resolve file paths in the same order as webpack
-const resolveModule = (resolveFn = resolveApp, filePath: string) => {
+export const resolveModule = (resolveFn = resolveApp, filePath: string) => {
   const extension = [
     ...moduleFileExtensions,
     ...typescriptFileExtensions,

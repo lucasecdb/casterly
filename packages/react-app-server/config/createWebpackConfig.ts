@@ -15,7 +15,8 @@ import { filterBoolean } from '../utils/filterBoolean'
 import resolveRequest from '../utils/resolveRequest'
 import {
   STATIC_CHUNKS_PATH,
-  STATIC_COMPONENTS_PATH,
+  STATIC_ENTRYPOINTS_ROUTES,
+  STATIC_ENTRYPOINTS_ERROR,
   STATIC_MEDIA_PATH,
   STATIC_RUNTIME_MAIN,
   STATIC_WEBPACK_PATH,
@@ -26,6 +27,7 @@ import { createOptimizationConfig } from './webpack/optimization'
 import BuildManifestPlugin from './webpack/plugins/BuildManifestPlugin'
 import ComponentsManifestPlugin from './webpack/plugins/ComponentsManifestPlugin'
 import RequireCacheHotReloaderPlugin from './webpack/plugins/RequireCacheHotReloaderPlugin'
+import RouteManifestPlugin from './webpack/plugins/RouteManifestPlugin'
 import SSRImportPlugin from './webpack/plugins/SSRImportPlugin'
 import { getStyleLoaders } from './webpack/styles'
 import { Options } from './webpack/types'
@@ -221,8 +223,8 @@ const getBaseWebpackConfig = async (
   }
 
   const entrypoints = {
-    [path.join(STATIC_COMPONENTS_PATH, 'routes')]: paths.appRoutesJs,
-    [path.join(STATIC_COMPONENTS_PATH, 'error')]: paths.serverErrorJs,
+    [STATIC_ENTRYPOINTS_ERROR]: paths.serverErrorJs,
+    [STATIC_ENTRYPOINTS_ROUTES]: paths.appRoutesJs,
   }
 
   return {
@@ -234,7 +236,7 @@ const getBaseWebpackConfig = async (
     externals,
     entry: () => ({
       ...entrypoints,
-      ...(!isServer ? { [STATIC_RUNTIME_MAIN]: paths.serverClientJs } : null),
+      ...(!isServer ? { [STATIC_RUNTIME_MAIN]: paths.serverClientJs } : {}),
     }),
     watchOptions: {
       ignored: ['**/.git/**', '**/node_modules/**', '**/.dist/**'],
@@ -412,6 +414,7 @@ const getBaseWebpackConfig = async (
       // This is because the client compilation generates the asset manifest that's used on the server side
       dev && new RequireCacheHotReloaderPlugin(),
       !isServer && new BuildManifestPlugin(),
+      !isServer && new RouteManifestPlugin(),
       isServer && new ComponentsManifestPlugin(),
       !isServer && hasServiceWorker && createWorkboxPlugin({ dev, isServer }),
       // Fix dynamic imports on server bundle
