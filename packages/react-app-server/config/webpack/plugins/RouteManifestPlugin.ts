@@ -7,14 +7,20 @@ import NodeTargetPlugin from 'webpack/lib/node/NodeTargetPlugin'
 // @ts-ignore
 import NodeTemplatePlugin from 'webpack/lib/node/NodeTemplatePlugin'
 
+import { RouteAssetsFile } from '../../../utils/routes'
 import {
   ROUTE_ASSETS_FILE,
   STATIC_ENTRYPOINTS_ROUTES_MANIFEST,
+  STATIC_RUNTIME_HOT,
+  STATIC_RUNTIME_MAIN,
+  STATIC_RUNTIME_WEBPACK,
 } from '../../constants'
 import * as paths from '../../paths'
 import RouteManifestChildPlugin from './RouteManifestChildPlugin'
 
 const { RawSource } = sources
+
+const JS_FILE_REGEX = /(?<!\.hot-update)\.js$/
 
 const PLUGIN_NAME = 'RouteManifestPlugin'
 
@@ -56,6 +62,21 @@ export default class RouteManifestPlugin {
             stage: Compilation.PROCESS_ASSETS_STAGE_ADDITIONS,
           },
           (assets) => {
+            const getNamedEntrypointAssets = (name: string) =>
+              Array.from(compilation.namedChunks.get(name)?.files ?? [])
+                .filter((file) => JS_FILE_REGEX.test(file))
+                .map((file) => '/' + file)
+
+            const runtimeEntrypointAssets = getNamedEntrypointAssets(
+              STATIC_RUNTIME_WEBPACK
+            )
+            const mainEntrypointAssets = getNamedEntrypointAssets(
+              STATIC_RUNTIME_MAIN
+            )
+            const hotEntrypointAssets = getNamedEntrypointAssets(
+              STATIC_RUNTIME_HOT
+            )
+
             // Create a map of the module name to it's assets, to
             // be later used with the routes-manifest.js file to
             // gather the chunks for a particular route.
@@ -92,8 +113,15 @@ export default class RouteManifestPlugin {
                 .filter(<T>(value: T | null): value is T => value != null)
             )
 
+            const routeAssets: RouteAssetsFile = {
+              main: runtimeEntrypointAssets
+                .concat(mainEntrypointAssets)
+                .concat(hotEntrypointAssets),
+              routes: routeComponentsAssets,
+            }
+
             assets[ROUTE_ASSETS_FILE] = new RawSource(
-              JSON.stringify(routeComponentsAssets, null, 2),
+              JSON.stringify(routeAssets, null, 2),
               true
             )
           }

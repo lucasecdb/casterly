@@ -112,8 +112,6 @@ class HMRClient {
   }
 }
 
-export function connectHMR() {
-  const hmrClient = new HMRClient()
+const hmrClient = new HMRClient()
 
-  hmrClient.init()
-}
+hmrClient.init()

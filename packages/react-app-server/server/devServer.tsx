@@ -5,10 +5,7 @@ import webpack, { MultiCompiler } from 'webpack'
 // @ts-ignore: TODO: typings incompatible with webpack 5
 import whm from 'webpack-hot-middleware'
 
-import {
-  ASSET_MANIFEST_FILE,
-  COMPONENTS_MANIFEST_FILE,
-} from '../config/constants'
+import { ASSET_MANIFEST_FILE, ROUTE_ASSETS_FILE } from '../config/constants'
 import createWebpackConfig from '../config/createWebpackConfig'
 import * as paths from '../config/paths'
 import { watchCompilers } from '../output/watcher'
@@ -84,8 +81,8 @@ export class DevServer extends AppServer {
     return require(path.join(paths.appDist, ASSET_MANIFEST_FILE))
   }
 
-  protected getComponentsManifest = () => {
-    return require(path.join(paths.appDistServer, COMPONENTS_MANIFEST_FILE))
+  protected getRouteAssetsFile = () => {
+    return require(path.join(paths.appDist, ROUTE_ASSETS_FILE))
   }
 
   protected async handleRequest(req: IncomingMessage, res: ServerResponse) {

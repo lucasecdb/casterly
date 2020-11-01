@@ -26,3 +26,15 @@ const defaultEnv = command === 'dev' ? 'development' : 'production'
 process.env.NODE_ENV = process.env.NODE_ENV || defaultEnv
 
 commands[command]()
+
+// @ts-ignore
+const { Request, Response, Headers } = require('minipass-fetch')
+const Body = require('minipass-fetch/lib/body')
+
+Object.assign(
+  global,
+  { Request, Response, Headers, Body },
+  {
+    fetch: require('make-fetch-happen'),
+  }
+)

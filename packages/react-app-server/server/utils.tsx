@@ -2,8 +2,6 @@ import React, { StrictMode } from 'react'
 import { renderToString } from 'react-dom/server'
 import { StaticRouter } from 'react-router-dom/server'
 
-import { Head } from './lib/head'
-
 export function interopDefault(mod: any) {
   return mod.default || mod
 }
@@ -49,7 +47,5 @@ export const renderToHTML = async (element: JSX.Element, path?: string) => {
 
   const { markup, state } = await renderFn({ container: appRoot })
 
-  const head = Head.rewind()
-
-  return { head, routerContext, markup, state }
+  return { routerContext, markup, state }
 }

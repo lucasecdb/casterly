@@ -1,3 +1,4 @@
+import { realpathSync } from 'fs'
 import path from 'path'
 
 import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin'
@@ -15,9 +16,10 @@ import { filterBoolean } from '../utils/filterBoolean'
 import resolveRequest from '../utils/resolveRequest'
 import {
   STATIC_CHUNKS_PATH,
-  STATIC_ENTRYPOINTS_ROUTES,
   STATIC_ENTRYPOINTS_ERROR,
+  STATIC_ENTRYPOINTS_ROUTES,
   STATIC_MEDIA_PATH,
+  STATIC_RUNTIME_HOT,
   STATIC_RUNTIME_MAIN,
   STATIC_WEBPACK_PATH,
 } from './constants'
@@ -25,7 +27,6 @@ import getClientEnvironment from './env'
 import * as paths from './paths'
 import { createOptimizationConfig } from './webpack/optimization'
 import BuildManifestPlugin from './webpack/plugins/BuildManifestPlugin'
-import ComponentsManifestPlugin from './webpack/plugins/ComponentsManifestPlugin'
 import RequireCacheHotReloaderPlugin from './webpack/plugins/RequireCacheHotReloaderPlugin'
 import RouteManifestPlugin from './webpack/plugins/RouteManifestPlugin'
 import SSRImportPlugin from './webpack/plugins/SSRImportPlugin'
@@ -167,11 +168,16 @@ const getBaseWebpackConfig = async (
           // Same as above: if the package, when required from the root,
           // would be different from what the real resolution would use, we
           // cannot externalize it.
-          if (baseRes !== res) {
+          if (
+            !baseRes ||
+            (baseRes !== res &&
+              // if res and baseRes are symlinks they could point to the the same file
+              realpathSync(baseRes) !== realpathSync(res))
+          ) {
             return callback()
           }
 
-          if (res.match(/react-app-server[/\\]dist[/\\]client[/\\]/)) {
+          if (res.match(/react-app-server[/\\]dist[/\\]/)) {
             return callback()
           }
 
@@ -236,7 +242,12 @@ const getBaseWebpackConfig = async (
     externals,
     entry: () => ({
       ...entrypoints,
-      ...(!isServer ? { [STATIC_RUNTIME_MAIN]: paths.serverClientJs } : {}),
+      ...(!isServer
+        ? {
+            [STATIC_RUNTIME_MAIN]: paths.serverBrowserEntry,
+            ...(dev ? { [STATIC_RUNTIME_HOT]: paths.serverClientHot } : null),
+          }
+        : { [STATIC_RUNTIME_MAIN]: paths.serverServerEntry }),
     }),
     watchOptions: {
       ignored: ['**/.git/**', '**/node_modules/**', '**/.dist/**'],
@@ -415,7 +426,6 @@ const getBaseWebpackConfig = async (
       dev && new RequireCacheHotReloaderPlugin(),
       !isServer && new BuildManifestPlugin(),
       !isServer && new RouteManifestPlugin(),
-      isServer && new ComponentsManifestPlugin(),
       !isServer && hasServiceWorker && createWorkboxPlugin({ dev, isServer }),
       // Fix dynamic imports on server bundle
       isServer && new SSRImportPlugin(),

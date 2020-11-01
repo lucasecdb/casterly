@@ -1,4 +1,4 @@
-import { Link } from 'react-app-server/router'
+import { Link } from 'react-router-dom'
 
 const OtherPage = () => {
   return (

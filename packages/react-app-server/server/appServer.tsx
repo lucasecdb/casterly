@@ -2,35 +2,28 @@ import * as fs from 'fs'
 import { IncomingMessage, ServerResponse } from 'http'
 import * as path from 'path'
 
-import React from 'react'
-import { renderToNodeStream } from 'react-dom/server'
-import { useRoutes } from 'react-router'
-
-import Document from '../components/Document'
+import { RootContext } from '../components/RootContext'
 import {
   ASSET_MANIFEST_FILE,
-  COMPONENTS_MANIFEST_FILE,
+  ROUTE_ASSETS_FILE,
+  STATIC_ENTRYPOINTS_ROUTES,
+  STATIC_ENTRYPOINTS_ROUTES_MANIFEST,
+  STATIC_RUNTIME_MAIN,
 } from '../config/constants'
-import { appDist, appDistPublic, appDistServer } from '../config/paths'
+import * as paths from '../config/paths'
+import {
+  RouteAssetComponent,
+  RouteAssetsFile,
+  RoutePromiseComponent,
+  getMatchedRoutes,
+} from '../utils/routes'
 import matchRoute from './matchRoute'
 import { serveStatic } from './serveStatic'
-import { interopDefault, renderToHTML } from './utils'
+import { interopDefault } from './utils'
 
 const readJSON = (filePath: string) => {
   const file = fs.readFileSync(filePath)
   return JSON.parse(file.toString())
-}
-
-const ERROR_COMPONENT_NAME = 'error'
-
-const resolveErrorComponent = async (entrypoint: string, props = {}) => {
-  const componentPath = path.join(appDistServer, entrypoint)
-
-  const Component = (await import(componentPath).then(
-    interopDefault
-  )) as React.ComponentType
-
-  return <Component {...props} />
 }
 
 export interface ServerOptions {
@@ -39,16 +32,16 @@ export interface ServerOptions {
 
 export class AppServer {
   private _assetManifest
-  private _componentsManifest
+  private _routeAssets
 
   constructor(opts: ServerOptions = {}) {
     const { dev = false } = opts
 
     if (!dev) {
-      this._assetManifest = readJSON(path.join(appDist, ASSET_MANIFEST_FILE))
-      this._componentsManifest = readJSON(
-        path.join(appDistServer, COMPONENTS_MANIFEST_FILE)
+      this._assetManifest = readJSON(
+        path.join(paths.appDist, ASSET_MANIFEST_FILE)
       )
+      this._routeAssets = readJSON(path.join(paths.appDist, ROUTE_ASSETS_FILE))
     }
   }
 
@@ -66,7 +59,11 @@ export class AppServer {
         route: '/:path*',
         fn: async (req, res, _, url) => {
           try {
-            await serveStatic(req, res, path.join(appDistPublic, url.pathname!))
+            await serveStatic(
+              req,
+              res,
+              path.join(paths.appDistPublic, url.pathname!)
+            )
             shouldContinue = false
           } catch (err) {
             if (err.code === 'ENOENT') {
@@ -81,7 +78,7 @@ export class AppServer {
         route: '/static/:path*',
         fn: async (req, res, _, url) => {
           try {
-            await serveStatic(req, res, path.join(appDist, url.pathname!))
+            await serveStatic(req, res, path.join(paths.appDist, url.pathname!))
           } catch {
             res.statusCode = 404
           } finally {
@@ -104,14 +101,16 @@ export class AppServer {
       await this.renderDocument(req, res)
     } catch (err) {
       console.error(err)
-      await this.renderError(req, res, err)
+      res.end('error')
+      // await this.renderError(req, res, err)
     }
   }
 
-  protected getComponentsManifest = () => this._componentsManifest
+  protected getRouteAssetsFile = (): RouteAssetsFile => this._routeAssets
 
   protected getAssetManifest = () => this._assetManifest
 
+  /*
   private renderError = async (
     _: IncomingMessage,
     res: ServerResponse,
@@ -153,52 +152,62 @@ export class AppServer {
       />
     ).pipe(res)
   }
+   */
 
   private renderDocument = async (
     req: IncomingMessage,
     res: ServerResponse
   ) => {
-    const assetManifest = this.getAssetManifest()
-    const componentsManifest = this.getComponentsManifest()
+    const routeAssetsFile = this.getRouteAssetsFile()
 
-    const assets: string[] = assetManifest.components['routes']
+    const appRoutesPromises: RoutePromiseComponent[] = await import(
+      path.join(paths.appDistServer, STATIC_ENTRYPOINTS_ROUTES)
+    ).then(interopDefault)
 
-    const routesEntrypoint = componentsManifest['routes']
-    const routesPath = path.join(appDistServer, routesEntrypoint)
-    const appRoutes = await import(routesPath).then(interopDefault)
+    const appRoutesAssets: RouteAssetComponent[] = await import(
+      path.join(paths.appDist, STATIC_ENTRYPOINTS_ROUTES_MANIFEST)
+    ).then(interopDefault)
 
-    const scriptAssets = assets.filter((path) => path.endsWith('.js'))
-    const styleAssets = assets.filter((path) => path.endsWith('.css'))
+    const { routes, matchedRoutesAssets } = await getMatchedRoutes({
+      location: req.url ?? '/',
+      routeAssetMap: routeAssetsFile.routes,
+      routesAssetComponent: appRoutesAssets,
+      routesPromiseComponent: appRoutesPromises,
+    })
 
-    // const language = req.language
+    const serverContext: RootContext = {
+      routes,
+      matchedRoutesAssets,
+      mainAssets: routeAssetsFile.main,
+    }
 
     res.setHeader('Content-Type', 'text/html')
 
-    const Root = () => {
-      const element = useRoutes(appRoutes)
-      return element
-    }
+    const request = new Request(req.url ?? '/', {
+      method: req.method,
+      headers: Object.entries(res.getHeaders()).map(([key, value]) => [
+        key,
+        Array.isArray(value) ? value : value?.toString(),
+      ]) as Array<[string, string]>,
+    })
 
-    const { head, routerContext, markup, state } = await renderToHTML(
-      <Root />,
-      req.url ?? '/'
-    )
+    const handleRequest: (
+      req: Request,
+      status: number,
+      headers: Headers,
+      context: unknown
+    ) => Response = await import(
+      path.join(paths.appDistServer, STATIC_RUNTIME_MAIN)
+    ).then(interopDefault)
 
-    if (routerContext.url) {
-      res.statusCode = 302
-      res.setHeader('location', routerContext.url)
-    } else {
-      res.statusCode = 200
-      res.write('<!doctype html>')
-      renderToNodeStream(
-        <Document
-          markup={markup}
-          state={state}
-          head={head}
-          scripts={scriptAssets}
-          styles={styleAssets}
-        />
-      ).pipe(res)
-    }
+    const response = handleRequest(request, 200, request.headers, serverContext)
+
+    res.statusCode = response.status
+
+    response.headers.forEach((value, key) => {
+      res.setHeader(key, value)
+    })
+
+    Body.writeToStream(res, response)
   }
 }

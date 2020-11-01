@@ -67,7 +67,9 @@ logStore.subscribe((state) => {
 
     const { message, moduleName, loc } = error
 
-    Log.error(chalk`{bold ${moduleName}}:{dim ${loc}}\n\n  ${message}`)
+    Log.error(
+      chalk`{bold ${moduleName}}${loc ? `:{dim ${loc}}` : ''}\n\n  ${message}`
+    )
 
     return
   }

@@ -1,7 +1,5 @@
 import React from 'react'
 
-import { Head } from '../server/lib/head'
-
 const styles = {
   container: {
     display: 'flex',
@@ -22,11 +20,6 @@ const styles = {
 const ErrorPage = ({ error }) => {
   return (
     <>
-      <Head
-        title="Rendering Error"
-        style={[{ cssText: `* { margin: 0; padding: 0; }` }]}
-        meta={[{ name: 'robot', content: 'noindex, nofollow' }]}
-      />
       <div style={styles.container}>
         <h1 style={styles.message}>{error.message}</h1>
         <pre style={styles.stack}>{error.stack}</pre>
