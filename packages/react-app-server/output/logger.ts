@@ -16,7 +16,14 @@ type WebpackState =
             moduleIdentifier: string
           }[]
         | null
-      warnings: string[] | null
+      warnings:
+        | {
+            message: string
+            loc: string
+            moduleName: string
+            moduleIdentifier: string
+          }[]
+        | null
     }
 
 export type LoggerStoreStatus =
@@ -44,6 +51,18 @@ function hasStoreChanged(nextStore: LoggerStoreStatus) {
   return true
 }
 
+const transformWebpackError = (error: {
+  message: string
+  moduleName: string
+  loc: string
+}) => {
+  const { message, moduleName, loc } = error
+
+  return chalk`{bold ${moduleName}}${
+    loc ? chalk`:{dim ${loc}}` : ''
+  }\n\n  ${message}`
+}
+
 logStore.subscribe((state) => {
   if (!hasStoreChanged(state)) {
     return
@@ -63,13 +82,7 @@ logStore.subscribe((state) => {
   }
 
   if (state.errors && state.errors.length > 0) {
-    const error = state.errors[0]
-
-    const { message, moduleName, loc } = error
-
-    Log.error(
-      chalk`{bold ${moduleName}}${loc ? `:{dim ${loc}}` : ''}\n\n  ${message}`
-    )
+    Log.error(transformWebpackError(state.errors[0]))
 
     return
   }
@@ -77,7 +90,7 @@ logStore.subscribe((state) => {
   const appUrl = `http://localhost:${state.port}`
 
   if (state.warnings && state.warnings.length > 0) {
-    Log.warn(state.warnings.join('\n\n'))
+    Log.warn(state.warnings.map(transformWebpackError).join('\n\n'))
     Log.info(`ready on ${appUrl}`)
     return
   }

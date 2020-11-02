@@ -92,7 +92,10 @@ export default class RouteManifestPlugin {
                         .userRequest
 
                       if (this.routesImports.includes(moduleName)) {
-                        routeComponentModule = moduleName
+                        routeComponentModule =
+                          '.' +
+                          path.sep +
+                          path.relative(compiler.context, moduleName)
                         return true
                       }
 

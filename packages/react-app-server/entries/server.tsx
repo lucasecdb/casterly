@@ -1,10 +1,7 @@
+import { Scripts, Styles } from '@app-server/components'
+import { RootServer, Routes } from '@app-server/components/server'
 import React from 'react'
 import { renderToString } from 'react-dom/server'
-
-import Root from '../components/Root'
-import Routes from '../components/Routes'
-import Scripts from '../components/Scripts'
-import Styles from '../components/Styles'
 
 const App: React.FC = () => {
   return (
@@ -34,9 +31,9 @@ export default function (
   context: unknown
 ) {
   const content = renderToString(
-    <Root context={context} url={request.url}>
+    <RootServer context={context} url={request.url}>
       <App />
-    </Root>
+    </RootServer>
   )
 
   return new Response('<!doctype html>' + content, {

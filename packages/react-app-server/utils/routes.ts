@@ -27,11 +27,15 @@ export type RoutePromiseComponent = {
 export type RouteWithAssets = {
   caseSensitive?: boolean
   assets: string[]
+  componentName: string
   path: string
   children?: RouteWithAssets[]
 }
 
-export type RouteObjectWithAssets = RouteObject & { assets: string[] }
+export type RouteObjectWithAssets = RouteObject & {
+  assets: string[]
+  componentName: string
+}
 
 export const createRouteComponentsParser = (
   routeComponentsAssets: Record<string, string[]>
@@ -43,6 +47,7 @@ export const createRouteComponentsParser = (
       caseSensitive: route.caseSensitive,
       path: route.path,
       assets: routeComponentsAssets[route.component()],
+      componentName: route.component(),
       children: undefined,
     }
 
@@ -78,6 +83,7 @@ export const mergeRouteAssetsAndRoutes = (
           await route.component().then(interopDefault)
         ),
         assets: routeAssets[index].assets,
+        componentName: routeAssets[index].componentName,
         children,
       }
     })
@@ -106,12 +112,12 @@ export const getMatchedRoutes = async ({
     routesPromiseComponent
   )
 
-  const matchedRoutes = matchRoutes(routes, location)
+  const matchedRoutes = matchRoutes(routes, location) ?? []
 
   const matchedRoutesAssets =
-    matchedRoutes?.flatMap((routeMatched) => {
+    matchedRoutes.flatMap((routeMatched) => {
       return (routeMatched.route as RouteObjectWithAssets).assets
     }) ?? []
 
-  return { routes, matchedRoutesAssets }
+  return { routes, matchedRoutes, matchedRoutesAssets }
 }

@@ -1,4 +1,6 @@
-import { ChunkGraph, Dependency } from 'webpack'
+import path from 'path'
+
+import { ChunkGraph, Dependency, NormalModule } from 'webpack'
 import type { sources } from 'webpack'
 // @ts-ignore
 import ImportDependency from 'webpack/lib/dependencies/ImportDependency'
@@ -6,6 +8,13 @@ import ImportDependency from 'webpack/lib/dependencies/ImportDependency'
 import * as paths from '../../paths'
 
 export default class RouteImportDependencyTemplate extends ImportDependency.Template {
+  private context
+
+  constructor(context: string) {
+    super()
+    this.context = context
+  }
+
   apply(
     dependency: Dependency,
     source: sources.ReplaceSource,
@@ -14,19 +23,21 @@ export default class RouteImportDependencyTemplate extends ImportDependency.Temp
     const { chunkGraph } = templateContext
 
     const parentModule = chunkGraph.moduleGraph.getParentModule(dependency)
-    const parentUserRequest = (parentModule as any).userRequest as string
+    const parentUserRequest = (parentModule as NormalModule).userRequest
 
     if (parentUserRequest !== paths.appRoutesJs) {
       return super.apply(dependency, source, templateContext)
     }
 
     const module = chunkGraph.moduleGraph.getModule(dependency)
-    const userRequest = (module as any).userRequest as string
+    const userRequest = (module as NormalModule).userRequest
+    const requestRelativeToContext =
+      '.' + path.sep + path.relative(this.context, userRequest)
 
     const start = (dependency as any).range[0] as number
     const end = ((dependency as any).range[1] as number) - 1
 
     // @ts-ignore: last parameter is optional
-    source.replace(start, end, JSON.stringify(userRequest))
+    source.replace(start, end, JSON.stringify(requestRelativeToContext))
   }
 }

@@ -2,7 +2,8 @@ import * as fs from 'fs'
 import { IncomingMessage, ServerResponse } from 'http'
 import * as path from 'path'
 
-import { RootContext } from '../components/RootContext'
+import { RootContext } from '@app-server/components'
+
 import {
   ASSET_MANIFEST_FILE,
   ROUTE_ASSETS_FILE,
@@ -168,7 +169,11 @@ export class AppServer {
       path.join(paths.appDist, STATIC_ENTRYPOINTS_ROUTES_MANIFEST)
     ).then(interopDefault)
 
-    const { routes, matchedRoutesAssets } = await getMatchedRoutes({
+    const {
+      routes,
+      matchedRoutes,
+      matchedRoutesAssets,
+    } = await getMatchedRoutes({
       location: req.url ?? '/',
       routeAssetMap: routeAssetsFile.routes,
       routesAssetComponent: appRoutesAssets,
@@ -176,7 +181,15 @@ export class AppServer {
     })
 
     const serverContext: RootContext = {
-      routes,
+      serverRoutes: routes,
+      matchedRoutes: matchedRoutes.map((routeMatch) => ({
+        ...routeMatch,
+        route: {
+          ...routeMatch.route,
+          element: undefined,
+          component: undefined,
+        },
+      })),
       matchedRoutesAssets,
       mainAssets: routeAssetsFile.main,
     }

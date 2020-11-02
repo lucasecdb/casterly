@@ -3,7 +3,7 @@ import { StaticRouter } from 'react-router-dom/server'
 
 import { RootContext, RootContextProvider } from './RootContext'
 
-const Root: React.FC<{ context: unknown; url: string }> = ({
+export const RootServer: React.FC<{ context: unknown; url: string }> = ({
   context,
   url,
   children,
@@ -14,5 +14,3 @@ const Root: React.FC<{ context: unknown; url: string }> = ({
     </RootContextProvider>
   )
 }
-
-export default Root

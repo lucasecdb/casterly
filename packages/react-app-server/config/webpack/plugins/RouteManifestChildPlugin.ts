@@ -17,7 +17,7 @@ export default class RouteManifestChildPlugin {
       (compilation) => {
         compilation.dependencyTemplates.set(
           ImportDependency,
-          new RouteImportDependencyTemplate()
+          new RouteImportDependencyTemplate(compiler.context)
         )
       }
     )

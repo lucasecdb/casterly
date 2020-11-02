@@ -1,12 +1,16 @@
 {
   "private": true,
-  "workspaces": {
-    "packages": ["packages/*"],
-    "nohoist": ["**/react-router", "**/react-router-dom"]
-  },
+  "workspaces": [
+    "packages/*"
+  ],
   "lint-staged": {
-    "*.{js,jsx,ts,tsx}": ["eslint --fix", "prettier --write"],
-    "*.{json,graphql,gql}": ["prettier --write"]
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,graphql,gql}": [
+      "prettier --write"
+    ]
   },
   "husky": {
     "hooks": {

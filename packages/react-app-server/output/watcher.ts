@@ -12,7 +12,14 @@ interface CompilerDiagnostics {
         loc: string
       }[]
     | null
-  warnings: string[] | null
+  warnings:
+    | {
+        message: string
+        moduleName: string
+        moduleIdentifier: string
+        loc: string
+      }[]
+    | null
 }
 
 type WebpackStatus =

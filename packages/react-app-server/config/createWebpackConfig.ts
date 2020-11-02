@@ -177,7 +177,10 @@ const getBaseWebpackConfig = async (
             return callback()
           }
 
-          if (res.match(/react-app-server[/\\]dist[/\\]/)) {
+          if (
+            res.match(/react-app-server[/\\]dist[/\\]/) ||
+            res.match(/@app-server[/\\]components[/\\]/)
+          ) {
             return callback()
           }
 
@@ -281,7 +284,11 @@ const getBaseWebpackConfig = async (
         ...paths.moduleFileExtensions.map((ext) => `.${ext}`),
       ],
       alias: {
-        _app: paths.appSrc,
+        ...(!isServer
+          ? {
+              buffer: require.resolve('buffer'),
+            }
+          : null),
       },
     },
     module: {

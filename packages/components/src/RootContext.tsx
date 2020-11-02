@@ -1,9 +1,9 @@
 import React, { useContext } from 'react'
-
-import { RouteObjectWithAssets } from '../utils/routes'
+import { RouteMatch, RouteObject } from 'react-router'
 
 export interface RootContext {
-  routes: RouteObjectWithAssets[]
+  serverRoutes: RouteObject[]
+  matchedRoutes: RouteMatch[]
   matchedRoutesAssets: string[]
   mainAssets: string[]
 }
