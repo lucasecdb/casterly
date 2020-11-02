@@ -265,7 +265,7 @@ const getBaseWebpackConfig = async (
         ? `${chunkFilename}.js`
         : `${STATIC_CHUNKS_PATH}/${chunkFilename}.js`,
       hotUpdateMainFilename: `${STATIC_WEBPACK_PATH}/[fullhash].hot-update.json`,
-      hotUpdateChunkFilename: '[id].[fullhash].hot-update.js',
+      hotUpdateChunkFilename: `${STATIC_WEBPACK_PATH}/[id].[fullhash].hot-update.js`,
       devtoolModuleFilenameTemplate: (info: any) =>
         path.resolve(info.absoluteResourcePath).replace(/\\/g, '/'),
       library: isServer ? undefined : '_RS',
