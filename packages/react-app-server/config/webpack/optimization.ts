@@ -26,7 +26,7 @@ export const createOptimizationConfig = ({
       default: false,
       defaultVendors: false,
       styles: {
-        name: `${STATIC_CHUNKS_PATH}/styles`,
+        name: `${dev ? '' : STATIC_CHUNKS_PATH + '/'}styles`,
         test: /.(sa|sc|c)ss$/,
         chunks: 'all',
         enforce: true,

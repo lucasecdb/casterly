@@ -1,6 +1,12 @@
 import path from 'path'
 
-import { Compilation, EntryPlugin, NormalModule, sources } from 'webpack'
+import {
+  Compilation,
+  EntryPlugin,
+  NormalModule,
+  runtime,
+  sources,
+} from 'webpack'
 import type { Compiler, javascript as javascriptTypes } from 'webpack'
 // @ts-ignore
 import NodeTargetPlugin from 'webpack/lib/node/NodeTargetPlugin'
@@ -106,10 +112,27 @@ export default class RouteManifestPlugin {
                     return null
                   }
 
+                  const referencedChunksFiles = Array.from(
+                    chunk.getAllReferencedChunks()
+                  )
+                    .filter(
+                      (referencedChunk) => referencedChunk.id !== chunk.id
+                    )
+                    .flatMap((referencedChunk) =>
+                      Array.from(referencedChunk.files.values())
+                    )
+                    .map((filePath) =>
+                      !filePath.startsWith('/') ? '/' + filePath : filePath
+                    )
+
                   return [
                     routeComponentModule!,
-                    Array.from(chunk.files.values()).map((filePath) =>
-                      !filePath.startsWith('/') ? '/' + filePath : filePath
+                    referencedChunksFiles.concat(
+                      Array.from(chunk.files.values())
+                        .filter((file) => file.indexOf('hot-update') === -1)
+                        .map((filePath) =>
+                          !filePath.startsWith('/') ? '/' + filePath : filePath
+                        )
                     ),
                   ] as const
                 })
