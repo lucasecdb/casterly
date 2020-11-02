@@ -4,9 +4,9 @@ import { useRoutes } from 'react-router'
 import { useRootContext } from './RootContext'
 
 export const Routes: React.FC = () => {
-  const { serverRoutes } = useRootContext()
+  const { routes } = useRootContext()
 
-  const element = useRoutes(serverRoutes)
+  const element = useRoutes(routes)
 
   return <>{element}</>
 }

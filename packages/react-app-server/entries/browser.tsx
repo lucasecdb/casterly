@@ -1,4 +1,5 @@
-import { RootBrowser, Routes } from '@app-server/components/browser'
+import { Routes } from '@app-server/components'
+import { RootBrowser } from '@app-server/components/browser'
 import React from 'react'
 import ReactDOM from 'react-dom'
 

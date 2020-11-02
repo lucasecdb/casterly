@@ -1,6 +1,7 @@
 import * as fs from 'fs'
 import { IncomingMessage, ServerResponse } from 'http'
 import * as path from 'path'
+import { parse as parseUrl } from 'url'
 
 import { RootContext } from '@app-server/components'
 
@@ -85,6 +86,36 @@ export class AppServer {
           } finally {
             shouldContinue = false
           }
+        },
+      }),
+      matchRoute({
+        route: '/__route-manifest',
+        fn: async (_, res, __, url) => {
+          const query = url.query as { path?: string }
+
+          res.statusCode = 200
+          res.setHeader('content-type', 'application/json')
+
+          if (!query.path) {
+            res.statusCode = 400
+
+            res.write(
+              JSON.stringify({ message: "Query parameter 'path' is required" })
+            )
+          } else {
+            const url = parseUrl(query.path)
+
+            const {
+              routes,
+              ...clientContext
+            } = await this.getServerContextForRoute(url.pathname!)
+
+            res.write(JSON.stringify(clientContext))
+          }
+
+          res.end()
+
+          shouldContinue = false
         },
       }),
     ]
@@ -178,7 +209,7 @@ export class AppServer {
     })
 
     const serverContext: RootContext = {
-      serverRoutes: routes,
+      routes,
       matchedRoutes: matchedRoutes.map((routeMatch) => ({
         ...routeMatch,
         route: {

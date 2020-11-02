@@ -1,5 +1,5 @@
-import { Scripts, Styles } from '@app-server/components'
-import { RootServer, Routes } from '@app-server/components/server'
+import { Routes, Scripts, Styles } from '@app-server/components'
+import { RootServer } from '@app-server/components/server'
 import React from 'react'
 import { renderToString } from 'react-dom/server'
 
