@@ -5,7 +5,6 @@ import { BrowserRouter as Router } from 'react-router-dom'
 import { RootContext, RootContextProvider } from './RootContext'
 import { RoutesProvider } from './RoutesBrowser'
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 declare global {
   interface Window {
     __serverContext?: Omit<RootContext, 'serverRoutes'>
