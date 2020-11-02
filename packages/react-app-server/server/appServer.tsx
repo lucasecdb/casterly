@@ -155,10 +155,7 @@ export class AppServer {
   }
    */
 
-  private renderDocument = async (
-    req: IncomingMessage,
-    res: ServerResponse
-  ) => {
+  private getServerContextForRoute = async (url: string) => {
     const routeAssetsFile = this.getRouteAssetsFile()
 
     const appRoutesPromises: RoutePromiseComponent[] = await import(
@@ -174,7 +171,7 @@ export class AppServer {
       matchedRoutes,
       matchedRoutesAssets,
     } = await getMatchedRoutes({
-      location: req.url ?? '/',
+      location: url,
       routeAssetMap: routeAssetsFile.routes,
       routesAssetComponent: appRoutesAssets,
       routesPromiseComponent: appRoutesPromises,
@@ -193,6 +190,15 @@ export class AppServer {
       matchedRoutesAssets,
       mainAssets: routeAssetsFile.main,
     }
+
+    return serverContext
+  }
+
+  private renderDocument = async (
+    req: IncomingMessage,
+    res: ServerResponse
+  ) => {
+    const serverContext = await this.getServerContextForRoute(req.url ?? '/')
 
     res.setHeader('Content-Type', 'text/html')
 

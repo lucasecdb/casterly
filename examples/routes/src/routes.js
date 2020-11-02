@@ -6,6 +6,12 @@ export default [
   {
     component: () => import('./OtherPage'),
     path: '/other-page',
+    children: [
+      {
+        component: () => import('./OtherPageChildren'),
+        path: '/child',
+      },
+    ],
   },
   {
     component: () => import('./NotFound'),

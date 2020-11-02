@@ -14,7 +14,10 @@ declare global {
   function __webpack_require__(assetPath: string): any
 }
 
-const parseRouteMatch = (routeMatch: RouteMatch): RouteObject => {
+const parseRouteMatch = (
+  routes: RouteObject[],
+  routeMatch: RouteMatch
+): RouteObject[] => {
   const { route } = routeMatch
 
   const routeEntrypoint = (route as any).componentName as string
@@ -23,19 +26,22 @@ const parseRouteMatch = (routeMatch: RouteMatch): RouteObject => {
     default: React.ComponentType
   }
 
-  const children: RouteObject[] = /*route.children ? route.children.map(parseRouteMatch) :*/ []
-
-  return {
-    ...route,
-    element: <Component />,
-    children,
-  }
+  return [
+    {
+      ...route,
+      element: <Component />,
+      children: routes,
+    },
+  ]
 }
 
 export const RootBrowser: React.FC = ({ children }) => {
   const [context, setContext] = useState(window.__serverContext as RootContext)
   const [routes, setRoutes] = useState(() => {
-    return window.__serverContext?.matchedRoutes.map(parseRouteMatch) ?? []
+    return (
+      window.__serverContext?.matchedRoutes.reduceRight(parseRouteMatch, []) ??
+      []
+    )
   })
 
   useEffect(() => {

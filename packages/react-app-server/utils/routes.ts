@@ -51,7 +51,7 @@ export const createRouteComponentsParser = (
       children: undefined,
     }
 
-    if (routeWithComponents.children) {
+    if (route.children) {
       routeWithComponents.children = route.children
         ? route.children.map(parseRouteComponents)
         : undefined
