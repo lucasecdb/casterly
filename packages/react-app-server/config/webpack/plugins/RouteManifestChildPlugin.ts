@@ -15,6 +15,8 @@ export default class RouteManifestChildPlugin {
     compiler.hooks.compilation.tap(
       { name: PLUGIN_NAME, stage: Infinity },
       (compilation) => {
+        compilation.dependencyTemplates = compiler.parentCompilation.dependencyTemplates.clone()
+
         compilation.dependencyTemplates.set(
           ImportDependency,
           new RouteImportDependencyTemplate(compiler.context)

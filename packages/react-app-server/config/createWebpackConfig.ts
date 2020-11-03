@@ -415,14 +415,13 @@ const getBaseWebpackConfig = async (
       ],
     },
     plugins: [
-      !isServer &&
-        (new MiniCssExtractPlugin({
-          // Options similar to the same options in webpackOptions.output
-          // both options are optional
-          filename: `${extractedCssFilename}.css`,
-          chunkFilename: `${extractedCssFilename}.chunk.css`,
-          ignoreOrder: true,
-        }) as { apply: (compiler: Compiler) => void }),
+      new MiniCssExtractPlugin({
+        // Options similar to the same options in webpackOptions.output
+        // both options are optional
+        filename: `${STATIC_CHUNKS_PATH}/${extractedCssFilename}.css`,
+        chunkFilename: `${STATIC_CHUNKS_PATH}/${extractedCssFilename}.chunk.css`,
+        ignoreOrder: true,
+      }) as { apply: (compiler: Compiler) => void },
       // Makes some environment variables available to the JS code, for example:
       // if (process.env.NODE_ENV === 'development') { ... }. See `./env.ts`.
       new webpack.DefinePlugin(env.stringified),

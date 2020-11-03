@@ -62,7 +62,6 @@ export const getStyleLoaders = ({
   }
 
   return [
-    !isServer && dev && 'extracted-loader',
     !isServer && {
       loader: MiniCssExtractPlugin.loader,
       options: {
