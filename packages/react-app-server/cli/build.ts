@@ -6,7 +6,7 @@ import util from 'util'
 import bfj from 'bfj'
 import chalk from 'chalk'
 import fs from 'fs-extra'
-import webpack, { MultiCompiler } from 'webpack'
+import webpack from 'webpack'
 
 import {
   measureFileSizesBeforeBuild,
@@ -31,21 +31,21 @@ async function build(
 ) {
   console.log('Creating an optimized production build...')
 
-  const compiler: MultiCompiler = webpack([
+  const compiler = webpack([
     await getBaseWebpackConfig(),
     await getBaseWebpackConfig({ isServer: true }),
   ])
 
   const run = util.promisify(compiler.run)
 
-  let stats: ReturnType<typeof run> extends Promise<infer U> ? U : never
+  let multiStats: ReturnType<typeof run> extends Promise<infer U> ? U : never
   let messages
 
   try {
-    stats = await run.call(compiler)
+    multiStats = await run.call(compiler)
+
     messages = formatWebpackMessages(
-      // @ts-ignore
-      stats.toJson({ all: false, warnings: true, errors: true })
+      multiStats?.toJson({ all: false, warnings: true, errors: true })
     )
   } catch (err) {
     if (!err.message) {
@@ -80,11 +80,11 @@ async function build(
   }
 
   if (writeStatsJson) {
-    await bfj.write(paths.appDist + '/bundle-stats.json', stats?.toJson())
+    await bfj.write(paths.appDist + '/bundle-stats.json', multiStats?.toJson())
   }
 
   return {
-    stats: stats!,
+    stats: multiStats!,
     previousFileSizes,
     warnings: messages.warnings,
   }

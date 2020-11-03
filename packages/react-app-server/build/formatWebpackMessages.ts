@@ -125,12 +125,15 @@ function formatMessage(errorOrWarning: WebpackError) {
   return message.trim()
 }
 
-export function formatWebpackMessages(json: {
-  errors: WebpackError[]
-  warnings: WebpackError[]
+export function formatWebpackMessages(json?: {
+  errors?: WebpackError[]
+  warnings?: WebpackError[]
 }) {
-  const formattedErrors = json.errors.map(formatMessage)
-  const formattedWarnings = json.warnings.map(formatMessage)
+  if (!json) {
+    return { errors: [], warnings: [] }
+  }
+  const formattedErrors = json.errors?.map(formatMessage) ?? []
+  const formattedWarnings = json.warnings?.map(formatMessage) ?? []
   const result = { errors: formattedErrors, warnings: formattedWarnings }
   if (result.errors.some(isLikelyASyntaxError)) {
     // If there are any syntax errors, show just them.
