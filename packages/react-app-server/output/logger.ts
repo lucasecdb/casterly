@@ -1,6 +1,7 @@
 import chalk from 'chalk'
 import createStore from 'unistore'
 
+import { WebpackError } from '../build/utils'
 import * as Log from './log'
 
 type WebpackState =
@@ -8,22 +9,8 @@ type WebpackState =
   | {
       loading: false
       typeChecking: boolean
-      errors:
-        | {
-            message: string
-            loc: string
-            moduleName: string
-            moduleIdentifier: string
-          }[]
-        | null
-      warnings:
-        | {
-            message: string
-            loc: string
-            moduleName: string
-            moduleIdentifier: string
-          }[]
-        | null
+      errors: WebpackError[] | null
+      warnings: WebpackError[] | null
     }
 
 export type LoggerStoreStatus =
@@ -51,11 +38,7 @@ function hasStoreChanged(nextStore: LoggerStoreStatus) {
   return true
 }
 
-const transformWebpackError = (error: {
-  message: string
-  moduleName: string
-  loc: string
-}) => {
+const transformWebpackError = (error: WebpackError) => {
   const { message, moduleName, loc } = error
 
   return chalk`{bold ${moduleName}}${

@@ -52,7 +52,7 @@ async function build(
       throw err
     }
     messages = formatWebpackMessages({
-      errors: [err.message],
+      errors: [{ message: err.message }],
       warnings: [],
     })
   }

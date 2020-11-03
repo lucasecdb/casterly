@@ -1,25 +1,12 @@
 import createStore from 'unistore'
 import { Compiler } from 'webpack'
 
+import { WebpackError } from '../build/utils'
 import { LoggerStoreStatus, logStore } from './logger'
 
 interface CompilerDiagnostics {
-  errors:
-    | {
-        message: string
-        moduleName: string
-        moduleIdentifier: string
-        loc: string
-      }[]
-    | null
-  warnings:
-    | {
-        message: string
-        moduleName: string
-        moduleIdentifier: string
-        loc: string
-      }[]
-    | null
+  errors: WebpackError[] | null
+  warnings: WebpackError[] | null
 }
 
 type WebpackStatus =

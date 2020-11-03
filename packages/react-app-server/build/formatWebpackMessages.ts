@@ -24,6 +24,8 @@ SOFTWARE.
 // originally taken from https://github.com/facebook/create-react-app/blob/master/packages/react-dev-utils/formatWebpackMessages.js
 import chalk from 'chalk'
 
+import { WebpackError } from './utils'
+
 const friendlySyntaxErrorLabel = 'Syntax error:'
 
 function isLikelyASyntaxError(message: string) {
@@ -31,7 +33,9 @@ function isLikelyASyntaxError(message: string) {
 }
 
 // Cleans up webpack error messages.
-function formatMessage(message: string) {
+function formatMessage(errorOrWarning: WebpackError) {
+  let { message } = errorOrWarning
+
   let lines = message.split('\n')
 
   // Strip webpack-added headers off errors/warnings
@@ -122,8 +126,8 @@ function formatMessage(message: string) {
 }
 
 export function formatWebpackMessages(json: {
-  errors: string[]
-  warnings: string[]
+  errors: WebpackError[]
+  warnings: WebpackError[]
 }) {
   const formattedErrors = json.errors.map(formatMessage)
   const formattedWarnings = json.warnings.map(formatMessage)
