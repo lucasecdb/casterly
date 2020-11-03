@@ -1,12 +1,6 @@
 import path from 'path'
 
-import {
-  Compilation,
-  EntryPlugin,
-  NormalModule,
-  runtime,
-  sources,
-} from 'webpack'
+import { Compilation, EntryPlugin, NormalModule, sources } from 'webpack'
 import type { Compiler, javascript as javascriptTypes } from 'webpack'
 // @ts-ignore
 import NodeTargetPlugin from 'webpack/lib/node/NodeTargetPlugin'
@@ -47,15 +41,26 @@ export default class RouteManifestPlugin {
 
       childCompiler.context = compiler.context
 
-      new NodeTargetPlugin().apply(childCompiler)
       new NodeTemplatePlugin().apply(childCompiler)
+      new NodeTargetPlugin().apply(childCompiler)
       new RouteManifestChildPlugin().apply(childCompiler)
       new EntryPlugin(compiler.context, paths.appRoutesJs, {
         name: STATIC_ENTRYPOINTS_ROUTES_MANIFEST,
+        library: {
+          type: 'commonjs2',
+        },
       }).apply(childCompiler)
 
-      childCompiler.runAsChild((error) => {
-        cb(error)
+      childCompiler.runAsChild((error, _, childCompilation) => {
+        if (error) {
+          return cb(error)
+        }
+
+        if (childCompilation && childCompilation.errors.length > 0) {
+          return cb(childCompilation.errors[0])
+        }
+
+        cb()
       })
     })
 
