@@ -1,5 +1,3 @@
-import path from 'path'
-
 import { ChunkGraph, Dependency, NormalModule } from 'webpack'
 import type { sources } from 'webpack'
 // @ts-ignore
@@ -8,13 +6,6 @@ import ImportDependency from 'webpack/lib/dependencies/ImportDependency'
 import * as paths from '../../paths'
 
 export default class RouteImportDependencyTemplate extends ImportDependency.Template {
-  private context
-
-  constructor(context: string) {
-    super()
-    this.context = context
-  }
-
   apply(
     dependency: Dependency,
     source: sources.ReplaceSource,
@@ -30,14 +21,13 @@ export default class RouteImportDependencyTemplate extends ImportDependency.Temp
     }
 
     const module = chunkGraph.moduleGraph.getModule(dependency)
-    const userRequest = (module as NormalModule).userRequest
-    const requestRelativeToContext =
-      '.' + path.sep + path.relative(this.context, userRequest)
+
+    const moduleId = chunkGraph.getModuleId(module)
 
     const start = (dependency as any).range[0] as number
     const end = ((dependency as any).range[1] as number) - 1
 
     // @ts-ignore: last parameter is optional
-    source.replace(start, end, JSON.stringify(requestRelativeToContext))
+    source.replace(start, end, JSON.stringify(moduleId.toString()))
   }
 }

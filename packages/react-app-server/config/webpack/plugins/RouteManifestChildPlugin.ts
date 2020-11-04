@@ -22,7 +22,7 @@ export default class RouteManifestChildPlugin {
 
         compilation.dependencyTemplates.set(
           ImportDependency,
-          new RouteImportDependencyTemplate(compiler.context)
+          new RouteImportDependencyTemplate()
         )
       }
     )

@@ -82,7 +82,7 @@ export const mergeRouteAssetsAndRoutes = (
         element: React.createElement(
           await route.component().then(interopDefault)
         ),
-        assets: routeAssets[index].assets,
+        assets: routeAssets[index].assets ?? [],
         componentName: routeAssets[index].componentName,
         children,
       }

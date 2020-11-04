@@ -100,10 +100,10 @@ export default class RouteManifestPlugin {
                         .userRequest
 
                       if (this.routesImports.includes(moduleName)) {
-                        routeComponentModule =
-                          '.' +
-                          path.sep +
-                          path.relative(compiler.context, moduleName)
+                        const moduleId = compilation.chunkGraph.getModuleId(
+                          chunkModule
+                        )
+                        routeComponentModule = moduleId.toString()
                         return true
                       }
 
@@ -117,9 +117,6 @@ export default class RouteManifestPlugin {
                   const referencedChunksFiles = Array.from(
                     chunk.getAllReferencedChunks()
                   )
-                    .filter(
-                      (referencedChunk) => referencedChunk.id !== chunk.id
-                    )
                     .flatMap((referencedChunk) =>
                       Array.from(referencedChunk.files.values())
                     )
@@ -128,16 +125,7 @@ export default class RouteManifestPlugin {
                       !filePath.startsWith('/') ? '/' + filePath : filePath
                     )
 
-                  return [
-                    routeComponentModule!,
-                    referencedChunksFiles.concat(
-                      Array.from(chunk.files.values())
-                        .filter((file) => file.indexOf('hot-update') === -1)
-                        .map((filePath) =>
-                          !filePath.startsWith('/') ? '/' + filePath : filePath
-                        )
-                    ),
-                  ] as const
+                  return [routeComponentModule!, referencedChunksFiles] as const
                 })
                 .filter(<T>(value: T | null): value is T => value != null)
             )
