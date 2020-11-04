@@ -126,6 +126,7 @@ export default class RouteManifestPlugin {
                     .flatMap((referencedChunk) =>
                       Array.from(referencedChunk.files.values())
                     )
+                    .filter((file) => file.indexOf('hot-update') === -1)
                     .map((filePath) =>
                       !filePath.startsWith('/') ? '/' + filePath : filePath
                     )
