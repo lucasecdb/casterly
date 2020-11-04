@@ -1,1 +1,1 @@
-export * from './lib/browser.js'
+module.exports = require('./lib/browser')
