@@ -1,8 +1,15 @@
-import React, { useEffect, useRef, useState } from 'react'
-import { RouteMatch, RouteObject } from 'react-router'
-import { BrowserRouter as Router, useLocation } from 'react-router-dom'
+import { BrowserHistory, Update, createBrowserHistory } from 'history'
+import React, {
+  useEffect,
+  useLayoutEffect,
+  useReducer,
+  useRef,
+  useState,
+} from 'react'
+import { RouteMatch, RouteObject, Router, RouterProps } from 'react-router'
 
 import { RootContext, RootContextProvider } from './RootContext'
+import { RoutePendingContextProvider } from './RoutePendingContext'
 
 declare global {
   interface Window {
@@ -64,7 +71,12 @@ const mergeRoutes = (
   return routes
 }
 
-const Root: React.FC = ({ children }) => {
+const InternalRoot: React.FC<RouterProps> = ({
+  location,
+  action,
+  navigator,
+  children,
+}) => {
   const [context, setContext] = useState(() => {
     const routes =
       window.__serverContext?.matchedRoutes.reduceRight(parseRouteMatch, []) ??
@@ -80,7 +92,8 @@ const Root: React.FC = ({ children }) => {
     delete window.__serverContext
   }, [])
 
-  const location = useLocation()
+  const [stateLocation, setStateLocation] = useState(location)
+  const [routePending, setRoutePending] = useState(false)
 
   const prevLocationRef = useRef(location)
 
@@ -93,6 +106,8 @@ const Root: React.FC = ({ children }) => {
 
     let cancelled = false
 
+    setRoutePending(true)
+
     fetch(`/__route-manifest?path=${location.pathname}`)
       .then((res) => res.json())
       .then((routeClientContext: Omit<RootContext, 'routes'>) => {
@@ -100,23 +115,50 @@ const Root: React.FC = ({ children }) => {
           return
         }
 
+        const scriptAssets = routeClientContext.matchedRoutesAssets.filter(
+          (file) => file.endsWith('.js')
+        )
+        const styleAssets = routeClientContext.matchedRoutesAssets.filter(
+          (file) => file.endsWith('.css')
+        )
+
         Promise.all(
-          routeClientContext.matchedRoutesAssets.map((asset) => {
-            if (document.querySelector(`script[src="${asset}"]`)) {
-              return Promise.resolve()
-            }
+          scriptAssets
+            .map((scriptAsset) => {
+              if (document.querySelector(`script[src="${scriptAsset}"]`)) {
+                return Promise.resolve()
+              }
 
-            const script = document.createElement('script')
+              const script = document.createElement('script')
 
-            return new Promise((resolve, reject) => {
-              script.src = asset
-              script.defer = true
-              script.onload = resolve
-              script.onerror = reject
+              return new Promise((resolve, reject) => {
+                script.src = scriptAsset
+                script.defer = true
+                script.onload = resolve
+                script.onerror = reject
 
-              document.head.appendChild(script)
+                document.body.appendChild(script)
+              })
             })
-          })
+            .concat(
+              styleAssets.map((styleAsset) => {
+                if (document.querySelector(`link[href="${styleAsset}"]`)) {
+                  return Promise.resolve()
+                }
+
+                const link = document.createElement('link')
+
+                return new Promise((resolve, reject) => {
+                  link.href = styleAsset
+                  link.type = 'text/css'
+                  link.rel = 'stylesheet'
+                  link.onload = resolve
+                  link.onerror = reject
+
+                  document.head.appendChild(link)
+                })
+              })
+            )
         ).then(() => {
           if (cancelled) {
             return
@@ -131,7 +173,13 @@ const Root: React.FC = ({ children }) => {
             ...prevContext,
             routes: mergeRoutes(prevContext.routes, routes),
           }))
+          setStateLocation(location)
+          setRoutePending(false)
         })
+      })
+      .catch(() => {
+        setStateLocation(location)
+        setRoutePending(false)
       })
 
     return () => {
@@ -139,13 +187,38 @@ const Root: React.FC = ({ children }) => {
     }
   }, [location])
 
-  return <RootContextProvider value={context}>{children}</RootContextProvider>
+  return (
+    <RootContextProvider value={context}>
+      <RoutePendingContextProvider value={routePending}>
+        <Router action={action} location={stateLocation} navigator={navigator}>
+          {children}
+        </Router>
+      </RoutePendingContextProvider>
+    </RootContextProvider>
+  )
 }
 
 export const RootBrowser: React.FC = ({ children }) => {
+  const historyRef = useRef<BrowserHistory>()
+  if (historyRef.current == null) {
+    historyRef.current = createBrowserHistory()
+  }
+
+  const history = historyRef.current
+  const [state, dispatch] = useReducer((_: Update, action: Update) => action, {
+    action: history.action,
+    location: history.location,
+  })
+
+  useLayoutEffect(() => history.listen(dispatch), [history])
+
   return (
-    <Router>
-      <Root>{children}</Root>
-    </Router>
+    <InternalRoot
+      action={state.action}
+      location={state.location}
+      navigator={history}
+    >
+      {children}
+    </InternalRoot>
   )
 }
