@@ -1,11 +1,7 @@
 import path from 'path'
 
-import { Compilation, EntryPlugin, NormalModule, sources } from 'webpack'
+import { Compilation, EntryPlugin, NormalModule, node, sources } from 'webpack'
 import type { Compiler, javascript as javascriptTypes } from 'webpack'
-// @ts-ignore
-import NodeTargetPlugin from 'webpack/lib/node/NodeTargetPlugin'
-// @ts-ignore
-import NodeTemplatePlugin from 'webpack/lib/node/NodeTemplatePlugin'
 
 import { RouteAssetsFile } from '../../../utils/routes'
 import {
@@ -41,8 +37,8 @@ export default class RouteManifestPlugin {
 
       childCompiler.context = compiler.context
 
-      new NodeTemplatePlugin().apply(childCompiler)
-      new NodeTargetPlugin().apply(childCompiler)
+      new node.NodeTemplatePlugin().apply(childCompiler)
+      new node.NodeTargetPlugin().apply(childCompiler)
       new RouteManifestChildPlugin().apply(childCompiler)
       new EntryPlugin(compiler.context, paths.appRoutesJs, {
         name: STATIC_ENTRYPOINTS_ROUTES_MANIFEST,
