@@ -42,6 +42,7 @@ export default class RouteManifestPlugin {
       new RouteManifestChildPlugin().apply(childCompiler)
       new EntryPlugin(compiler.context, paths.appRoutesJs, {
         name: STATIC_ENTRYPOINTS_ROUTES_MANIFEST,
+        filename: STATIC_ENTRYPOINTS_ROUTES_MANIFEST + '.js',
         library: {
           type: 'commonjs2',
         },
