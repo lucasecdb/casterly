@@ -19,14 +19,14 @@ export const STATIC_ENTRYPOINTS_ROUTES = path.join(
   STATIC_ENTRYPOINTS_PATH,
   'routes'
 )
-export const STATIC_ENTRYPOINTS_ROUTES_MANIFEST = path.join(
+export const STATIC_ENTRYPOINTS_ROUTES_ASSETS = path.join(
   STATIC_ENTRYPOINTS_PATH,
-  'routes-manifest'
+  'routes-assets'
 )
 
 export const ASSET_MANIFEST_FILE = 'asset-manifest.json'
 export const COMPONENTS_MANIFEST_FILE = 'components-manifest.json'
-export const ROUTE_ASSETS_FILE = 'route-assets.json'
+export const ROUTES_MANIFEST_FILE = 'routes-manifest.json'
 
 // match: static/component/:name
 export const COMPONENT_NAME_REGEX = /^static[/\\]components[/\\](.*)$/

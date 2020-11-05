@@ -7,18 +7,13 @@ import { RootContext } from '@app-server/components'
 
 import {
   ASSET_MANIFEST_FILE,
-  ROUTE_ASSETS_FILE,
+  ROUTES_MANIFEST_FILE,
   STATIC_ENTRYPOINTS_ROUTES,
-  STATIC_ENTRYPOINTS_ROUTES_MANIFEST,
   STATIC_RUNTIME_MAIN,
 } from '../config/constants'
 import * as paths from '../config/paths'
-import {
-  RouteAssetComponent,
-  RouteAssetsFile,
-  RoutePromiseComponent,
-  getMatchedRoutes,
-} from '../utils/routes'
+import { RoutesManifest } from '../config/webpack/plugins/routes/utils'
+import { RoutePromiseComponent, getMatchedRoutes } from '../utils/routes'
 import matchRoute from './matchRoute'
 import { serveStatic } from './serveStatic'
 import { interopDefault } from './utils'
@@ -34,7 +29,7 @@ export interface ServerOptions {
 
 export class AppServer {
   private _assetManifest
-  private _routeAssets
+  private _routesManifest
 
   constructor(opts: ServerOptions = {}) {
     const { dev = false } = opts
@@ -43,7 +38,9 @@ export class AppServer {
       this._assetManifest = readJSON(
         path.join(paths.appDist, ASSET_MANIFEST_FILE)
       )
-      this._routeAssets = readJSON(path.join(paths.appDist, ROUTE_ASSETS_FILE))
+      this._routesManifest = readJSON(
+        path.join(paths.appDist, ROUTES_MANIFEST_FILE)
+      )
     }
   }
 
@@ -138,7 +135,7 @@ export class AppServer {
     }
   }
 
-  protected getRouteAssetsFile = (): RouteAssetsFile => this._routeAssets
+  protected getRoutesManifestFile = (): RoutesManifest => this._routesManifest
 
   protected getAssetManifest = () => this._assetManifest
 
@@ -187,14 +184,10 @@ export class AppServer {
    */
 
   private getServerContextForRoute = async (url: string) => {
-    const routeAssetsFile = this.getRouteAssetsFile()
+    const routesManifest = this.getRoutesManifestFile()
 
     const appRoutesPromises: RoutePromiseComponent[] = await import(
       path.join(paths.appDistServer, STATIC_ENTRYPOINTS_ROUTES)
-    ).then(interopDefault)
-
-    const appRoutesAssets: RouteAssetComponent[] = await import(
-      path.join(paths.appDist, STATIC_ENTRYPOINTS_ROUTES_MANIFEST)
     ).then(interopDefault)
 
     const {
@@ -203,9 +196,8 @@ export class AppServer {
       matchedRoutesAssets,
     } = await getMatchedRoutes({
       location: url,
-      routeAssetMap: routeAssetsFile.routes,
-      routesAssetComponent: appRoutesAssets,
       routesPromiseComponent: appRoutesPromises,
+      routesManifest,
     })
 
     const serverContext: RootContext = {
@@ -219,7 +211,7 @@ export class AppServer {
         },
       })),
       matchedRoutesAssets,
-      mainAssets: routeAssetsFile.main,
+      mainAssets: routesManifest.main,
     }
 
     return serverContext

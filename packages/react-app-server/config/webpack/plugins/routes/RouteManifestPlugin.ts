@@ -2,17 +2,24 @@ import path from 'path'
 
 import { Compilation, EntryPlugin, NormalModule, node, sources } from 'webpack'
 import type { Compiler, javascript as javascriptTypes } from 'webpack'
+// @ts-ignore: no declaration file
+import ImportDependency from 'webpack/lib/dependencies/ImportDependency'
 
-import { RouteAssetsFile } from '../../../utils/routes'
 import {
-  ROUTE_ASSETS_FILE,
-  STATIC_ENTRYPOINTS_ROUTES_MANIFEST,
+  ROUTES_MANIFEST_FILE,
+  STATIC_ENTRYPOINTS_ROUTES_ASSETS,
   STATIC_RUNTIME_HOT,
   STATIC_RUNTIME_MAIN,
   STATIC_RUNTIME_WEBPACK,
-} from '../../constants'
-import * as paths from '../../paths'
-import RouteManifestChildPlugin from './RouteManifestChildPlugin'
+} from '../../../constants'
+import * as paths from '../../../paths'
+import RouteAssetsChildPlugin from './RouteAssetsChildPlugin'
+import RouteModuleIdCollectorImportDependencyTemplate from './RouteModuleIdCollectorImportDependencyTemplate'
+import {
+  RouteAssetComponent,
+  evalModuleCode,
+  parseRoutesAndAssets,
+} from './utils'
 
 const { RawSource } = sources
 
@@ -22,6 +29,7 @@ const PLUGIN_NAME = 'RouteManifestPlugin'
 
 export default class RouteManifestPlugin {
   private routesImports: string[]
+  private routeModuleIdMap: Record<string, string | number> = {}
 
   constructor() {
     this.routesImports = []
@@ -30,7 +38,7 @@ export default class RouteManifestPlugin {
   apply(compiler: Compiler) {
     compiler.hooks.make.tapAsync(PLUGIN_NAME, async (compilation, cb) => {
       const childCompiler = compilation.createChildCompiler(
-        'routeManifest',
+        'routeAssets',
         compiler.options.output,
         []
       )
@@ -39,10 +47,10 @@ export default class RouteManifestPlugin {
 
       new node.NodeTemplatePlugin().apply(childCompiler)
       new node.NodeTargetPlugin().apply(childCompiler)
-      new RouteManifestChildPlugin().apply(childCompiler)
+      new RouteAssetsChildPlugin().apply(childCompiler)
       new EntryPlugin(compiler.context, paths.appRoutesJs, {
-        name: STATIC_ENTRYPOINTS_ROUTES_MANIFEST,
-        filename: STATIC_ENTRYPOINTS_ROUTES_MANIFEST + '.js',
+        name: STATIC_ENTRYPOINTS_ROUTES_ASSETS,
+        filename: STATIC_ENTRYPOINTS_ROUTES_ASSETS + '.js',
         library: {
           type: 'commonjs2',
         },
@@ -60,6 +68,19 @@ export default class RouteManifestPlugin {
         cb()
       })
     })
+
+    compiler.hooks.compilation.tap(
+      { name: PLUGIN_NAME, stage: Infinity },
+      (compilation) => {
+        compilation.dependencyTemplates.set(
+          ImportDependency,
+          new RouteModuleIdCollectorImportDependencyTemplate(
+            this.routeModuleIdMap,
+            compiler.context
+          )
+        )
+      }
+    )
 
     compiler.hooks.thisCompilation.tap(
       PLUGIN_NAME,
@@ -86,34 +107,11 @@ export default class RouteManifestPlugin {
             )
 
             // Create a map of the module name to it's assets, to
-            // be later used with the routes-manifest.js file to
+            // be later used with the routes-assets.js file to
             // gather the chunks for a particular route.
             const routeComponentsAssets = Object.fromEntries(
               Array.from(compilation.chunks.values())
-                .map((chunk) => {
-                  let routeComponentModule: string | null = null
-
-                  const isChunkForRouteComponent = compilation.chunkGraph
-                    .getChunkModules(chunk)
-                    .some((chunkModule) => {
-                      const moduleName = (chunkModule as NormalModule)
-                        .userRequest
-
-                      if (this.routesImports.includes(moduleName)) {
-                        const moduleId = compilation.chunkGraph.getModuleId(
-                          chunkModule
-                        )
-                        routeComponentModule = moduleId.toString()
-                        return true
-                      }
-
-                      return false
-                    })
-
-                  if (!isChunkForRouteComponent) {
-                    return null
-                  }
-
+                .flatMap((chunk) => {
                   const referencedChunksFiles = Array.from(
                     chunk.getAllReferencedChunks()
                   )
@@ -125,20 +123,46 @@ export default class RouteManifestPlugin {
                       !filePath.startsWith('/') ? '/' + filePath : filePath
                     )
 
-                  return [routeComponentModule!, referencedChunksFiles] as const
+                  return compilation.chunkGraph
+                    .getChunkModules(chunk)
+                    .filter((chunkModule) => {
+                      const moduleName = (chunkModule as NormalModule)
+                        .userRequest
+
+                      return this.routesImports.includes(moduleName)
+                    })
+                    .map((chunkModule) => {
+                      const moduleId = compilation.chunkGraph.getModuleId(
+                        chunkModule
+                      )
+
+                      return [moduleId, referencedChunksFiles] as const
+                    })
                 })
                 .filter(<T>(value: T | null): value is T => value != null)
             )
 
-            const routeAssets: RouteAssetsFile = {
-              main: runtimeEntrypointAssets
-                .concat(mainEntrypointAssets)
-                .concat(hotEntrypointAssets),
-              routes: routeComponentsAssets,
-            }
+            const routeAssetsFilename = STATIC_ENTRYPOINTS_ROUTES_ASSETS + '.js'
 
-            assets[ROUTE_ASSETS_FILE] = new RawSource(
-              JSON.stringify(routeAssets, null, 2),
+            const routes: RouteAssetComponent[] = evalModuleCode(
+              compiler.context,
+              assets[routeAssetsFilename].source().toString(),
+              routeAssetsFilename
+            ).default
+
+            const mainAssets = runtimeEntrypointAssets
+              .concat(mainEntrypointAssets)
+              .concat(hotEntrypointAssets)
+
+            const routesManifest = parseRoutesAndAssets(
+              mainAssets,
+              routeComponentsAssets,
+              routes,
+              this.routeModuleIdMap
+            )
+
+            assets[ROUTES_MANIFEST_FILE] = new RawSource(
+              JSON.stringify(routesManifest, null, 2),
               true
             )
           }
@@ -153,6 +177,9 @@ export default class RouteManifestPlugin {
 
           if (resource === paths.appRoutesJs) {
             this.routesImports = []
+            Object.keys(this.routeModuleIdMap).forEach((key) => {
+              delete this.routeModuleIdMap[key]
+            })
           }
         })
 
