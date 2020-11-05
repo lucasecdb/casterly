@@ -1,12 +1,20 @@
+import { useIsRoutePending } from '@app-server/components'
 import { Link } from 'react-router-dom'
 
-const App = () => {
+import LoadingIndicator from './LoadingIndicator'
+import styles from './styles.module.css'
+
+const IndexPage = () => {
+  const isPending = useIsRoutePending()
+
   return (
     <>
       <p>Hello world!</p>
-      <Link to="/other-page">Go to other page</Link>
+      <Link className={styles.link} to="/other-page">
+        Go to other page {isPending && <LoadingIndicator />}
+      </Link>
     </>
   )
 }
 
-export default App
+export default IndexPage
