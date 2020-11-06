@@ -1,3 +1,4 @@
+import CssMinimizerPlugin from 'css-minimizer-webpack-plugin'
 // @ts-ignore: TODO: typings incompatible with webpack 5
 import TerserPlugin, { TerserPluginOptions } from 'terser-webpack-plugin'
 import { Configuration } from 'webpack'
@@ -49,6 +50,7 @@ export const createOptimizationConfig = ({
   config.minimizer = [
     // @ts-ignore
     new TerserPlugin(terserPluginConfig),
+    new CssMinimizerPlugin(),
   ]
 
   splitChunks.chunks = 'all'
