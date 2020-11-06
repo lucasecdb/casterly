@@ -108,7 +108,12 @@ const InternalRoot: React.FC<RouterProps> = ({
 
     setRoutePending(true)
 
-    fetch(`/__route-manifest?path=${location.pathname}`)
+    fetch(
+      `/__route-manifest?${new URLSearchParams({
+        path: location.pathname,
+        v: context.version ?? '',
+      })}`
+    )
       .then((res) => res.json())
       .then((routeClientContext: Omit<RootContext, 'routes'>) => {
         if (cancelled) {

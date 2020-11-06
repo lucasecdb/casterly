@@ -1,51 +1,68 @@
-import React, { StrictMode } from 'react'
-import { renderToString } from 'react-dom/server'
-import { StaticRouter } from 'react-router-dom/server'
+import { IncomingMessage, OutgoingHttpHeaders } from 'http'
 
 export function interopDefault(mod: any) {
   return mod.default || mod
 }
 
-async function defaultRenderFn({
-  container,
-}: RenderOptions): Promise<RenderResult> {
-  return { markup: renderToString(container) }
-}
+export function requestContainsPrecondition(req: IncomingMessage) {
+  const { headers } = req
 
-interface RenderOptions {
-  container: React.ReactElement
-}
-
-interface RenderResult {
-  markup: string
-  state?: any
-}
-
-export const renderToHTML = async (element: JSX.Element, path?: string) => {
-  const routerContext: { url?: string } = {}
-
-  /*const {
-      component: Component,
-      renderFn = defaultRenderFn,
-    } = await createRootComponent({
-      requestUrl: ctx.url,
-      requestHost: `${ctx.protocol}://${ctx.get('host')}`,
-      cookie: ctx.headers.cookie,
-      userAgent: ctx.headers['user-agent'],
-      requestLanguage: '',
-      routerContext,
-      server: true,
-    })*/
-
-  const renderFn = defaultRenderFn
-
-  const appRoot = (
-    <StrictMode>
-      <StaticRouter location={path}>{element}</StaticRouter>
-    </StrictMode>
+  return (
+    !!headers['if-match'] ||
+    !!headers['if-none-match'] ||
+    !!headers['if-modified-since'] ||
+    !!headers['if-unmodified-since']
   )
+}
 
-  const { markup, state } = await renderFn({ container: appRoot })
+export function isPreconditionFailure(
+  req: IncomingMessage,
+  headers: OutgoingHttpHeaders
+) {
+  const { headers: requestHeaders } = req
 
-  return { routerContext, markup, state }
+  const match = requestHeaders['if-match']
+
+  if (match) {
+    const etag = headers['etag']
+    return (
+      !etag ||
+      (match !== '*' &&
+        parseTokenList(match).every(
+          (match) =>
+            match !== etag && match !== 'W/' + etag && 'W/' + match !== etag
+        ))
+    )
+  }
+
+  return false
+}
+
+function parseTokenList(str: string) {
+  let end = 0
+  const list = []
+  let start = 0
+
+  // gather tokens
+  for (let i = 0, len = str.length; i < len; i++) {
+    switch (str.charCodeAt(i)) {
+      case 0x20 /*   */:
+        if (start === end) {
+          start = end = i + 1
+        }
+        break
+      case 0x2c /* , */:
+        list.push(str.substring(start, end))
+        start = end = i + 1
+        break
+      default:
+        end = i + 1
+        break
+    }
+  }
+
+  // final token
+  list.push(str.substring(start, end))
+
+  return list
 }

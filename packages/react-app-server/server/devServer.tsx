@@ -85,6 +85,10 @@ export class DevServer extends AppServer {
     return require(path.join(paths.appDist, ROUTES_MANIFEST_FILE))
   }
 
+  protected getBuildId() {
+    return Promise.resolve(undefined)
+  }
+
   protected async handleRequest(req: IncomingMessage, res: ServerResponse) {
     await this.serverReady
 

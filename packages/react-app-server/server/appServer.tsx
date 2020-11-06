@@ -4,19 +4,26 @@ import * as path from 'path'
 import { parse as parseUrl } from 'url'
 
 import { RootContext } from '@app-server/components'
+import fresh from 'fresh'
 
 import {
   ASSET_MANIFEST_FILE,
+  BUILD_ID_FILE,
   ROUTES_MANIFEST_FILE,
   STATIC_ENTRYPOINTS_ROUTES,
   STATIC_RUNTIME_MAIN,
 } from '../config/constants'
 import * as paths from '../config/paths'
 import { RoutesManifest } from '../config/webpack/plugins/routes/utils'
+import { MAX_AGE_LONG } from '../utils/maxAge'
 import { RoutePromiseComponent, getMatchedRoutes } from '../utils/routes'
 import matchRoute from './matchRoute'
 import { serveStatic } from './serveStatic'
-import { interopDefault } from './utils'
+import {
+  interopDefault,
+  isPreconditionFailure,
+  requestContainsPrecondition,
+} from './utils'
 
 const readJSON = (filePath: string) => {
   const file = fs.readFileSync(filePath)
@@ -30,6 +37,7 @@ export interface ServerOptions {
 export class AppServer {
   private _assetManifest
   private _routesManifest
+  private dev
 
   constructor(opts: ServerOptions = {}) {
     const { dev = false } = opts
@@ -42,10 +50,20 @@ export class AppServer {
         path.join(paths.appDist, ROUTES_MANIFEST_FILE)
       )
     }
+
+    this.dev = dev
   }
 
   public getRequestHandler() {
     return this.handleRequest.bind(this)
+  }
+
+  protected async getBuildId(): Promise<string | undefined> {
+    const fileContent = await fs.promises.readFile(
+      path.join(paths.appDist, BUILD_ID_FILE)
+    )
+
+    return fileContent.toString()
   }
 
   protected async handleRequest(req: IncomingMessage, res: ServerResponse) {
@@ -61,7 +79,8 @@ export class AppServer {
             await serveStatic(
               req,
               res,
-              path.join(paths.appDistPublic, url.pathname!)
+              path.join(paths.appDistPublic, url.pathname!),
+              !this.dev
             )
             shouldContinue = false
           } catch (err) {
@@ -77,7 +96,12 @@ export class AppServer {
         route: '/static/:path*',
         fn: async (req, res, _, url) => {
           try {
-            await serveStatic(req, res, path.join(paths.appDist, url.pathname!))
+            await serveStatic(
+              req,
+              res,
+              path.join(paths.appDist, url.pathname!),
+              !this.dev
+            )
           } catch {
             res.statusCode = 404
           } finally {
@@ -87,11 +111,34 @@ export class AppServer {
       }),
       matchRoute({
         route: '/__route-manifest',
-        fn: async (_, res, __, url) => {
+        fn: async (req, res, __, url) => {
           const query = url.query as { path?: string }
+
+          const etag = await this.getBuildId()
 
           res.statusCode = 200
           res.setHeader('content-type', 'application/json')
+
+          if (!this.dev) {
+            res.setHeader('etag', etag!)
+            res.setHeader('cache-control', 'public, max-age=' + MAX_AGE_LONG)
+          }
+
+          if (requestContainsPrecondition(req)) {
+            if (isPreconditionFailure(req, { etag })) {
+              res.statusCode = 412
+              res.end()
+              shouldContinue = false
+              return
+            }
+
+            if (fresh(req.headers, { etag })) {
+              res.statusCode = 304
+              res.end()
+              shouldContinue = false
+              return
+            }
+          }
 
           if (!query.path) {
             res.statusCode = 400
@@ -201,6 +248,7 @@ export class AppServer {
     })
 
     const serverContext: RootContext = {
+      version: await this.getBuildId(),
       routes,
       matchedRoutes: matchedRoutes.map((routeMatch) => ({
         ...routeMatch,

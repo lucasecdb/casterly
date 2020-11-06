@@ -4,7 +4,12 @@ import serializeJavascript from 'serialize-javascript'
 import { useRootContext } from './RootContext'
 
 export const Scripts: React.FC = () => {
-  const { matchedRoutesAssets, matchedRoutes, mainAssets } = useRootContext()
+  const {
+    matchedRoutesAssets,
+    matchedRoutes,
+    mainAssets,
+    version,
+  } = useRootContext()
 
   return (
     <>
@@ -13,6 +18,7 @@ export const Scripts: React.FC = () => {
           __html:
             'window.__serverContext = ' +
             serializeJavascript({
+              version,
               matchedRoutesAssets,
               matchedRoutes,
               mainAssets,

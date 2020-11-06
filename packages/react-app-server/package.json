@@ -45,12 +45,14 @@
     "file-loader": "^6.0.0",
     "filesize": "^6.1.0",
     "fork-ts-checker-webpack-plugin": "^5.2.0",
+    "fresh": "^0.5.2",
     "fs-extra": "^9.0.1",
     "gzip-size": "^5.1.1",
     "history": "^5.0.0",
     "ignore-loader": "^0.1.2",
     "make-fetch-happen": "^8.0.10",
     "mini-css-extract-plugin": "^1.2.1",
+    "nanoid": "^3.1.16",
     "node-sass": "^5.0.0",
     "path-to-regexp": "^6.1.0",
     "postcss": "^8.1.4",
@@ -74,6 +76,7 @@
     "workbox-webpack-plugin": "^6.0.0-alpha.3"
   },
   "devDependencies": {
+    "@types/fresh": "^0.5.0",
     "@types/fs-extra": "^9.0.1",
     "@types/minipass": "^2.2.0",
     "@types/node": "^14.6.2",

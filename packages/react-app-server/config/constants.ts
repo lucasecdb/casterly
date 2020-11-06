@@ -27,6 +27,7 @@ export const STATIC_ENTRYPOINTS_ROUTES_ASSETS = path.join(
 export const ASSET_MANIFEST_FILE = 'asset-manifest.json'
 export const COMPONENTS_MANIFEST_FILE = 'components-manifest.json'
 export const ROUTES_MANIFEST_FILE = 'routes-manifest.json'
+export const BUILD_ID_FILE = 'build-id.txt'
 
 // match: static/component/:name
 export const COMPONENT_NAME_REGEX = /^static[/\\]components[/\\](.*)$/

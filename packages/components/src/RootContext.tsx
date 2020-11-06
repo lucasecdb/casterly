@@ -2,6 +2,7 @@ import React, { useContext } from 'react'
 import { RouteMatch, RouteObject } from 'react-router'
 
 export interface RootContext {
+  version?: string
   routes: RouteObject[]
   matchedRoutes: RouteMatch[]
   matchedRoutesAssets: string[]

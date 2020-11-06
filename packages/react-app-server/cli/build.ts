@@ -1,11 +1,13 @@
 // Ensure environment variables are read.
 import '../config/env'
 
+import { join } from 'path'
 import util from 'util'
 
 import bfj from 'bfj'
 import chalk from 'chalk'
 import fs from 'fs-extra'
+import { nanoid } from 'nanoid'
 import webpack from 'webpack'
 
 import {
@@ -14,6 +16,7 @@ import {
 } from '../build/fileSizeReporter'
 import { formatWebpackMessages } from '../build/formatWebpackMessages'
 import { checkRequiredFiles, printBuildError } from '../build/utils'
+import { BUILD_ID_FILE } from '../config/constants'
 import getBaseWebpackConfig from '../config/createWebpackConfig'
 import * as paths from '../config/paths'
 
@@ -144,6 +147,10 @@ export default function startBuild() {
         } else {
           console.log(chalk.green('Compiled successfully.\n'))
         }
+
+        const buildId = nanoid()
+
+        fs.writeFileSync(join(paths.appDist, BUILD_ID_FILE), buildId)
 
         const [clientStats] = stats.stats
 
