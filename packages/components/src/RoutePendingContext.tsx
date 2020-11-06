@@ -7,7 +7,7 @@ export const useIsRoutePending = () => {
 
   if (contextValue == null) {
     throw new Error(
-      'Hook useIsRoutePending must be a descendant of either <RootBrowser /> or <RootServer />'
+      'You must use useIsRoutePending in a descendant of either <RootBrowser /> or <RootServer />'
     )
   }
 

@@ -15,7 +15,9 @@ export const useRootContext = () => {
   const value = useContext(ctx)
 
   if (value == null) {
-    throw new Error('<Root /> component is required for server rendering.')
+    throw new Error(
+      'You must wrap your app in either <RootServer /> or <RootBrowser />'
+    )
   }
 
   return value
