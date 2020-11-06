@@ -7,7 +7,6 @@ import { RootContext } from '@app-server/components'
 import fresh from 'fresh'
 
 import {
-  ASSET_MANIFEST_FILE,
   BUILD_ID_FILE,
   ROUTES_MANIFEST_FILE,
   STATIC_ENTRYPOINTS_ROUTES,
@@ -35,7 +34,6 @@ export interface ServerOptions {
 }
 
 export class AppServer {
-  private _assetManifest
   private _routesManifest
   private dev
 
@@ -43,9 +41,6 @@ export class AppServer {
     const { dev = false } = opts
 
     if (!dev) {
-      this._assetManifest = readJSON(
-        path.join(paths.appDist, ASSET_MANIFEST_FILE)
-      )
       this._routesManifest = readJSON(
         path.join(paths.appDist, ROUTES_MANIFEST_FILE)
       )
@@ -183,8 +178,6 @@ export class AppServer {
   }
 
   protected getRoutesManifestFile = (): RoutesManifest => this._routesManifest
-
-  protected getAssetManifest = () => this._assetManifest
 
   /*
   private renderError = async (
