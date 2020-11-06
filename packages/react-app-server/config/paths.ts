@@ -58,6 +58,5 @@ export const appNodePath = buildNodePath(appPath)
 
 export const serverPath = resolveServer('.')
 export const serverClientHot = resolveServer('client/hot.js')
-export const serverErrorJs = resolveServer('client/error.js')
 export const serverServerEntry = resolveServer('entries/server')
 export const serverBrowserEntry = resolveServer('entries/browser')

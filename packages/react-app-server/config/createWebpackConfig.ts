@@ -16,7 +16,6 @@ import { filterBoolean } from '../utils/filterBoolean'
 import resolveRequest from '../utils/resolveRequest'
 import {
   STATIC_CHUNKS_PATH,
-  STATIC_ENTRYPOINTS_ERROR,
   STATIC_ENTRYPOINTS_ROUTES,
   STATIC_MEDIA_PATH,
   STATIC_RUNTIME_HOT,
@@ -228,7 +227,6 @@ const getBaseWebpackConfig = async (
   }
 
   const entrypoints = {
-    [STATIC_ENTRYPOINTS_ERROR]: paths.serverErrorJs,
     [STATIC_ENTRYPOINTS_ROUTES]: paths.appRoutesJs,
   }
 

@@ -11,10 +11,6 @@ export const STATIC_RUNTIME_MAIN = path.join(STATIC_RUNTIME_PATH, 'main')
 export const STATIC_RUNTIME_WEBPACK = path.join(STATIC_RUNTIME_PATH, 'webpack')
 export const STATIC_RUNTIME_HOT = path.join(STATIC_RUNTIME_PATH, 'hot')
 
-export const STATIC_ENTRYPOINTS_ERROR = path.join(
-  STATIC_ENTRYPOINTS_PATH,
-  'error'
-)
 export const STATIC_ENTRYPOINTS_ROUTES = path.join(
   STATIC_ENTRYPOINTS_PATH,
   'routes'
