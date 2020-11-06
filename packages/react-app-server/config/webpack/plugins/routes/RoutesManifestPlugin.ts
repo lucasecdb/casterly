@@ -25,9 +25,9 @@ const { RawSource } = sources
 
 const JS_FILE_REGEX = /(?<!\.hot-update)\.js$/
 
-const PLUGIN_NAME = 'RouteManifestPlugin'
+const PLUGIN_NAME = 'RoutesManifestPlugin'
 
-export default class RouteManifestPlugin {
+export default class RoutesManifestPlugin {
   private routesImports: string[]
   private routeModuleIdMap: Record<string, string | number> = {}
 

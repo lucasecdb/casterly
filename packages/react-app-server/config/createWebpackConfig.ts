@@ -27,7 +27,7 @@ import * as paths from './paths'
 import { createOptimizationConfig } from './webpack/optimization'
 import RequireCacheHotReloaderPlugin from './webpack/plugins/RequireCacheHotReloaderPlugin'
 import SSRImportPlugin from './webpack/plugins/SSRImportPlugin'
-import RouteManifestPlugin from './webpack/plugins/routes/RouteManifestPlugin'
+import RoutesManifestPlugin from './webpack/plugins/routes/RoutesManifestPlugin'
 import { getStyleLoaders } from './webpack/styles'
 import { Options } from './webpack/types'
 import { createWorkboxPlugin } from './webpack/workbox'
@@ -425,7 +425,7 @@ const getBaseWebpackConfig = async (
       // Even though require.cache is server only we have to clear assets from both compilations
       // This is because the client compilation generates the asset manifest that's used on the server side
       dev && new RequireCacheHotReloaderPlugin(),
-      !isServer && new RouteManifestPlugin(),
+      !isServer && new RoutesManifestPlugin(),
       !isServer && hasServiceWorker && createWorkboxPlugin({ dev, isServer }),
       // Fix dynamic imports on server bundle
       isServer && new SSRImportPlugin(),
