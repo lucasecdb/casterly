@@ -106,7 +106,7 @@ export default class RoutesManifestPlugin {
               STATIC_RUNTIME_HOT
             )
 
-            // Create a map of the module name to it's assets, to
+            // Create a map of the module name to its assets, to
             // be later used with the routes-assets.js file to
             // gather the chunks for a particular route.
             const routeComponentsAssets = Object.fromEntries(
