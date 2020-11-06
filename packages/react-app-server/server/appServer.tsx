@@ -172,56 +172,13 @@ export class AppServer {
       await this.renderDocument(req, res)
     } catch (err) {
       console.error(err)
+      res.statusCode = 500
+      res.setHeader('x-robots-tag', 'noindex')
       res.end('error')
-      // await this.renderError(req, res, err)
     }
   }
 
   protected getRoutesManifestFile = (): RoutesManifest => this._routesManifest
-
-  /*
-  private renderError = async (
-    _: IncomingMessage,
-    res: ServerResponse,
-    err: Error
-  ) => {
-    const errorComponentEntrypoint = this.getComponentsManifest()[
-      ERROR_COMPONENT_NAME
-    ]
-
-    const assets: string[] = this.getAssetManifest().components[
-      ERROR_COMPONENT_NAME
-    ]
-
-    const scriptAssets = assets.filter((path) => path.endsWith('.js'))
-    const styleAssets = assets.filter((path) => path.endsWith('.css'))
-
-    const props = {
-      error: { name: err.name, message: err.message, stack: err.stack },
-    }
-
-    const { head, markup } = await renderToHTML(
-      await resolveErrorComponent(errorComponentEntrypoint, props)
-    )
-
-    res.setHeader('x-robots-tag', 'noindex, nofollow')
-    res.setHeader('cache-control', 'no-cache')
-
-    res.statusCode = 500
-
-    res.write('<!doctype html>')
-
-    renderToNodeStream(
-      <Document
-        markup={markup}
-        head={head}
-        scripts={scriptAssets}
-        styles={styleAssets}
-        componentProps={props}
-      />
-    ).pipe(res)
-  }
-   */
 
   private getServerContextForRoute = async (url: string) => {
     const routesManifest = this.getRoutesManifestFile()
