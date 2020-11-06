@@ -1,7 +1,6 @@
 **/node_modules
 **/.dist
 **/dist
-packages/react-app-server/head.js
-packages/react-app-server/head.d.ts
-packages/react-app-server/router.js
-packages/react-app-server/router.d.ts
+**/lib
+packages/*/*.js
+packages/*/*.d.ts

@@ -32,3 +32,10 @@ export function checkRequiredFiles(files: string[]) {
     return false
   }
 }
+
+export type WebpackError = {
+  message: string
+  loc?: string
+  moduleName?: string
+  moduleIdentifier?: string
+}

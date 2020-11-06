@@ -1,3 +1,4 @@
+import { realpathSync } from 'fs'
 import path from 'path'
 
 import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin'
@@ -15,18 +16,18 @@ import { filterBoolean } from '../utils/filterBoolean'
 import resolveRequest from '../utils/resolveRequest'
 import {
   STATIC_CHUNKS_PATH,
-  STATIC_COMPONENTS_PATH,
+  STATIC_ENTRYPOINTS_ROUTES,
   STATIC_MEDIA_PATH,
+  STATIC_RUNTIME_HOT,
   STATIC_RUNTIME_MAIN,
   STATIC_WEBPACK_PATH,
 } from './constants'
 import getClientEnvironment from './env'
 import * as paths from './paths'
 import { createOptimizationConfig } from './webpack/optimization'
-import BuildManifestPlugin from './webpack/plugins/BuildManifestPlugin'
-import ComponentsManifestPlugin from './webpack/plugins/ComponentsManifestPlugin'
 import RequireCacheHotReloaderPlugin from './webpack/plugins/RequireCacheHotReloaderPlugin'
 import SSRImportPlugin from './webpack/plugins/SSRImportPlugin'
+import RoutesManifestPlugin from './webpack/plugins/routes/RoutesManifestPlugin'
 import { getStyleLoaders } from './webpack/styles'
 import { Options } from './webpack/types'
 import { createWorkboxPlugin } from './webpack/workbox'
@@ -165,11 +166,16 @@ const getBaseWebpackConfig = async (
           // Same as above: if the package, when required from the root,
           // would be different from what the real resolution would use, we
           // cannot externalize it.
-          if (baseRes !== res) {
+          if (
+            !baseRes ||
+            (baseRes !== res &&
+              // if res and baseRes are symlinks they could point to the the same file
+              realpathSync(baseRes) !== realpathSync(res))
+          ) {
             return callback()
           }
 
-          if (res.match(/react-app-server[/\\]dist[/\\]client[/\\]/)) {
+          if (res.match(/react-app-server[/\\]dist[/\\]/)) {
             return callback()
           }
 
@@ -221,8 +227,7 @@ const getBaseWebpackConfig = async (
   }
 
   const entrypoints = {
-    [path.join(STATIC_COMPONENTS_PATH, 'routes')]: paths.appRoutesJs,
-    [path.join(STATIC_COMPONENTS_PATH, 'error')]: paths.serverErrorJs,
+    [STATIC_ENTRYPOINTS_ROUTES]: paths.appRoutesJs,
   }
 
   return {
@@ -234,7 +239,12 @@ const getBaseWebpackConfig = async (
     externals,
     entry: () => ({
       ...entrypoints,
-      ...(!isServer ? { [STATIC_RUNTIME_MAIN]: paths.serverClientJs } : null),
+      ...(!isServer
+        ? {
+            [STATIC_RUNTIME_MAIN]: paths.serverBrowserEntry,
+            ...(dev ? { [STATIC_RUNTIME_HOT]: paths.serverClientHot } : null),
+          }
+        : { [STATIC_RUNTIME_MAIN]: paths.serverServerEntry }),
     }),
     watchOptions: {
       ignored: ['**/.git/**', '**/node_modules/**', '**/.dist/**'],
@@ -249,7 +259,7 @@ const getBaseWebpackConfig = async (
         ? `${chunkFilename}.js`
         : `${STATIC_CHUNKS_PATH}/${chunkFilename}.js`,
       hotUpdateMainFilename: `${STATIC_WEBPACK_PATH}/[fullhash].hot-update.json`,
-      hotUpdateChunkFilename: '[id].[fullhash].hot-update.js',
+      hotUpdateChunkFilename: `${STATIC_WEBPACK_PATH}/[id].[fullhash].hot-update.js`,
       devtoolModuleFilenameTemplate: (info: any) =>
         path.resolve(info.absoluteResourcePath).replace(/\\/g, '/'),
       library: isServer ? undefined : '_RS',
@@ -268,7 +278,11 @@ const getBaseWebpackConfig = async (
         ...paths.moduleFileExtensions.map((ext) => `.${ext}`),
       ],
       alias: {
-        _app: paths.appSrc,
+        ...(!isServer
+          ? {
+              buffer: require.resolve('buffer'),
+            }
+          : null),
       },
     },
     module: {
@@ -398,8 +412,8 @@ const getBaseWebpackConfig = async (
       new MiniCssExtractPlugin({
         // Options similar to the same options in webpackOptions.output
         // both options are optional
-        filename: `${extractedCssFilename}.css`,
-        chunkFilename: `${extractedCssFilename}.chunk.css`,
+        filename: `${STATIC_CHUNKS_PATH}/${extractedCssFilename}.css`,
+        chunkFilename: `${STATIC_CHUNKS_PATH}/${extractedCssFilename}.chunk.css`,
         ignoreOrder: true,
       }) as { apply: (compiler: Compiler) => void },
       // Makes some environment variables available to the JS code, for example:
@@ -411,8 +425,7 @@ const getBaseWebpackConfig = async (
       // Even though require.cache is server only we have to clear assets from both compilations
       // This is because the client compilation generates the asset manifest that's used on the server side
       dev && new RequireCacheHotReloaderPlugin(),
-      !isServer && new BuildManifestPlugin(),
-      isServer && new ComponentsManifestPlugin(),
+      !isServer && new RoutesManifestPlugin(),
       !isServer && hasServiceWorker && createWorkboxPlugin({ dev, isServer }),
       // Fix dynamic imports on server bundle
       isServer && new SSRImportPlugin(),

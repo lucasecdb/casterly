@@ -1,0 +1,50 @@
+{
+  "name": "@app-server/components",
+  "version": "0.1.6",
+  "author": "Lucas Cordeiro <ecdb.lucas@gmail.com>",
+  "homepage": "https://github.com/lucasecdb/react-app-server#readme",
+  "license": "MIT",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lucasecdb/react-app-server.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: run tests from root\" && exit 1",
+    "clean": "rimraf lib",
+    "ts": "tsc",
+    "dev": "tsc --watch",
+    "build": "run-s clean ts"
+  },
+  "bugs": {
+    "url": "https://github.com/lucasecdb/react-app-server/issues"
+  },
+  "peerDependencies": {
+    "react": "^16.9.0 || ^17.0.1",
+    "react-dom": "^16.9.0 || ^17.0.1",
+    "react-router": "^6.0.0-beta.0",
+    "react-router-dom": "^6.0.0-beta.0"
+  },
+  "devDependencies": {
+    "@types/react": "^16.9.55",
+    "@types/react-dom": "^16.9.9",
+    "npm-run-all": "^4.1.5",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
+    "react-router": "^6.0.0-beta.0",
+    "react-router-dom": "^6.0.0-beta.0",
+    "rimraf": "^3.0.2"
+  }
+}

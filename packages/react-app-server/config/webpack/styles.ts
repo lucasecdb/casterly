@@ -27,13 +27,16 @@ export const getStyleLoaders = ({
         // https://github.com/facebook/create-react-app/issues/2677
         ident: 'postcss',
         plugins: [
-          require('postcss-flexbugs-fixes'),
-          require('postcss-preset-env')({
-            autoprefixer: {
-              flexbox: 'no-2009',
+          require.resolve('postcss-flexbugs-fixes'),
+          [
+            require.resolve('postcss-preset-env'),
+            {
+              autoprefixer: {
+                flexbox: 'no-2009',
+              },
+              stage: 3,
             },
-            stage: 3,
-          }),
+          ],
         ],
       },
     },
@@ -59,11 +62,10 @@ export const getStyleLoaders = ({
   }
 
   return [
-    !isServer && dev && 'extracted-loader',
     !isServer && {
       loader: MiniCssExtractPlugin.loader,
       options: {
-        modules: cssModules ? {} : undefined,
+        modules: cssModules ? { namedExport: false } : undefined,
       },
     },
     cssLoader,

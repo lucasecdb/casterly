@@ -14,7 +14,7 @@ export const moduleFileExtensions = ['mjs', 'js', 'json', 'jsx']
 export const typescriptFileExtensions = ['ts', 'tsx']
 
 // Resolve file paths in the same order as webpack
-const resolveModule = (resolveFn = resolveApp, filePath: string) => {
+export const resolveModule = (resolveFn = resolveApp, filePath: string) => {
   const extension = [
     ...moduleFileExtensions,
     ...typescriptFileExtensions,
@@ -57,5 +57,6 @@ const buildNodePath = (basePath: string) => {
 export const appNodePath = buildNodePath(appPath)
 
 export const serverPath = resolveServer('.')
-export const serverClientJs = resolveServer('client/index.js')
-export const serverErrorJs = resolveServer('client/error.js')
+export const serverClientHot = resolveServer('client/hot.js')
+export const serverServerEntry = resolveServer('entries/server')
+export const serverBrowserEntry = resolveServer('entries/browser')

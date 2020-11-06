@@ -1,12 +1,14 @@
 // Ensure environment variables are read.
 import '../config/env'
 
+import { join } from 'path'
 import util from 'util'
 
 import bfj from 'bfj'
 import chalk from 'chalk'
 import fs from 'fs-extra'
-import webpack, { MultiCompiler } from 'webpack'
+import { nanoid } from 'nanoid'
+import webpack from 'webpack'
 
 import {
   measureFileSizesBeforeBuild,
@@ -14,6 +16,7 @@ import {
 } from '../build/fileSizeReporter'
 import { formatWebpackMessages } from '../build/formatWebpackMessages'
 import { checkRequiredFiles, printBuildError } from '../build/utils'
+import { BUILD_ID_FILE } from '../config/constants'
 import getBaseWebpackConfig from '../config/createWebpackConfig'
 import * as paths from '../config/paths'
 
@@ -31,28 +34,28 @@ async function build(
 ) {
   console.log('Creating an optimized production build...')
 
-  const compiler: MultiCompiler = webpack([
+  const compiler = webpack([
     await getBaseWebpackConfig(),
     await getBaseWebpackConfig({ isServer: true }),
   ])
 
   const run = util.promisify(compiler.run)
 
-  let stats: ReturnType<typeof run> extends Promise<infer U> ? U : never
+  let multiStats: ReturnType<typeof run> extends Promise<infer U> ? U : never
   let messages
 
   try {
-    stats = await run.call(compiler)
+    multiStats = await run.call(compiler)
+
     messages = formatWebpackMessages(
-      // @ts-ignore
-      stats.toJson({ all: false, warnings: true, errors: true })
+      multiStats?.toJson({ all: false, warnings: true, errors: true })
     )
   } catch (err) {
     if (!err.message) {
       throw err
     }
     messages = formatWebpackMessages({
-      errors: [err.message],
+      errors: [{ message: err.message }],
       warnings: [],
     })
   }
@@ -80,11 +83,11 @@ async function build(
   }
 
   if (writeStatsJson) {
-    await bfj.write(paths.appDist + '/bundle-stats.json', stats?.toJson())
+    await bfj.write(paths.appDist + '/bundle-stats.json', multiStats?.toJson())
   }
 
   return {
-    stats: stats!,
+    stats: multiStats!,
     previousFileSizes,
     warnings: messages.warnings,
   }
@@ -144,6 +147,10 @@ export default function startBuild() {
         } else {
           console.log(chalk.green('Compiled successfully.\n'))
         }
+
+        const buildId = nanoid()
+
+        fs.writeFileSync(join(paths.appDist, BUILD_ID_FILE), buildId)
 
         const [clientStats] = stats.stats
 

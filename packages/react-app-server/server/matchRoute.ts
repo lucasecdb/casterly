@@ -1,5 +1,5 @@
 import { IncomingMessage, ServerResponse } from 'http'
-import { UrlWithStringQuery, parse as parseUrl } from 'url'
+import { UrlWithParsedQuery, parse as parseUrl } from 'url'
 
 import { Key, pathToRegexp, regexpToFunction } from 'path-to-regexp'
 
@@ -9,7 +9,7 @@ interface MatchRouteOptions<T> {
     req: IncomingMessage,
     res: ServerResponse,
     params: T,
-    url: UrlWithStringQuery
+    url: UrlWithParsedQuery
   ) => Promise<any>
 }
 
@@ -22,16 +22,19 @@ export default function matchRoute<
     delimiter: '/',
     sensitive: false,
   })
+
   const match = regexpToFunction<T>(matcherRegex, keys)
 
   const routeHandler = async (req: IncomingMessage, res: ServerResponse) => {
-    const result = match(req.url ?? '')
+    const url = parseUrl(req.url!, true)
+
+    const result = match(url.pathname!)
 
     if (!result) {
       return
     }
 
-    await fn(req, res, result.params, parseUrl(req.url!))
+    await fn(req, res, result.params, url)
   }
 
   return routeHandler
