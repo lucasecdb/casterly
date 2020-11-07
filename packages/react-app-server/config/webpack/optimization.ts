@@ -21,13 +21,13 @@ const BYTE = 1
 const KILOBYTE = 1000 * BYTE
 
 interface Options extends ArgOptions {
-  numberOfRoutes?: number
+  getNumberOfRoutes(): number
 }
 
 export const createOptimizationConfig = ({
   dev,
   isServer,
-  numberOfRoutes = 0,
+  getNumberOfRoutes,
 }: Options): Required<Configuration>['optimization'] => {
   const terserPluginConfig: TerserPluginOptions = {
     parallel: true,
@@ -113,11 +113,11 @@ export const createOptimizationConfig = ({
       minChunks: 1,
       reuseExistingChunk: true,
     },
-    commons: {
+    commons: () => ({
       name: STATIC_CHUNKS_PATH + sep + 'commons',
-      minChunks: Math.max(numberOfRoutes, 2),
+      minChunks: Math.max(getNumberOfRoutes(), 2),
       priority: 20,
-    },
+    }),
     shared: {
       test(module: Module) {
         return !isModuleCSS(module)

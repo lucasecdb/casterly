@@ -90,6 +90,10 @@ const getBaseWebpackConfig = async (
     },
   ]
 
+  const routesManifestPluginInstance = !isServer
+    ? new RoutesManifestPlugin()
+    : null
+
   const dir = paths.appDist
   const outputDir = isServer ? 'server' : ''
   const outputPath = path.join(dir, outputDir)
@@ -269,6 +273,8 @@ const getBaseWebpackConfig = async (
     optimization: createOptimizationConfig({
       dev,
       isServer,
+      getNumberOfRoutes: () =>
+        routesManifestPluginInstance?.getNumberOfRoutes() ?? 0,
     }),
     resolve: {
       modules: ['node_modules'].concat(
@@ -434,7 +440,7 @@ const getBaseWebpackConfig = async (
       // Even though require.cache is server only we have to clear assets from both compilations
       // This is because the client compilation generates the asset manifest that's used on the server side
       dev && new RequireCacheHotReloaderPlugin(),
-      !isServer && new RoutesManifestPlugin({ dev, isServer }),
+      routesManifestPluginInstance,
       !isServer && hasServiceWorker && createWorkboxPlugin({ dev, isServer }),
       // Fix dynamic imports on server bundle
       isServer && new SSRImportPlugin(),
