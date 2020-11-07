@@ -28,15 +28,15 @@ import { createOptimizationConfig } from './webpack/optimization'
 import RequireCacheHotReloaderPlugin from './webpack/plugins/RequireCacheHotReloaderPlugin'
 import SSRImportPlugin from './webpack/plugins/SSRImportPlugin'
 import RoutesManifestPlugin from './webpack/plugins/routes/RoutesManifestPlugin'
-import { getStyleLoaders } from './webpack/styles'
+import {
+  cssModuleRegex,
+  cssRegex,
+  getStyleLoaders,
+  sassModuleRegex,
+  sassRegex,
+} from './webpack/styles'
 import { Options } from './webpack/types'
 import { createWorkboxPlugin } from './webpack/workbox'
-
-// style files regexes
-const cssRegex = /\.global\.css$/
-const cssModuleRegex = /\.css$/
-const sassRegex = /\.global\.(scss|sass)$/
-const sassModuleRegex = /\.(scss|sass)$/
 
 const getBaseWebpackConfig = async (
   options?: Options
@@ -266,7 +266,10 @@ const getBaseWebpackConfig = async (
       libraryTarget: isServer ? 'commonjs2' : 'assign',
     },
     performance: { hints: false },
-    optimization: createOptimizationConfig({ dev, isServer }),
+    optimization: createOptimizationConfig({
+      dev,
+      isServer,
+    }),
     resolve: {
       modules: ['node_modules'].concat(
         process.env.NODE_PATH!.split(path.delimiter).filter(Boolean)
@@ -431,7 +434,7 @@ const getBaseWebpackConfig = async (
       // Even though require.cache is server only we have to clear assets from both compilations
       // This is because the client compilation generates the asset manifest that's used on the server side
       dev && new RequireCacheHotReloaderPlugin(),
-      !isServer && new RoutesManifestPlugin(),
+      !isServer && new RoutesManifestPlugin({ dev, isServer }),
       !isServer && hasServiceWorker && createWorkboxPlugin({ dev, isServer }),
       // Fix dynamic imports on server bundle
       isServer && new SSRImportPlugin(),

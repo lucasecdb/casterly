@@ -1,6 +1,13 @@
 import path from 'path'
 
-import { Compilation, EntryPlugin, NormalModule, node, sources } from 'webpack'
+import {
+  Compilation,
+  EntryPlugin,
+  NormalModule,
+  node,
+  optimize,
+  sources,
+} from 'webpack'
 import type { Compiler, javascript as javascriptTypes } from 'webpack'
 // @ts-ignore: no declaration file
 import ImportDependency from 'webpack/lib/dependencies/ImportDependency'
@@ -13,6 +20,8 @@ import {
   STATIC_RUNTIME_WEBPACK,
 } from '../../../constants'
 import * as paths from '../../../paths'
+import { createOptimizationConfig } from '../../optimization'
+import { Options } from '../../types'
 import RouteAssetsChildPlugin from './RouteAssetsChildPlugin'
 import RouteModuleIdCollectorImportDependencyTemplate from './RouteModuleIdCollectorImportDependencyTemplate'
 import {
@@ -22,6 +31,7 @@ import {
 } from './utils'
 
 const { RawSource } = sources
+const { SplitChunksPlugin } = optimize
 
 const JS_FILE_REGEX = /(?<!\.hot-update)\.js$/
 
@@ -30,9 +40,11 @@ const PLUGIN_NAME = 'RoutesManifestPlugin'
 export default class RoutesManifestPlugin {
   private routesImports: string[]
   private routeModuleIdMap: Record<string, string | number> = {}
+  private options: { dev: boolean; isServer: boolean }
 
-  constructor() {
+  constructor({ dev = false, isServer = false }: Options) {
     this.routesImports = []
+    this.options = { dev, isServer }
   }
 
   apply(compiler: Compiler) {
@@ -85,6 +97,19 @@ export default class RoutesManifestPlugin {
     compiler.hooks.thisCompilation.tap(
       PLUGIN_NAME,
       (compilation, { normalModuleFactory }) => {
+        compilation.hooks.afterChunks.tap(PLUGIN_NAME, () => {
+          const { splitChunks } = createOptimizationConfig({
+            ...this.options,
+            numberOfRoutes: this.routesImports.length,
+          })
+
+          if (!splitChunks) {
+            return
+          }
+
+          new SplitChunksPlugin(splitChunks).apply(compiler)
+        })
+
         compilation.hooks.processAssets.tap(
           {
             name: PLUGIN_NAME,
