@@ -8,9 +8,9 @@
     "moduleResolution": "node",
     "strict": true,
     "declaration": true,
-    "outDir": "dist",
+    "outDir": "lib",
     "allowJs": true,
     "skipLibCheck": true
   },
-  "exclude": ["dist/**/*", "./*.js", "./*.d.ts"]
+  "exclude": ["lib", "./*.js", "./*.d.ts"]
 }

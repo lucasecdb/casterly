@@ -179,7 +179,7 @@ const getBaseWebpackConfig = async (
             return callback()
           }
 
-          if (res.match(/react-app-server[/\\]dist[/\\]/)) {
+          if (res.match(/react-app-server[/\\]lib[/\\]/)) {
             return callback()
           }
 
