@@ -236,8 +236,6 @@ export class AppServer {
   ) => {
     const serverContext = await this.getServerContextForRoute(req.url ?? '/')
 
-    res.setHeader('Content-Type', 'text/html')
-
     const request = new Request(req.url ?? '/', {
       method: req.method,
       headers: Object.entries(res.getHeaders()).map(([key, value]) => [

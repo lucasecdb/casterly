@@ -37,6 +37,9 @@ export default function (request, statusCode, headers, context) {
 
   return new Response(content, {
     status: statusCode,
-    headers,
+    headers: {
+      ...Object.fromEntries(headers),
+      'content-type': 'text/html',
+    },
   })
 }
