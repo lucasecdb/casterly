@@ -94,7 +94,7 @@ const getBaseWebpackConfig = async (
     ? new RoutesManifestPlugin()
     : null
 
-  const dir = paths.appDist
+  const dir = paths.appBuildFolder
   const outputDir = isServer ? 'server' : ''
   const outputPath = path.join(dir, outputDir)
   const webpackMode = dev ? 'development' : 'production'
@@ -225,7 +225,7 @@ const getBaseWebpackConfig = async (
       require.resolve('@babel/plugin-syntax-dynamic-import'),
       require.resolve('babel-plugin-macros'),
     ],
-    cacheDirectory: path.join(paths.appDist, 'cache', 'webpack'),
+    cacheDirectory: path.join(paths.appBuildFolder, 'cache', 'webpack'),
     // Don't waste time on Gzipping the cache
     cacheCompression: false,
   }
@@ -233,6 +233,12 @@ const getBaseWebpackConfig = async (
   const entrypoints = {
     [STATIC_ENTRYPOINTS_ROUTES]: paths.appRoutesJs,
   }
+
+  const appSrcFiles = [
+    paths.appSrc,
+    paths.appServerEntry,
+    paths.appBrowserEntry,
+  ]
 
   return {
     mode: webpackMode,
@@ -245,10 +251,10 @@ const getBaseWebpackConfig = async (
       ...entrypoints,
       ...(!isServer
         ? {
-            [STATIC_RUNTIME_MAIN]: paths.serverBrowserEntry,
+            [STATIC_RUNTIME_MAIN]: paths.appBrowserEntry,
             ...(dev ? { [STATIC_RUNTIME_HOT]: paths.serverClientHot } : null),
           }
-        : { [STATIC_RUNTIME_MAIN]: paths.serverServerEntry }),
+        : { [STATIC_RUNTIME_MAIN]: paths.appServerEntry }),
     }),
     watchOptions: {
       ignored: ['**/.git/**', '**/node_modules/**', '**/.dist/**'],
@@ -317,13 +323,13 @@ const getBaseWebpackConfig = async (
             },
             {
               test: /\.(js|mjs|ts)$/,
-              include: paths.appSrc,
+              include: appSrcFiles,
               loader: require.resolve('babel-loader'),
               options: baseBabelOptions,
             },
             {
               test: /\.(jsx|tsx)$/,
-              include: paths.appSrc,
+              include: appSrcFiles,
               loader: require.resolve('babel-loader'),
               options: {
                 ...baseBabelOptions,

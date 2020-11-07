@@ -42,7 +42,7 @@ export class AppServer {
 
     if (!dev) {
       this._routesManifest = readJSON(
-        path.join(paths.appDist, ROUTES_MANIFEST_FILE)
+        path.join(paths.appBuildFolder, ROUTES_MANIFEST_FILE)
       )
     }
 
@@ -55,7 +55,7 @@ export class AppServer {
 
   protected async getBuildId(): Promise<string | undefined> {
     const fileContent = await fs.promises.readFile(
-      path.join(paths.appDist, BUILD_ID_FILE)
+      path.join(paths.appBuildFolder, BUILD_ID_FILE)
     )
 
     return fileContent.toString()
@@ -74,7 +74,7 @@ export class AppServer {
             await serveStatic(
               req,
               res,
-              path.join(paths.appDistPublic, url.pathname!),
+              path.join(paths.appPublicBuildFolder, url.pathname!),
               !this.dev
             )
             shouldContinue = false
@@ -94,7 +94,7 @@ export class AppServer {
             await serveStatic(
               req,
               res,
-              path.join(paths.appDist, url.pathname!),
+              path.join(paths.appBuildFolder, url.pathname!),
               !this.dev
             )
           } catch {
@@ -184,7 +184,7 @@ export class AppServer {
     const routesManifest = this.getRoutesManifestFile()
 
     const appRoutesPromises: RoutePromiseComponent[] = await import(
-      path.join(paths.appDistServer, STATIC_ENTRYPOINTS_ROUTES)
+      path.join(paths.appServerBuildFolder, STATIC_ENTRYPOINTS_ROUTES)
     ).then(interopDefault)
 
     const {
@@ -215,6 +215,21 @@ export class AppServer {
     return serverContext
   }
 
+  private getAppRequestHandler = async (): Promise<
+    (
+      req: Request,
+      status: number,
+      headers: Headers,
+      context: unknown
+    ) => Response
+  > => {
+    const handleRequest = await import(
+      path.join(paths.appServerBuildFolder, STATIC_RUNTIME_MAIN)
+    ).then(interopDefault)
+
+    return handleRequest
+  }
+
   private renderDocument = async (
     req: IncomingMessage,
     res: ServerResponse
@@ -231,14 +246,7 @@ export class AppServer {
       ]) as Array<[string, string]>,
     })
 
-    const handleRequest: (
-      req: Request,
-      status: number,
-      headers: Headers,
-      context: unknown
-    ) => Response = await import(
-      path.join(paths.appDistServer, STATIC_RUNTIME_MAIN)
-    ).then(interopDefault)
+    const handleRequest = await this.getAppRequestHandler()
 
     const response = handleRequest(request, 200, request.headers, serverContext)
 

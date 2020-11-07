@@ -78,7 +78,7 @@ export class DevServer extends AppServer {
   }
 
   protected getRoutesManifestFile = () => {
-    return require(path.join(paths.appDist, ROUTES_MANIFEST_FILE))
+    return require(path.join(paths.appBuildFolder, ROUTES_MANIFEST_FILE))
   }
 
   protected getBuildId() {
