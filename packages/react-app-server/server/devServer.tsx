@@ -10,7 +10,7 @@ import createWebpackConfig from '../config/createWebpackConfig'
 import * as paths from '../config/paths'
 import { watchCompilers } from '../output/watcher'
 import fileExists from '../utils/fileExists'
-import { AppServer } from './appServer'
+import { DefaultServer } from './defaultServer'
 
 type NextFunction = (err?: any) => void
 export type NextHandleFunction = (
@@ -21,7 +21,7 @@ export type NextHandleFunction = (
 
 type MultiWatching = ReturnType<MultiCompiler['watch']>
 
-export class DevServer extends AppServer {
+export class DevServer extends DefaultServer {
   private serverReady?: Promise<void>
   private setServerReady?: () => void
 
@@ -78,7 +78,7 @@ export class DevServer extends AppServer {
   }
 
   protected getRoutesManifestFile = () => {
-    return require(path.join(paths.appDist, ROUTES_MANIFEST_FILE))
+    return require(path.join(paths.appBuildFolder, ROUTES_MANIFEST_FILE))
   }
 
   protected getBuildId() {

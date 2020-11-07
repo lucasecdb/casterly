@@ -1,9 +1,11 @@
-import { Routes, Scripts, Styles } from '@app-server/components'
+import { Scripts, Styles } from '@app-server/components'
 import { RootServer } from '@app-server/components/server'
 import React from 'react'
-import { renderToString } from 'react-dom/server'
+import { renderToNodeStream } from 'react-dom/server'
 
-const App: React.FC = () => {
+import App from './src/App'
+
+const Document = () => {
   return (
     <html>
       <head>
@@ -16,7 +18,7 @@ const App: React.FC = () => {
       </head>
       <body>
         <div id="root">
-          <Routes />
+          <App />
         </div>
         <Scripts />
       </body>
@@ -24,20 +26,20 @@ const App: React.FC = () => {
   )
 }
 
-export default function (
-  request: Request,
-  statusCode: number,
-  headers: Headers,
-  context: unknown
-) {
-  const content = renderToString(
+export default function (request, statusCode, headers, context) {
+  const content = renderToNodeStream(
     <RootServer context={context} url={request.url}>
-      <App />
+      <Document />
     </RootServer>
   )
 
-  return new Response('<!doctype html>' + content, {
+  content.unshift('<!doctype html>')
+
+  return new Response(content, {
     status: statusCode,
-    headers,
+    headers: {
+      ...Object.fromEntries(headers),
+      'content-type': 'text/html',
+    },
   })
 }

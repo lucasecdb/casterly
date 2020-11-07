@@ -1,11 +1,8 @@
-import { Routes } from '@app-server/components'
 import { RootBrowser } from '@app-server/components/browser'
 import React from 'react'
 import ReactDOM from 'react-dom'
 
-const App: React.FC = () => {
-  return <Routes />
-}
+import App from './src/App'
 
 ReactDOM.hydrate(
   <RootBrowser>

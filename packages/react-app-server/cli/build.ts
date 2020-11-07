@@ -84,7 +84,10 @@ async function build(
   }
 
   if (writeStatsJson) {
-    await bfj.write(paths.appDist + '/bundle-stats.json', multiStats?.toJson())
+    await bfj.write(
+      paths.appBuildFolder + '/bundle-stats.json',
+      multiStats?.toJson()
+    )
   }
 
   return {
@@ -99,7 +102,7 @@ function copyPublicFolder() {
     return
   }
 
-  fs.copySync(paths.appPublic, paths.appDistPublic, {
+  fs.copySync(paths.appPublic, paths.appPublicBuildFolder, {
     dereference: true,
   })
 }
@@ -121,11 +124,11 @@ export default function startBuild() {
 
   // First, read the current file sizes in build directory.
   // This lets us display how much they changed later.
-  measureFileSizesBeforeBuild(paths.appDist)
+  measureFileSizesBeforeBuild(paths.appBuildFolder)
     .then((previousFileSizes) => {
       // Remove all content but keep the directory so that
       // if you're in it, you don't end up in Trash
-      fs.emptyDirSync(paths.appDist)
+      fs.emptyDirSync(paths.appBuildFolder)
       // Merge with the public folder
       copyPublicFolder()
       // Start the webpack build
@@ -152,7 +155,7 @@ export default function startBuild() {
 
         const buildId = nanoid()
 
-        fs.writeFileSync(join(paths.appDist, BUILD_ID_FILE), buildId)
+        fs.writeFileSync(join(paths.appBuildFolder, BUILD_ID_FILE), buildId)
 
         const [clientStats] = stats.stats
 
@@ -160,7 +163,7 @@ export default function startBuild() {
         printFileSizesAfterBuild(
           clientStats,
           previousFileSizes,
-          paths.appDist,
+          paths.appBuildFolder,
           WARN_AFTER_BUNDLE_GZIP_SIZE,
           WARN_AFTER_CHUNK_GZIP_SIZE
         )

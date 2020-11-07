@@ -1,10 +1,10 @@
 import { createServer } from 'http'
 
 import * as Log from '../output/log'
-import { AppServer } from '../server/appServer'
+import { DefaultServer } from '../server/defaultServer'
 
 const start = () => {
-  const app = new AppServer()
+  const app = new DefaultServer()
 
   const server = createServer(app.getRequestHandler())
 
