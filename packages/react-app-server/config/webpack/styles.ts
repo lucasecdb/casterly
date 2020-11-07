@@ -9,6 +9,12 @@ interface StyleOptions extends Options {
   loaders?: RuleSetUse[]
 }
 
+// style files regexes
+export const cssRegex = /\.global\.css$/
+export const cssModuleRegex = /\.css$/
+export const sassRegex = /\.global\.(scss|sass)$/
+export const sassModuleRegex = /\.(scss|sass)$/
+
 // common function to get style loaders
 export const getStyleLoaders = ({
   isServer = false,
@@ -26,6 +32,10 @@ export const getStyleLoaders = ({
         // Necessary for external CSS imports to work
         // https://github.com/facebook/create-react-app/issues/2677
         ident: 'postcss',
+        map: {
+          inline: false,
+          annotate: false,
+        },
         plugins: [
           require.resolve('postcss-flexbugs-fixes'),
           [
