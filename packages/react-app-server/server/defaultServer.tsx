@@ -33,7 +33,7 @@ export interface ServerOptions {
   dev?: boolean
 }
 
-export class AppServer {
+export class DefaultServer {
   private _routesManifest
   private dev
 
