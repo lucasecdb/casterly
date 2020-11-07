@@ -30,13 +30,14 @@ process.on('unhandledRejection', (err) => {
 // Create the production build and print the deployment instructions.
 async function build(
   previousFileSizes: { root: string; sizes: Record<string, number> },
-  writeStatsJson = false
+  writeStatsJson = false,
+  profile = false
 ) {
   console.log('Creating an optimized production build...')
 
   const compiler = webpack([
-    await getBaseWebpackConfig(),
-    await getBaseWebpackConfig({ isServer: true }),
+    await getBaseWebpackConfig({ profile }),
+    await getBaseWebpackConfig({ isServer: true, profile }),
   ])
 
   const run = util.promisify(compiler.run)
@@ -116,6 +117,7 @@ export default function startBuild() {
   // Process CLI arguments
   const argv = process.argv.slice(3)
   const writeStatsJson = argv.indexOf('--stats') !== -1
+  const profile = argv.indexOf('--profile') !== -1
 
   // First, read the current file sizes in build directory.
   // This lets us display how much they changed later.
@@ -127,7 +129,7 @@ export default function startBuild() {
       // Merge with the public folder
       copyPublicFolder()
       // Start the webpack build
-      return build(previousFileSizes, writeStatsJson)
+      return build(previousFileSizes, writeStatsJson, profile)
     })
     .then(
       ({ stats, previousFileSizes, warnings }) => {
