@@ -6,15 +6,15 @@
     "rs": "./bin/rs-bin.js"
   },
   "files": [
-    "dist",
+    "lib",
     "bin",
     "*.js",
     "*.d.ts"
   ],
   "scripts": {
-    "start": "cross-env NODE_ENV=development node dist/server/start-dev.js",
-    "start-prod": "cross-env NODE_ENV=production node dist/server/start.js",
-    "clean": "rimraf dist",
+    "start": "cross-env NODE_ENV=development node lib/server/start-dev.js",
+    "start-prod": "cross-env NODE_ENV=production node lib/server/start.js",
+    "clean": "rimraf lib",
     "ts": "tsc",
     "build": "run-s clean ts",
     "dev": "tsc --watch"
