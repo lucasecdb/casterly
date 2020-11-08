@@ -47,7 +47,7 @@ const getBaseWebpackConfig = async (
   const env = getClientEnvironment({ isServer })
 
   const sassLoaderConfig = {
-    loader: 'sass-loader',
+    loader: require.resolve('sass-loader'),
     options: {
       sassOptions: {
         includePaths: paths.appNodePath,
