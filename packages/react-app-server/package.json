@@ -17,7 +17,8 @@
     "clean": "rimraf lib",
     "ts": "tsc",
     "build": "run-s clean ts",
-    "dev": "tsc --watch"
+    "dev": "tsc --watch",
+    "prepublishOnly": "yarn build"
   },
   "dependencies": {
     "@babel/core": "^7.11.4",
