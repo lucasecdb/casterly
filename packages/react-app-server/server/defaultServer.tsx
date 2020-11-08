@@ -221,7 +221,7 @@ export class DefaultServer {
       status: number,
       headers: Headers,
       context: unknown
-    ) => Response
+    ) => Response | Promise<Response>
   > => {
     const handleRequest = await import(
       path.join(paths.appServerBuildFolder, STATIC_RUNTIME_MAIN)
@@ -246,7 +246,11 @@ export class DefaultServer {
 
     const handleRequest = await this.getAppRequestHandler()
 
-    const response = handleRequest(request, 200, request.headers, serverContext)
+    let response = handleRequest(request, 200, request.headers, serverContext)
+
+    if ('then' in response) {
+      response = await response
+    }
 
     res.statusCode = response.status
 
