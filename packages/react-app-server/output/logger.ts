@@ -41,7 +41,7 @@ function hasStoreChanged(nextStore: LoggerStoreStatus) {
 const transformWebpackError = (error: WebpackError) => {
   const { message, moduleName, loc } = error
 
-  return chalk`{bold ${moduleName}}${
+  return `${moduleName ? chalk`{bold ${moduleName}}` : ''}${
     loc ? chalk`:{dim ${loc}}` : ''
   }\n\n  ${message}`
 }
