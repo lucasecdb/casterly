@@ -1,6 +1,7 @@
 import * as fs from 'fs'
 import { IncomingMessage, ServerResponse } from 'http'
 import * as path from 'path'
+import { Writable } from 'stream'
 import { parse as parseUrl } from 'url'
 
 import { RootContext } from '@app-server/components'
@@ -23,6 +24,12 @@ import {
   isPreconditionFailure,
   requestContainsPrecondition,
 } from './utils'
+
+declare global {
+  const Body: {
+    writeToStream(stream: Writable, body: Body): void
+  }
+}
 
 const readJSON = (filePath: string) => {
   const file = fs.readFileSync(filePath)
@@ -243,6 +250,8 @@ export class DefaultServer {
         Array.isArray(value) ? value : value?.toString(),
       ]) as Array<[string, string]>,
     })
+
+    global.fetch = require('make-fetch-happen')
 
     const handleRequest = await this.getAppRequestHandler()
 
