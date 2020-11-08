@@ -35,7 +35,7 @@ export default class RouteImportDependencyTemplate extends ImportDependency.Temp
       return super.apply(dependency, source, templateContext)
     }
 
-    const module = moduleGraph.getModule(dependency)
+    const module = moduleGraph.getResolvedModule(dependency)
     const userRequest = (module as NormalModule).userRequest
     const moduleId =
       '.' +

@@ -12,7 +12,7 @@ export default class RouteModuleIdCollectorImportDependencyTemplate extends Impo
   private compilerContext
 
   constructor(
-    routeImportModuleIdMap: Record<string, string | number>,
+    routeImportModuleIdMap: Map<string, string | number>,
     compilerContext: string
   ) {
     super()
@@ -36,13 +36,13 @@ export default class RouteModuleIdCollectorImportDependencyTemplate extends Impo
       return
     }
 
-    const module = moduleGraph.getModule(dependency)
+    const module = moduleGraph.getResolvedModule(dependency)
     const userRequest = (module as NormalModule).userRequest
     const modulePath =
       '.' + path.sep + path.relative(this.compilerContext, userRequest)
 
-    const moduleId = chunkGraph.getModuleId(module)
+    const moduleId = chunkGraph.getModuleId(moduleGraph.getModule(dependency))
 
-    this.routeImportModuleIdMap[modulePath] = moduleId
+    this.routeImportModuleIdMap.set(modulePath, moduleId)
   }
 }

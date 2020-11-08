@@ -1,7 +1,5 @@
-import path from 'path'
-
 import { Compilation, EntryPlugin, NormalModule, node, sources } from 'webpack'
-import type { Compiler, javascript as javascriptTypes } from 'webpack'
+import type { Compiler, javascript } from 'webpack'
 // @ts-ignore: no declaration file
 import ImportDependency from 'webpack/lib/dependencies/ImportDependency'
 
@@ -28,15 +26,11 @@ const JS_FILE_REGEX = /(?<!\.hot-update)\.js$/
 const PLUGIN_NAME = 'RoutesManifestPlugin'
 
 export default class RoutesManifestPlugin {
-  private routesImports: string[]
-  private routeModuleIdMap: Record<string, string | number> = {}
-
-  constructor() {
-    this.routesImports = []
-  }
+  private routeModuleIdMap: Map<string, string | number> = new Map()
+  private numberOfRoutes = 0
 
   public getNumberOfRoutes() {
-    return this.routesImports.length
+    return this.numberOfRoutes
   }
 
   public apply(compiler: Compiler) {
@@ -110,38 +104,41 @@ export default class RoutesManifestPlugin {
               STATIC_RUNTIME_HOT
             )
 
+            const compilationModules = Array.from(compilation.modules.values())
+
             // Create a map of the module name to its assets, to
             // be later used with the routes-assets.js file to
             // gather the chunks for a particular route.
             const routeComponentsAssets = Object.fromEntries(
-              Array.from(compilation.chunks.values())
-                .flatMap((chunk) => {
-                  const referencedChunksFiles = Array.from(
-                    chunk.getAllReferencedChunks()
+              Array.from(this.routeModuleIdMap.values())
+                .map((moduleId) => {
+                  const routeModule = compilationModules.find(
+                    (module) =>
+                      compilation.chunkGraph.getModuleId(module) === moduleId
                   )
-                    .flatMap((referencedChunk) =>
-                      Array.from(referencedChunk.files.values())
-                    )
-                    .filter((file) => file.indexOf('hot-update') === -1)
-                    .map((filePath) =>
-                      !filePath.startsWith('/') ? '/' + filePath : filePath
-                    )
 
-                  return compilation.chunkGraph
-                    .getChunkModules(chunk)
-                    .filter((chunkModule) => {
-                      const moduleName = (chunkModule as NormalModule)
-                        .userRequest
+                  if (!routeModule) {
+                    return null
+                  }
 
-                      return this.routesImports.includes(moduleName)
-                    })
-                    .map((chunkModule) => {
-                      const moduleId = compilation.chunkGraph.getModuleId(
-                        chunkModule
+                  const routeFiles = compilation.chunkGraph
+                    .getModuleChunks(routeModule)
+                    .flatMap((chunk) => {
+                      const referencedChunksFiles = Array.from(
+                        chunk.getAllReferencedChunks()
                       )
+                        .flatMap((referencedChunk) =>
+                          Array.from(referencedChunk.files.values())
+                        )
+                        .filter((file) => file.indexOf('hot-update') === -1)
+                        .map((filePath) =>
+                          !filePath.startsWith('/') ? '/' + filePath : filePath
+                        )
 
-                      return [moduleId, referencedChunksFiles] as const
+                      return referencedChunksFiles
                     })
+
+                  return [moduleId, routeFiles]
                 })
                 .filter(<T>(value: T | null): value is T => value != null)
             )
@@ -180,18 +177,14 @@ export default class RoutesManifestPlugin {
           const resource = normalModule.resource
 
           if (resource === paths.appRoutesJs) {
-            this.routesImports = []
-            Object.keys(this.routeModuleIdMap).forEach((key) => {
-              delete this.routeModuleIdMap[key]
-            })
+            this.routeModuleIdMap.clear()
+            this.numberOfRoutes = 0
           }
         })
 
         // Collect the path for the dynamic import statements inside
         // the routes file.
-        const importParserHandler = (
-          parser: javascriptTypes.JavascriptParser
-        ) => {
+        const importParserHandler = (parser: javascript.JavascriptParser) => {
           parser.hooks.importCall.tap(PLUGIN_NAME, (expr) => {
             const parserModule = parser.state.current as NormalModule
             const module = compilation.getModule(parserModule)
@@ -206,24 +199,7 @@ export default class RoutesManifestPlugin {
               return
             }
 
-            const param = parser.evaluateExpression(expr.source)
-
-            if (
-              !param.isString() ||
-              param.expression.type !== 'Literal' ||
-              typeof param.expression.value !== 'string'
-            ) {
-              throw new Error(
-                'Imports inside the routes file must be a plain string'
-              )
-            }
-
-            this.routesImports.push(
-              paths.resolveModule(
-                (relativePath) => path.resolve(module.context, relativePath),
-                param.expression.value
-              )
-            )
+            this.numberOfRoutes++
           })
         }
 
