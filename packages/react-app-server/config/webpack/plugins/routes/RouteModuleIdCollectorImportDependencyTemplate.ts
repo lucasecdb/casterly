@@ -12,7 +12,7 @@ export default class RouteModuleIdCollectorImportDependencyTemplate extends Impo
   private compilerContext
 
   constructor(
-    routeImportModuleIdMap: Record<string, string | number>,
+    routeImportModuleIdMap: Map<string, string | number>,
     compilerContext: string
   ) {
     super()
@@ -43,6 +43,6 @@ export default class RouteModuleIdCollectorImportDependencyTemplate extends Impo
 
     const moduleId = chunkGraph.getModuleId(moduleGraph.getModule(dependency))
 
-    this.routeImportModuleIdMap[modulePath] = moduleId
+    this.routeImportModuleIdMap.set(modulePath, moduleId)
   }
 }
