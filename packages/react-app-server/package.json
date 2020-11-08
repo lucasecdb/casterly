@@ -99,7 +99,7 @@
     "rimraf": "^3.0.0"
   },
   "peerDependencies": {
-    "@app-server/components": "^0.1.6",
+    "@app-server/components": "^0.2.0",
     "react": "^16.9.0 || ^17.0.0",
     "react-dom": "^16.9.0 || ^17.0.0",
     "react-router": "^6.0.0-beta.0",
