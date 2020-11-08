@@ -1,6 +1,6 @@
 {
   "name": "@app-server/components",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "author": "Lucas Cordeiro <ecdb.lucas@gmail.com>",
   "homepage": "https://github.com/lucasecdb/react-app-server#readme",
   "license": "MIT",
