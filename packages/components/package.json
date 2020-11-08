@@ -26,7 +26,8 @@
     "clean": "rimraf lib",
     "ts": "tsc",
     "dev": "tsc --watch",
-    "build": "run-s clean ts"
+    "build": "run-s clean ts",
+    "prepublishOnly": "yarn build"
   },
   "bugs": {
     "url": "https://github.com/lucasecdb/react-app-server/issues"
