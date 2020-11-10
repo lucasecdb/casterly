@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
-    "lib": ["ES6", "DOM"],
-    "jsx": "react",
+    "lib": ["ESNext", "DOM"],
     "target": "es2017",
     "module": "commonjs",
     "esModuleInterop": true,
@@ -9,7 +8,6 @@
     "strict": true,
     "declaration": true,
     "outDir": "lib",
-    "allowJs": true,
     "skipLibCheck": true
   },
   "exclude": ["lib", "./*.js", "./*.d.ts"]

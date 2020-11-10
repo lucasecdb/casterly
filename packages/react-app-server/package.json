@@ -11,14 +11,24 @@
     "*.js",
     "*.d.ts"
   ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lucasecdb/react-app-server.git",
+    "directory": "packages/react-app-server"
+  },
   "scripts": {
-    "start": "cross-env NODE_ENV=development node lib/server/start-dev.js",
-    "start-prod": "cross-env NODE_ENV=production node lib/server/start.js",
     "clean": "rimraf lib",
     "ts": "tsc",
     "build": "run-s clean ts",
-    "dev": "tsc --watch",
+    "dev": "tsc --watch --preserveWatchOutput",
     "prepublishOnly": "yarn build"
+  },
+  "bugs": {
+    "url": "https://github.com/lucasecdb/react-app-server/issues"
   },
   "dependencies": {
     "@babel/core": "^7.11.4",
@@ -46,6 +56,7 @@
     "file-loader": "^6.2.0",
     "filesize": "^6.1.0",
     "fork-ts-checker-webpack-plugin": "^5.2.0",
+    "etag": "^1.8.1",
     "fresh": "^0.5.2",
     "fs-extra": "^9.0.1",
     "gzip-size": "^5.1.1",
@@ -55,6 +66,7 @@
     "mini-css-extract-plugin": "^1.3.0",
     "nanoid": "^3.1.16",
     "node-sass": "^5.0.0",
+    "mime": "^2.4.6",
     "path-to-regexp": "^6.1.0",
     "postcss": "^8.1.6",
     "postcss-flexbugs-fixes": "^5.0.1",
@@ -66,7 +78,6 @@
     "resolve": "^1.18.1",
     "sass-loader": "^10.0.5",
     "semver": "^7.3.2",
-    "send": "^0.17.1",
     "serialize-javascript": "^5.0.0",
     "strip-ansi": "^6.0.0",
     "terser-webpack-plugin": "^5.0.3",
@@ -79,15 +90,16 @@
   "devDependencies": {
     "@app-server/components": "^0.2.2",
     "@types/css-minimizer-webpack-plugin": "^1.1.1",
+    "@types/etag": "^1.8.0",
     "@types/fresh": "^0.5.0",
     "@types/fs-extra": "^9.0.3",
+    "@types/mime": "^2.0.3",
     "@types/minipass": "^2.2.0",
     "@types/node": "^14.14.6",
     "@types/react": "^16.9.56",
     "@types/react-dom": "^16.9.9",
     "@types/recursive-readdir": "^2.2.0",
     "@types/semver": "^7.3.4",
-    "@types/send": "^0.14.5",
     "@types/serialize-javascript": "^4.0.0",
     "@types/workbox-webpack-plugin": "^5.1.4",
     "cross-env": "^7.0.2",
@@ -104,9 +116,5 @@
     "react-dom": "^16.9.0 || ^17.0.0",
     "react-router": "^6.0.0-beta.0",
     "react-router-dom": "^6.0.0-beta.0"
-  },
-  "publishConfig": {
-    "access": "public",
-    "registry": "https://registry.npmjs.org/"
   }
 }

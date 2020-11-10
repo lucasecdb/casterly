@@ -10,7 +10,7 @@ import createWebpackConfig from '../config/createWebpackConfig'
 import * as paths from '../config/paths'
 import { watchCompilers } from '../output/watcher'
 import fileExists from '../utils/fileExists'
-import { DefaultServer } from './defaultServer'
+import { _private_DefaultServer as DefaultServer } from './defaultServer'
 
 type NextFunction = (err?: any) => void
 export type NextHandleFunction = (
@@ -85,11 +85,12 @@ export class DevServer extends DefaultServer {
     return Promise.resolve(undefined)
   }
 
-  protected async handleRequest(req: IncomingMessage, res: ServerResponse) {
+  protected async handleRequest(req: Request) {
     await this.serverReady
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     for (const middleware of this.middlewares) {
-      // eslint-disable-next-line no-await-in-loop
+      /*
       await new Promise<void>((resolve, reject) => {
         middleware(req, res, (err) => {
           if (err) {
@@ -99,8 +100,15 @@ export class DevServer extends DefaultServer {
           resolve()
         })
       })
+      */
     }
 
-    return super.handleRequest(req, res)
+    return super.handleRequest(req)
   }
+}
+
+export const createRequestHandler = () => {
+  const serverInstance = new DevServer()
+
+  return serverInstance.getRequestHandler()
 }

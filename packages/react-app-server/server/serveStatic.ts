@@ -1,33 +1,75 @@
-import { IncomingMessage, ServerResponse } from 'http'
+import fs from 'fs'
 
-import send from 'send'
+import etag from 'etag'
+import fresh from 'fresh'
+import mime from 'mime'
 
 import { MAX_AGE_LONG } from '../utils/maxAge'
+import {
+  isPreconditionFailure,
+  requestContainsPrecondition,
+  requestHeadersToNodeHeaders,
+} from './utils'
 
 export const serveStatic = (
-  req: IncomingMessage,
-  res: ServerResponse,
+  request: Request,
   path: string,
   enableCaching: boolean
 ) => {
-  return new Promise((resolve, reject) => {
-    send(req, path, {
-      etag: enableCaching,
-      cacheControl: enableCaching,
-      lastModified: false,
-      // MAX_AGE_LONG is in seconds, so we
-      // need to convert it to milliseconds
-      // first
-      maxAge: MAX_AGE_LONG * 1000,
-    })
-      .on('directory', () => {
-        // We don't allow directories to be read.
-        const err: any = new Error('No directory access')
-        err.code = 'ENOENT'
-        reject(err)
+  return new Promise<Response>((resolve, reject) => {
+    fs.stat(path, (err, stats) => {
+      if (err) {
+        return reject(err)
+      }
+
+      if (stats.isDirectory()) {
+        const error = new Error('Directory not allowed')
+        ;(error as any).code = 'ENOENT'
+
+        return reject(error)
+      }
+
+      const readStream = fs.createReadStream(path)
+
+      const fileTag = etag(stats)
+      const fileType = mime.getType(path)
+
+      const headers = new Headers({
+        etag: enableCaching ? fileTag : '',
+        'cache-control': enableCaching ? `public, max-age=${MAX_AGE_LONG}` : '',
+        'content-type': fileType ?? '',
       })
-      .on('error', reject)
-      .pipe(res)
-      .on('finish', resolve)
+
+      if (requestContainsPrecondition(request)) {
+        if (
+          isPreconditionFailure(request, new Headers({ etag: fileTag || '' }))
+        ) {
+          return resolve(
+            new Response(null, {
+              status: 412,
+              headers,
+            })
+          )
+        }
+
+        if (
+          fresh(requestHeadersToNodeHeaders(request.headers), { etag: fileTag })
+        ) {
+          return resolve(
+            new Response(null, {
+              status: 304,
+              headers,
+            })
+          )
+        }
+      }
+
+      resolve(
+        new Response(request.method === 'HEAD' ? null : (readStream as any), {
+          status: 200,
+          headers,
+        })
+      )
+    })
   })
 }

@@ -28,6 +28,6 @@
   },
   "scripts": {
     "lint": "eslint --ext js,jsx,ts,tsx .",
-    "dev": "yarn --cwd packages/react-app-server dev"
+    "dev": "yarn lerna run dev --parallel"
   }
 }

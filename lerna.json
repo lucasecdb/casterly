@@ -1,6 +1,14 @@
 {
+  "packages": ["packages/*"],
   "npmClient": "yarn",
   "useWorkspaces": true,
-  "packages": ["packages/*"],
-  "version": "0.2.2"
+  "version": "0.2.2",
+  "registry": "https://registry.npmjs.org/",
+  "ignoreChanges": [
+    "CHANGELOG.md",
+    "**/__fixtures__/**",
+    "**/*.snap",
+    "**/*.test.*",
+    "**/*.md"
+  ]
 }
