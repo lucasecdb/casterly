@@ -1,0 +1,5 @@
+{
+  "parserOptions": {
+    "project": "./packages/cli/tsconfig.json"
+  }
+}

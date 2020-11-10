@@ -2,18 +2,11 @@ import * as fs from 'fs'
 import * as path from 'path'
 import { parse as parseUrl } from 'url'
 
+import { RoutesManifest, constants, paths } from '@app-server/cli'
 import { RootContext } from '@app-server/components'
 import fresh from 'fresh'
 import { RouteMatch } from 'react-router'
 
-import {
-  BUILD_ID_FILE,
-  ROUTES_MANIFEST_FILE,
-  STATIC_ENTRYPOINTS_ROUTES,
-  STATIC_RUNTIME_MAIN,
-} from '../config/constants'
-import * as paths from '../config/paths'
-import { RoutesManifest } from '../config/webpack/plugins/routes/utils'
 import { MAX_AGE_LONG } from '../utils/maxAge'
 import { RoutePromiseComponent, getMatchedRoutes } from '../utils/routes'
 import matchRoute from './matchRoute'
@@ -25,6 +18,13 @@ import {
   requestHeadersToNodeHeaders,
 } from './utils'
 
+const {
+  BUILD_ID_FILE,
+  ROUTES_MANIFEST_FILE,
+  STATIC_ENTRYPOINTS_ROUTES,
+  STATIC_RUNTIME_MAIN,
+} = constants
+
 const readJSON = (filePath: string) => {
   const file = fs.readFileSync(filePath)
   return JSON.parse(file.toString())
@@ -33,6 +33,10 @@ const readJSON = (filePath: string) => {
 export interface ServerOptions {
   dev?: boolean
 }
+
+global.Request = require('minipass-fetch').Request
+global.Response = require('minipass-fetch').Response
+global.Headers = require('minipass-fetch').Headers
 
 class DefaultServer {
   private _routesManifest

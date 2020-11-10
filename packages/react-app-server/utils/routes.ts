@@ -1,7 +1,7 @@
+import { RoutesManifest } from '@app-server/cli'
 import * as React from 'react'
 import { RouteObject, matchRoutes } from 'react-router'
 
-import { RoutesManifest } from '../config/webpack/plugins/routes/utils'
 import { interopDefault } from '../server/utils'
 
 export type RoutePromiseComponent = {

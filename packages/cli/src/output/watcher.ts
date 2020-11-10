@@ -62,8 +62,8 @@ buildStore.subscribe((state) => {
   if (status.loading === true) {
     nextState = {
       bootstrap: false,
-      port,
       loading: true,
+      port,
     }
   } else {
     const { errors, warnings, typeChecking } = status

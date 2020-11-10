@@ -11,7 +11,7 @@ class HMRClient {
   }
 
   init = () => {
-    const es = new EventSource('/__webpack-hmr')
+    const es = new EventSource('http://localhost:8081/__webpack-hmr')
 
     this.es = es
 
