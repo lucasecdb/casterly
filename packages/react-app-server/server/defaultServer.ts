@@ -1,11 +1,10 @@
 import * as fs from 'fs'
-import { IncomingMessage, ServerResponse } from 'http'
 import * as path from 'path'
-import { Writable } from 'stream'
 import { parse as parseUrl } from 'url'
 
 import { RootContext } from '@app-server/components'
 import fresh from 'fresh'
+import { RouteMatch } from 'react-router'
 
 import {
   BUILD_ID_FILE,
@@ -23,13 +22,8 @@ import {
   interopDefault,
   isPreconditionFailure,
   requestContainsPrecondition,
+  requestHeadersToNodeHeaders,
 } from './utils'
-
-declare global {
-  const Body: {
-    writeToStream(stream: Writable, body: Body): void
-  }
-}
 
 const readJSON = (filePath: string) => {
   const file = fs.readFileSync(filePath)
@@ -40,7 +34,7 @@ export interface ServerOptions {
   dev?: boolean
 }
 
-export class DefaultServer {
+class DefaultServer {
   private _routesManifest
   private dev
 
@@ -68,23 +62,17 @@ export class DefaultServer {
     return fileContent.toString()
   }
 
-  protected async handleRequest(req: IncomingMessage, res: ServerResponse) {
-    res.statusCode = 200
-
-    let shouldContinue = true
-
+  protected async handleRequest(req: Request) {
     const matches = [
       matchRoute<{ path: string }>({
         route: '/:path*',
-        fn: async (req, res, _, url) => {
+        fn: async (req, _, url) => {
           try {
-            await serveStatic(
+            return await serveStatic(
               req,
-              res,
               path.join(paths.appPublicBuildFolder, url.pathname!),
               !this.dev
             )
-            shouldContinue = false
           } catch (err) {
             if (err.code === 'ENOENT') {
               return
@@ -96,58 +84,60 @@ export class DefaultServer {
       }),
       matchRoute<{ path: string }>({
         route: '/static/:path*',
-        fn: async (req, res, _, url) => {
+        fn: async (req, _, url) => {
           try {
-            await serveStatic(
+            return await serveStatic(
               req,
-              res,
               path.join(paths.appBuildFolder, url.pathname!),
               !this.dev
             )
           } catch {
-            res.statusCode = 404
-          } finally {
-            shouldContinue = false
+            return new Response(null, { status: 404 })
           }
         },
       }),
       matchRoute({
         route: '/__route-manifest',
-        fn: async (req, res, __, url) => {
+        fn: async (req, __, url) => {
           const query = url.query as { path?: string }
 
           const etag = await this.getBuildId()
 
-          res.statusCode = 200
-          res.setHeader('content-type', 'application/json')
+          let status = 200
+
+          const headers = new Headers()
+
+          headers.set('content-type', 'application/json')
 
           if (!this.dev) {
-            res.setHeader('etag', etag!)
-            res.setHeader('cache-control', 'public, max-age=' + MAX_AGE_LONG)
+            headers.set('etag', etag!)
+            headers.set('cache-control', 'public, max-age=' + MAX_AGE_LONG)
           }
 
           if (requestContainsPrecondition(req)) {
-            if (isPreconditionFailure(req, { etag })) {
-              res.statusCode = 412
-              res.end()
-              shouldContinue = false
-              return
+            if (isPreconditionFailure(req, new Headers({ etag: etag || '' }))) {
+              return new Response(null, {
+                status: 412,
+                headers,
+              })
             }
 
-            if (fresh(req.headers, { etag })) {
-              res.statusCode = 304
-              res.end()
-              shouldContinue = false
-              return
+            if (fresh(requestHeadersToNodeHeaders(req.headers), { etag })) {
+              return new Response(null, {
+                status: 304,
+                headers,
+              })
             }
           }
 
-          if (!query.path) {
-            res.statusCode = 400
+          let body
 
-            res.write(
-              JSON.stringify({ message: "Query parameter 'path' is required" })
-            )
+          if (!query.path) {
+            status = 400
+
+            body = JSON.stringify({
+              message: "Query parameter 'path' is required",
+            })
           } else {
             const url = parseUrl(query.path)
 
@@ -156,32 +146,36 @@ export class DefaultServer {
               ...clientContext
             } = await this.getServerContextForRoute(url.pathname!)
 
-            res.write(JSON.stringify(clientContext))
+            body = JSON.stringify(clientContext)
           }
 
-          res.end()
-
-          shouldContinue = false
+          return new Response(body, {
+            status,
+            headers,
+          })
         },
       }),
     ]
 
     for (const routeMatch of matches) {
       // eslint-disable-next-line no-await-in-loop
-      await routeMatch(req, res)
+      const response = await routeMatch(req)
 
-      if (!shouldContinue) {
-        return
+      if (response) {
+        return response
       }
     }
 
     try {
-      await this.renderDocument(req, res)
+      return await this.renderDocument(req)
     } catch (err) {
-      console.error(err)
-      res.statusCode = 500
-      res.setHeader('x-robots-tag', 'noindex')
-      res.end('error')
+      console.log(err)
+      return new Response('error', {
+        status: 500,
+        headers: {
+          'x-robots-tag': 'noindex, nofollow',
+        },
+      })
     }
   }
 
@@ -207,14 +201,21 @@ export class DefaultServer {
     const serverContext: RootContext = {
       version: await this.getBuildId(),
       routes,
-      matchedRoutes: matchedRoutes.map((routeMatch) => ({
-        ...routeMatch,
-        route: {
-          ...routeMatch.route,
-          element: undefined,
-          component: undefined,
-        },
-      })),
+      matchedRoutes: matchedRoutes.map((routeMatch) => {
+        const {
+          element,
+          // @ts-ignore: the component prop is injected by the
+          // webpack plugin via routes-manifest.json
+          component,
+          children,
+          ...route
+        } = routeMatch.route
+
+        return {
+          ...routeMatch,
+          route,
+        }
+      }) as RouteMatch[],
       matchedRoutesAssets,
       mainAssets: routesManifest.main,
     }
@@ -237,19 +238,8 @@ export class DefaultServer {
     return handleRequest
   }
 
-  private renderDocument = async (
-    req: IncomingMessage,
-    res: ServerResponse
-  ) => {
-    const serverContext = await this.getServerContextForRoute(req.url ?? '/')
-
-    const request = new Request(req.url ?? '/', {
-      method: req.method,
-      headers: Object.entries(res.getHeaders()).map(([key, value]) => [
-        key,
-        Array.isArray(value) ? value : value?.toString(),
-      ]) as Array<[string, string]>,
-    })
+  private renderDocument = async (request: Request) => {
+    const serverContext = await this.getServerContextForRoute(request.url)
 
     global.fetch = require('make-fetch-happen')
 
@@ -261,12 +251,14 @@ export class DefaultServer {
       response = await response
     }
 
-    res.statusCode = response.status
-
-    response.headers.forEach((value, key) => {
-      res.setHeader(key, value)
-    })
-
-    Body.writeToStream(res, response)
+    return response
   }
+}
+
+export { DefaultServer as _private_DefaultServer }
+
+export const createRequestHandler = () => {
+  const serverInstance = new DefaultServer()
+
+  return serverInstance.getRequestHandler()
 }
