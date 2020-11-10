@@ -35,6 +35,10 @@ export const createOptimizationConfig = ({
 
   if (isServer) {
     return {
+      nodeEnv: false,
+      runtimeChunk: {
+        name: 'webpack-runtime',
+      },
       splitChunks: false,
       minimize: false,
       emitOnErrors: false,
@@ -58,6 +62,7 @@ export const createOptimizationConfig = ({
   }
 
   const config: Required<Configuration>['optimization'] = {
+    nodeEnv: false,
     runtimeChunk: {
       name: STATIC_RUNTIME_WEBPACK,
     },

@@ -53,9 +53,7 @@ logStore.subscribe((state) => {
 
   if (state.bootstrap === true) {
     Log.wait('starting the development server')
-    if (state.port !== null) {
-      Log.info(`waiting on http://localhost:${state.port}`)
-    }
+    Log.info(`build server ready on http://localhost:${state.port}`)
     return
   }
 
@@ -70,18 +68,12 @@ logStore.subscribe((state) => {
     return
   }
 
-  const appUrl = `http://localhost:${state.port}`
-
   if (state.warnings && state.warnings.length > 0) {
     Log.warn(state.warnings.map(transformWebpackError).join('\n\n'))
-    Log.info(`ready on ${appUrl}`)
+
+    Log.ready('compiled with warnings')
     return
   }
 
-  if (state.typeChecking) {
-    Log.info('bundled successfully, waiting for type checking')
-    return
-  }
-
-  Log.ready(`compiled successfully - ready on ${appUrl}`)
+  Log.ready('compiled successfully')
 })

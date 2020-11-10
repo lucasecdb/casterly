@@ -1,84 +1,21 @@
-import { IncomingMessage, ServerResponse } from 'http'
 import * as path from 'path'
 
-import webpack, { MultiCompiler } from 'webpack'
-// @ts-ignore: TODO: typings incompatible with webpack 5
-import whm from 'webpack-hot-middleware'
+import { constants, paths } from '@app-server/cli'
+// @ts-ignore
+import fetch from 'make-fetch-happen'
 
-import { ROUTES_MANIFEST_FILE } from '../config/constants'
-import createWebpackConfig from '../config/createWebpackConfig'
-import * as paths from '../config/paths'
-import { watchCompilers } from '../output/watcher'
-import fileExists from '../utils/fileExists'
 import { _private_DefaultServer as DefaultServer } from './defaultServer'
 
-type NextFunction = (err?: any) => void
-export type NextHandleFunction = (
-  req: IncomingMessage,
-  res: ServerResponse,
-  next: NextFunction
-) => void
-
-type MultiWatching = ReturnType<MultiCompiler['watch']>
-
-export class DevServer extends DefaultServer {
-  private serverReady?: Promise<void>
-  private setServerReady?: () => void
-
-  private middlewares: NextHandleFunction[] = []
-  private watcher: MultiWatching | null = null
-
+class DevServer extends DefaultServer {
   constructor() {
     super({ dev: true })
-
-    this.initDevServer()
-  }
-
-  initDevServer = async () => {
-    this.serverReady = new Promise<void>((resolve) => {
-      this.setServerReady = resolve
-    })
-
-    const clientConfig = await createWebpackConfig({
-      dev: true,
-      isServer: false,
-    })
-
-    const serverConfig = await createWebpackConfig({
-      dev: true,
-      isServer: true,
-    })
-
-    const multiCompiler = webpack([clientConfig, serverConfig])
-
-    const [clientCompiler, serverCompiler] = multiCompiler.compilers
-
-    const useTypescript = await fileExists(paths.appTsConfig)
-
-    watchCompilers(clientCompiler, serverCompiler, useTypescript)
-
-    this.watcher = await new Promise<MultiWatching>((resolve, reject) => {
-      const watcher = multiCompiler.watch(
-        [clientConfig.watchOptions!, serverConfig.watchOptions!],
-        (error) => {
-          if (error) {
-            return reject(error)
-          }
-
-          resolve(watcher)
-        }
-      )
-    })
-
-    this.middlewares = [
-      whm(clientCompiler, { path: '/__webpack-hmr', log: false }),
-    ]
-
-    this.setServerReady!()
   }
 
   protected getRoutesManifestFile = () => {
-    return require(path.join(paths.appBuildFolder, ROUTES_MANIFEST_FILE))
+    return require(path.join(
+      paths.appBuildFolder,
+      constants.ROUTES_MANIFEST_FILE
+    ))
   }
 
   protected getBuildId() {
@@ -86,21 +23,12 @@ export class DevServer extends DefaultServer {
   }
 
   protected async handleRequest(req: Request) {
-    await this.serverReady
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    for (const middleware of this.middlewares) {
-      /*
-      await new Promise<void>((resolve, reject) => {
-        middleware(req, res, (err) => {
-          if (err) {
-            return reject(err)
-          }
-
-          resolve()
-        })
+    try {
+      await fetch('http://localhost:8081/server-ready')
+    } catch {
+      return new Response("The build server isn't running.", {
+        status: 500,
       })
-      */
     }
 
     return super.handleRequest(req)

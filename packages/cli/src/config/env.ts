@@ -6,12 +6,11 @@ import * as paths from './paths'
 // Make sure that including paths.js after env.js will read .env variables.
 delete require.cache[require.resolve('./paths')]
 
-const NODE_ENV = process.env.NODE_ENV
-if (!NODE_ENV) {
-  throw new Error(
-    'The NODE_ENV environment variable is required but was not specified.'
-  )
+if (!process.env.NODE_ENV) {
+  process.env.NODE_ENV = 'development'
 }
+
+const NODE_ENV = process.env.NODE_ENV
 
 // https://github.com/bkeepers/dotenv#what-other-env-files-can-i-use
 const dotenvFiles = [

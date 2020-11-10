@@ -2,13 +2,13 @@
 import '../config/env'
 
 import { join } from 'path'
-import util from 'util'
+import * as util from 'util'
 
 import bfj from 'bfj'
-import chalk from 'chalk'
-import fs from 'fs-extra'
+import * as chalk from 'chalk'
+import * as fs from 'fs-extra'
 import { nanoid } from 'nanoid'
-import webpack from 'webpack'
+import { webpack } from 'webpack'
 
 import {
   measureFileSizesBeforeBuild,
