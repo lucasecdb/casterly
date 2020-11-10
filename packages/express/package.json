@@ -11,7 +11,9 @@
     "test": "__tests__"
   },
   "files": [
-    "lib"
+    "lib",
+    "*.js",
+    "*.d.ts"
   ],
   "publishConfig": {
     "registry": "https://registry.npmjs.org/",
