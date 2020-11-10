@@ -1,6 +1,6 @@
 {
   "name": "react-app-server",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "license": "MIT",
   "files": [
     "lib",
@@ -36,7 +36,7 @@
     "serialize-javascript": "^5.0.0"
   },
   "devDependencies": {
-    "@app-server/components": "^0.2.2",
+    "@app-server/components": "^0.3.0",
     "@types/etag": "^1.8.0",
     "@types/fresh": "^0.5.0",
     "@types/mime": "^2.0.3",

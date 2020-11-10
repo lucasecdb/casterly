@@ -1,6 +1,6 @@
 {
   "name": "@app-server/express",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "React App Server bindings for Express.js",
   "author": "Lucas Cordeiro <ecdb.lucas@gmail.com>",
   "homepage": "https://github.com/lucasecdb/react-app-server#readme",
@@ -47,6 +47,6 @@
     "rimraf": "^3.0.2"
   },
   "dependencies": {
-    "react-app-server": "^0.2.1"
+    "react-app-server": "^0.3.0"
   }
 }
