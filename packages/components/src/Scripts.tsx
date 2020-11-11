@@ -1,5 +1,4 @@
 import React from 'react'
-import serializeJavascript from 'serialize-javascript'
 
 import { useRootContext } from './RootContext'
 
@@ -16,13 +15,16 @@ export const Scripts: React.FC = () => {
       <script
         dangerouslySetInnerHTML={{
           __html:
-            'window.__serverContext = ' +
-            serializeJavascript({
-              version,
-              matchedRoutesAssets,
-              matchedRoutes,
-              mainAssets,
-            }),
+            'window.__serverContext = JSON.parse(' +
+            JSON.stringify(
+              JSON.stringify({
+                version,
+                matchedRoutesAssets,
+                matchedRoutes,
+                mainAssets,
+              })
+            ) +
+            ')',
         }}
       />
       {matchedRoutesAssets
