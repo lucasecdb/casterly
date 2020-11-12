@@ -293,11 +293,6 @@ const getBaseWebpackConfig = async (
         ...paths.moduleFileExtensions.map((ext) => `.${ext}`),
       ],
       alias: {
-        ...(!isServer
-          ? {
-              buffer: require.resolve('buffer'),
-            }
-          : null),
         ...(!isServer && !dev && profile
           ? {
               'react-dom$': 'react-dom/profiling',

@@ -32,8 +32,7 @@
     "history": "^5.0.0",
     "make-fetch-happen": "^8.0.10",
     "mime": "^2.4.6",
-    "path-to-regexp": "^6.1.0",
-    "serialize-javascript": "^5.0.0"
+    "path-to-regexp": "^6.1.0"
   },
   "devDependencies": {
     "@app-server/components": "^0.3.0",
@@ -44,7 +43,6 @@
     "@types/node": "^14.14.6",
     "@types/react": "^16.9.56",
     "@types/react-dom": "^16.9.9",
-    "@types/serialize-javascript": "^4.0.0",
     "cross-env": "^7.0.2",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
