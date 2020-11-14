@@ -52,8 +52,8 @@ logStore.subscribe((state) => {
   }
 
   if (state.bootstrap === true) {
-    Log.wait('starting the development server')
-    Log.info(`build server ready on http://localhost:${state.port}`)
+    Log.wait('starting the build server')
+    Log.info(`build server listening on http://localhost:${state.port}`)
     return
   }
 
