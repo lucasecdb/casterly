@@ -6,9 +6,14 @@ import React, {
   useRef,
   useState,
 } from 'react'
-import { RouteMatch, RouteObject, Router, RouterProps } from 'react-router'
+import { Router, RouterProps } from 'react-router'
 
-import { RootContext, RootContextProvider } from './RootContext'
+import {
+  RootContext,
+  RootContextProvider,
+  RouteMatchWithKey,
+  RouteObjectWithKey,
+} from './RootContext'
 import { RoutePendingContextProvider } from './RoutePendingContext'
 
 declare global {
@@ -21,9 +26,9 @@ declare global {
 }
 
 const parseRouteMatch = (
-  routes: RouteObject[],
-  routeMatch: RouteMatch
-): RouteObject[] => {
+  routes: RouteObjectWithKey[],
+  routeMatch: RouteMatchWithKey
+): RouteObjectWithKey[] => {
   const { route } = routeMatch
 
   const routeEntrypoint = (route as any).componentName as string
@@ -42,13 +47,13 @@ const parseRouteMatch = (
 }
 
 const mergeRoutes = (
-  currentRoutes: RouteObject[],
-  newRoutes: RouteObject[]
+  currentRoutes: RouteObjectWithKey[],
+  newRoutes: RouteObjectWithKey[]
 ) => {
-  const routes: RouteObject[] = []
+  const routes: RouteObjectWithKey[] = []
 
   currentRoutes.forEach((route) => {
-    const newRoute = newRoutes.find(({ path }) => route.path === path)
+    const newRoute = newRoutes.find(({ key }) => route.key === key)
 
     const children = newRoute
       ? mergeRoutes(route.children ?? [], newRoute.children ?? [])
@@ -61,14 +66,14 @@ const mergeRoutes = (
   })
 
   newRoutes.forEach((newRoute) => {
-    if (currentRoutes.find(({ path }) => newRoute.path === path)) {
+    if (currentRoutes.find(({ key }) => newRoute.key === key)) {
       return
     }
 
     routes.push(newRoute)
   })
 
-  return routes
+  return routes.sort((routeA, routeB) => routeA.key - routeB.key)
 }
 
 const InternalRoot: React.FC<RouterProps> = ({

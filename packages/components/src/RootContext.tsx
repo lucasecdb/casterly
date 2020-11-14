@@ -1,10 +1,17 @@
 import React, { useContext } from 'react'
 import { RouteMatch, RouteObject } from 'react-router'
 
+export type RouteObjectWithKey = RouteObject & {
+  key: number
+  children?: RouteObjectWithKey[]
+}
+
+export type RouteMatchWithKey = RouteMatch & { route: RouteObjectWithKey }
+
 export interface RootContext {
   version?: string
-  routes: RouteObject[]
-  matchedRoutes: RouteMatch[]
+  routes: RouteObjectWithKey[]
+  matchedRoutes: RouteMatchWithKey[]
   matchedRoutesAssets: string[]
   mainAssets: string[]
 }
