@@ -6,6 +6,7 @@ export const STATIC_WEBPACK_PATH = path.join(STATIC_FOLDER, 'webpack')
 export const STATIC_CHUNKS_PATH = path.join(STATIC_FOLDER, 'chunks')
 export const STATIC_MEDIA_PATH = path.join(STATIC_FOLDER, 'media')
 export const STATIC_ENTRYPOINTS_PATH = path.join(STATIC_FOLDER, 'entrypoints')
+export const STATIC_ASSETS_PATH = path.join(STATIC_FOLDER, 'assets')
 
 export const STATIC_RUNTIME_MAIN = path.join(STATIC_RUNTIME_PATH, 'main')
 export const STATIC_RUNTIME_WEBPACK = path.join(STATIC_RUNTIME_PATH, 'webpack')
