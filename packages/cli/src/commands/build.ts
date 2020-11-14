@@ -5,7 +5,7 @@ import { join } from 'path'
 import * as util from 'util'
 
 import bfj from 'bfj'
-import * as chalk from 'chalk'
+import chalk from 'chalk'
 import * as fs from 'fs-extra'
 import { nanoid } from 'nanoid'
 import { webpack } from 'webpack'
