@@ -15,6 +15,7 @@ import fileExists from '../utils/fileExists'
 import { filterBoolean } from '../utils/filterBoolean'
 import resolveRequest from '../utils/resolveRequest'
 import {
+  STATIC_ASSETS_PATH,
   STATIC_CHUNKS_PATH,
   STATIC_ENTRYPOINTS_ROUTES,
   STATIC_MEDIA_PATH,
@@ -268,6 +269,25 @@ const getBaseWebpackConfig = async (
       chunkFilename: isServer
         ? `${chunkFilename}.js`
         : `${STATIC_CHUNKS_PATH}/${chunkFilename}.js`,
+      assetModuleFilename: isServer
+        ? '[hash][ext][query]'
+        : (pathData) => {
+            const ext = pathData.filename
+              ?.split('?')[0]
+              .match(
+                new RegExp(
+                  `\\.(${
+                    useTypescript
+                      ? paths.typescriptFileExtensions.join('|') + '|'
+                      : ''
+                  }${paths.moduleFileExtensions.join('|')})$`
+                )
+              )
+              ? '.js'
+              : '[ext]'
+
+            return `${STATIC_ASSETS_PATH}/[hash]${ext}[query]`
+          },
       hotUpdateMainFilename: `${STATIC_WEBPACK_PATH}/[fullhash].hot-update.json`,
       hotUpdateChunkFilename: `${STATIC_WEBPACK_PATH}/[id].[fullhash].hot-update.js`,
       devtoolModuleFilenameTemplate: (info: any) =>
