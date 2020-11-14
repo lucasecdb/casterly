@@ -1,6 +1,6 @@
 import { RoutesManifest } from '@app-server/cli'
 import * as React from 'react'
-import { RouteObject, matchRoutes } from 'react-router'
+import { RouteMatch, RouteObject, matchRoutes } from 'react-router'
 
 import { interopDefault } from '../server/utils'
 
@@ -14,9 +14,13 @@ export type RoutePromiseComponent = {
 }
 
 export type RouteObjectWithAssets = RouteObject & {
+  children?: RouteObjectWithAssets[]
   assets: string[]
   componentName: string | number
+  key: number
 }
+
+type RouteMatchWithKey = RouteMatch & { route: RouteObjectWithAssets }
 
 export const mergeRouteAssetsAndRoutes = (
   routesManifestRoutes: RoutesManifest['routes'],
@@ -40,6 +44,7 @@ export const mergeRouteAssetsAndRoutes = (
         assets: routesManifestRoutes[index].assets ?? [],
         componentName: routesManifestRoutes[index].componentName,
         children,
+        key: index,
       }
     })
   )
@@ -59,12 +64,16 @@ export const getMatchedRoutes = async ({
     routesPromiseComponent
   )
 
-  const matchedRoutes = matchRoutes(routes, location) ?? []
+  const matchedRoutes = (matchRoutes(routes, location) ??
+    []) as RouteMatchWithKey[]
 
-  const matchedRoutesAssets =
-    matchedRoutes.flatMap((routeMatched) => {
-      return (routeMatched.route as RouteObjectWithAssets).assets
-    }) ?? []
+  const matchedRoutesAssets = Array.from(
+    new Set(
+      matchedRoutes.flatMap((routeMatched) => {
+        return (routeMatched.route as RouteObjectWithAssets).assets
+      }) ?? []
+    )
+  )
 
   return { routes, matchedRoutes, matchedRoutesAssets }
 }

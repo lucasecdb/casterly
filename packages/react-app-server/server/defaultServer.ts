@@ -5,7 +5,6 @@ import { parse as parseUrl } from 'url'
 import { RoutesManifest, constants, paths } from '@app-server/cli'
 import { RootContext } from '@app-server/components'
 import fresh from 'fresh'
-import { RouteMatch } from 'react-router'
 
 import { MAX_AGE_LONG } from '../utils/maxAge'
 import { RoutePromiseComponent, getMatchedRoutes } from '../utils/routes'
@@ -217,9 +216,12 @@ class DefaultServer {
 
         return {
           ...routeMatch,
-          route,
+          route: {
+            ...route,
+            element: null,
+          },
         }
-      }) as RouteMatch[],
+      }),
       matchedRoutesAssets,
       mainAssets: routesManifest.main,
     }
