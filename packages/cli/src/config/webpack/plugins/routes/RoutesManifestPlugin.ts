@@ -105,6 +105,12 @@ export default class RoutesManifestPlugin {
               STATIC_RUNTIME_HOT
             )
 
+            const mainAssets = mainEntrypointAssets.concat(
+              hotEntrypointAssets.filter(
+                (file) => !mainEntrypointAssets.includes(file)
+              )
+            )
+
             const compilationModules = Array.from(compilation.modules.values())
 
             // Create a map of the module name to its assets, to
@@ -132,6 +138,7 @@ export default class RoutesManifestPlugin {
                           Array.from(referencedChunk.files.values())
                         )
                         .filter((file) => file.indexOf('hot-update') === -1)
+                        .filter((file) => !mainAssets.includes(file))
                         .map((filePath) =>
                           !filePath.startsWith('/') ? '/' + filePath : filePath
                         )
@@ -151,8 +158,6 @@ export default class RoutesManifestPlugin {
               assets[routeAssetsFilename].source().toString(),
               routeAssetsFilename
             ).default
-
-            const mainAssets = mainEntrypointAssets.concat(hotEntrypointAssets)
 
             const routesManifest = parseRoutesAndAssets(
               mainAssets,
