@@ -49,15 +49,6 @@ export const createOptimizationConfig = ({
     cacheGroups: {
       default: false,
       defaultVendors: false,
-      styles: {
-        name: 'styles',
-        test(module: Module) {
-          // TODO: do not include CSS modules
-          return isModuleCSS(module)
-        },
-        chunks: 'all',
-        enforce: true,
-      },
     },
   }
 
@@ -145,6 +136,15 @@ export const createOptimizationConfig = ({
       priority: 10,
       minChunks: 2,
       reuseExistingChunk: true,
+    },
+    styles: {
+      name: 'styles',
+      test(module: Module) {
+        // TODO: do not include CSS modules
+        return isModuleCSS(module)
+      },
+      chunks: 'all',
+      enforce: true,
     },
   }
 
