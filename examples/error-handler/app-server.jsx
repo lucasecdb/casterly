@@ -1,9 +1,9 @@
 import { Scripts, Styles } from '@app-server/components'
 import { RootServer } from '@app-server/components/server'
-import React from 'react'
-import { renderToNodeStream } from 'react-dom/server'
+import { renderToNodeStream, renderToString } from 'react-dom/server'
 
 import App from './src/App'
+import ErrorPage from './src/ErrorPage'
 
 const Document = () => {
   return (
@@ -27,19 +27,35 @@ const Document = () => {
 }
 
 export default function (request, statusCode, headers, context) {
-  const content = renderToNodeStream(
-    <RootServer context={context} url={request.url}>
-      <Document />
-    </RootServer>
-  )
+  try {
+    const content = renderToString(
+      <RootServer context={context} url={request.url}>
+        <Document />
+      </RootServer>
+    )
 
-  content.unshift('<!doctype html>')
+    return new Response('<!doctype html>' + content, {
+      status: statusCode,
+      headers: {
+        ...Object.fromEntries(headers),
+        'content-type': 'text/html',
+      },
+    })
+  } catch (err) {
+    const content = renderToNodeStream(
+      <RootServer context={context} url={request.url}>
+        <ErrorPage error={err} />
+      </RootServer>
+    )
 
-  return new Response(content, {
-    status: statusCode,
-    headers: {
-      ...Object.fromEntries(headers),
-      'content-type': 'text/html',
-    },
-  })
+    content.unshift('<!doctype html>')
+
+    return new Response(content, {
+      status: 500,
+      headers: {
+        ...Object.fromEntries(headers),
+        'content-type': 'text/html',
+      },
+    })
+  }
 }

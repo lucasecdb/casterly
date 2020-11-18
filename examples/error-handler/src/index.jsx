@@ -1,5 +1,5 @@
-const App = () => {
+const IndexPage = () => {
   throw new Error('uh-oh')
 }
 
-export default App
+export default IndexPage

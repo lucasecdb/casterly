@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-const App = () => {
+const IndexPage = () => {
   const [counter, setCounter] = useState(0)
 
   useEffect(() => {
@@ -21,4 +21,4 @@ const App = () => {
   )
 }
 
-export default App
+export default IndexPage
