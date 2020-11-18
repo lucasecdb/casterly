@@ -8,7 +8,6 @@ import {
   STATIC_ENTRYPOINTS_ROUTES_ASSETS,
   STATIC_RUNTIME_HOT,
   STATIC_RUNTIME_MAIN,
-  STATIC_RUNTIME_WEBPACK,
 } from '../../../constants'
 import * as paths from '../../../paths'
 import RouteAssetsChildPlugin from './RouteAssetsChildPlugin'
@@ -20,8 +19,6 @@ import {
 } from './utils'
 
 const { RawSource } = sources
-
-const JS_FILE_REGEX = /(?<!\.hot-update)\.js$/
 
 const PLUGIN_NAME = 'RoutesManifestPlugin'
 
@@ -89,14 +86,18 @@ export default class RoutesManifestPlugin {
             stage: Compilation.PROCESS_ASSETS_STAGE_ADDITIONS,
           },
           (assets) => {
-            const getNamedEntrypointAssets = (name: string) =>
-              Array.from(compilation.namedChunks.get(name)?.files ?? [])
-                .filter((file) => JS_FILE_REGEX.test(file))
-                .map((file) => '/' + file)
+            const stats = compilation
+              .getStats()
+              .toJson({ all: false, entrypoints: true })
 
-            const runtimeEntrypointAssets = getNamedEntrypointAssets(
-              STATIC_RUNTIME_WEBPACK
-            )
+            const getNamedEntrypointAssets = (name: string) =>
+              ((stats.entrypoints[name]?.assets ?? []) as { name: string }[])
+                .map((asset) => asset.name)
+                .filter((file) => file.indexOf('hot-update') === -1)
+                .map((filePath) =>
+                  !filePath.startsWith('/') ? '/' + filePath : filePath
+                )
+
             const mainEntrypointAssets = getNamedEntrypointAssets(
               STATIC_RUNTIME_MAIN
             )
@@ -151,9 +152,7 @@ export default class RoutesManifestPlugin {
               routeAssetsFilename
             ).default
 
-            const mainAssets = runtimeEntrypointAssets
-              .concat(mainEntrypointAssets)
-              .concat(hotEntrypointAssets)
+            const mainAssets = mainEntrypointAssets.concat(hotEntrypointAssets)
 
             const routesManifest = parseRoutesAndAssets(
               mainAssets,

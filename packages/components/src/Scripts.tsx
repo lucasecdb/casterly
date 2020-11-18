@@ -28,8 +28,8 @@ export const Scripts: React.FC = () => {
         }}
       />
       {matchedRoutesAssets
-        .filter((file) => file.endsWith('.js'))
         .concat(mainAssets)
+        .filter((file) => file.endsWith('.js'))
         .map((scriptSource) => (
           <script key={scriptSource} defer src={scriptSource} />
         ))}
