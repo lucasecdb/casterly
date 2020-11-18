@@ -1,6 +1,6 @@
 {
   "name": "@app-server/cli",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "CLI for React App Server",
   "author": "Lucas Cordeiro <ecdb.lucas@gmail.com>",
   "homepage": "https://github.com/lucasecdb/react-app-server#readme",
