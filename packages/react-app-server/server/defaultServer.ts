@@ -172,7 +172,7 @@ class DefaultServer {
     try {
       return await this.renderDocument(req)
     } catch (err) {
-      console.log(err)
+      console.log('[ERROR]:', err)
       return new Response('error', {
         status: 500,
         headers: {
