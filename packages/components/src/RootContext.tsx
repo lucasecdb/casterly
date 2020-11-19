@@ -4,6 +4,7 @@ import { RouteMatch, RouteObject } from 'react-router'
 export type RouteObjectWithKey = RouteObject & {
   key: number
   children?: RouteObjectWithKey[]
+  props?: Record<string, unknown>
 }
 
 export type RouteMatchWithKey = RouteMatch & { route: RouteObjectWithKey }

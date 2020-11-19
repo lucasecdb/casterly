@@ -21,11 +21,13 @@ export type RouteAssetComponent = {
   component: () => string
   path: string
   children?: RouteAssetComponent[]
+  props?: Record<string, unknown>
 }
 
 export type RouteWithAssets = {
   caseSensitive?: boolean
   assets: string[]
+  props?: Record<string, unknown>
   componentName: string | number
   path: string
   children?: RouteWithAssets[]
@@ -50,6 +52,7 @@ export const parseRoutesAndAssets = (
       assets: routeComponentsAssets[moduleId],
       componentName: moduleId,
       children: undefined,
+      props: route.props,
     }
 
     if (route.children) {
