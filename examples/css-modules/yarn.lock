@@ -2,73 +2,6 @@
 # yarn lockfile v1
 
 
-"@app-server/cli@^0.3.3":
-  version "0.3.3"
-  resolved "https://registry.yarnpkg.com/@app-server/cli/-/cli-0.3.3.tgz#4df6d9f87b003e60bb6ac1692817955501e81207"
-  integrity sha512-8us9Sv745GZzdgtrk4wTvdPfwXTvH48n6XkfazPphlf11U/DeLPAVmRS/lwkYNNOb2WKN9wxqhIYyaz37c9M3g==
-  dependencies:
-    "@babel/core" "^7.11.4"
-    "@babel/plugin-proposal-class-properties" "^7.10.4"
-    "@babel/plugin-syntax-dynamic-import" "^7.8.3"
-    "@babel/plugin-transform-destructuring" "^7.10.4"
-    "@babel/plugin-transform-runtime" "^7.11.0"
-    "@babel/preset-env" "^7.11.0"
-    "@babel/preset-react" "^7.12.5"
-    "@babel/preset-typescript" "^7.10.4"
-    "@pmmmwh/react-refresh-webpack-plugin" "^0.4.3"
-    "@svgr/webpack" "^5.4.0"
-    babel-core "^7.0.0-bridge.0"
-    babel-loader "^8.0.6"
-    babel-plugin-macros "^2.6.1"
-    babel-plugin-named-asset-import "^0.3.7"
-    bfj "^7.0.1"
-    case-sensitive-paths-webpack-plugin "^2.3.0"
-    chalk "^4.1.0"
-    cors "^2.8.5"
-    css-loader "^5.0.1"
-    css-minimizer-webpack-plugin "^1.1.5"
-    dotenv "^8.2.0"
-    dotenv-expand "^5.1.0"
-    express "^4.17.1"
-    file-loader "^6.2.0"
-    filesize "^6.1.0"
-    fork-ts-checker-webpack-plugin "^5.2.0"
-    fs-extra "^9.0.1"
-    gzip-size "^5.1.1"
-    ignore-loader "^0.1.2"
-    mini-css-extract-plugin "^1.3.0"
-    nanoid "^3.1.16"
-    node-sass "^5.0.0"
-    postcss "^8.1.6"
-    postcss-flexbugs-fixes "^5.0.1"
-    postcss-loader "^4.0.4"
-    postcss-preset-env "^6.7.0"
-    postcss-safe-parser "^5.0.0"
-    react-refresh "^0.9.0"
-    recursive-readdir "^2.2.2"
-    resolve "^1.18.1"
-    sass-loader "^10.0.5"
-    semver "^7.3.2"
-    strip-ansi "^6.0.0"
-    terser-webpack-plugin "^5.0.3"
-    unistore "^3.5.2"
-    url-loader "^4.1.0"
-    webpack "^5.4.0"
-    webpack-hot-middleware "^2.25.0"
-    workbox-webpack-plugin "^6.0.0-alpha.3"
-
-"@app-server/components@^0.3.2":
-  version "0.3.2"
-  resolved "https://registry.yarnpkg.com/@app-server/components/-/components-0.3.2.tgz#3e9326794ded3a825097e52ff6fcf69e849fbca7"
-  integrity sha512-sElneFBed/3nwxf2D48L77TteNm9d9hVDOp5xxJGVdZAtmz0T/VNO13BCzlZL7/+mvUOldKXXISxzDVconcMxA==
-
-"@app-server/express@^0.3.3":
-  version "0.3.3"
-  resolved "https://registry.yarnpkg.com/@app-server/express/-/express-0.3.3.tgz#38856158ce14557a0196f9d80eccbed9f3c6403a"
-  integrity sha512-06YrZp/Vqgl3XTOWBCWAUcVgI/Xbua83L/1/jLXmz1ZT2glxanlcgRiO53T//v7pEHLPUuinGMmAwK1PN2hSlw==
-  dependencies:
-    react-app-server "^0.3.3"
-
 "@babel/code-frame@^7.0.0", "@babel/code-frame@^7.10.4", "@babel/code-frame@^7.8.3":
   version "7.10.4"
   resolved "https://registry.yarnpkg.com/@babel/code-frame/-/code-frame-7.10.4.tgz#168da1a36e90da68ae8d49c0f1b48c7c6249213a"
@@ -1156,6 +1089,73 @@
     lodash "^4.17.19"
     to-fast-properties "^2.0.0"
 
+"@casterly/cli@^0.4.0":
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/@casterly/cli/-/cli-0.4.0.tgz#2bffe6d88cde51b0df8467c73724591b80f05d7c"
+  integrity sha512-q4ptiQ/hqGhI22UrXlRcpweJ7rqQJlxSwO7szD1/EugqnyLJCpHerzXHvKFPHL0X19wtFuB66XQDnVVhHUFq1Q==
+  dependencies:
+    "@babel/core" "^7.11.4"
+    "@babel/plugin-proposal-class-properties" "^7.10.4"
+    "@babel/plugin-syntax-dynamic-import" "^7.8.3"
+    "@babel/plugin-transform-destructuring" "^7.10.4"
+    "@babel/plugin-transform-runtime" "^7.11.0"
+    "@babel/preset-env" "^7.11.0"
+    "@babel/preset-react" "^7.12.5"
+    "@babel/preset-typescript" "^7.10.4"
+    "@pmmmwh/react-refresh-webpack-plugin" "^0.4.3"
+    "@svgr/webpack" "^5.4.0"
+    babel-core "^7.0.0-bridge.0"
+    babel-loader "^8.0.6"
+    babel-plugin-macros "^2.6.1"
+    babel-plugin-named-asset-import "^0.3.7"
+    bfj "^7.0.1"
+    case-sensitive-paths-webpack-plugin "^2.3.0"
+    chalk "^4.1.0"
+    cors "^2.8.5"
+    css-loader "^5.0.1"
+    css-minimizer-webpack-plugin "^1.1.5"
+    dotenv "^8.2.0"
+    dotenv-expand "^5.1.0"
+    express "^4.17.1"
+    file-loader "^6.2.0"
+    filesize "^6.1.0"
+    fork-ts-checker-webpack-plugin "^5.2.0"
+    fs-extra "^9.0.1"
+    gzip-size "^5.1.1"
+    ignore-loader "^0.1.2"
+    mini-css-extract-plugin "^1.3.0"
+    nanoid "^3.1.16"
+    node-sass "^5.0.0"
+    postcss "^8.1.6"
+    postcss-flexbugs-fixes "^5.0.1"
+    postcss-loader "^4.0.4"
+    postcss-preset-env "^6.7.0"
+    postcss-safe-parser "^5.0.0"
+    react-refresh "^0.9.0"
+    recursive-readdir "^2.2.2"
+    resolve "^1.18.1"
+    sass-loader "^10.0.5"
+    semver "^7.3.2"
+    strip-ansi "^6.0.0"
+    terser-webpack-plugin "^5.0.3"
+    unistore "^3.5.2"
+    url-loader "^4.1.0"
+    webpack "^5.4.0"
+    webpack-hot-middleware "^2.25.0"
+    workbox-webpack-plugin "^6.0.0-alpha.3"
+
+"@casterly/components@^0.4.0":
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/@casterly/components/-/components-0.4.0.tgz#3ce5a4115b0d2f7455061065c3a73b92ae9d0d65"
+  integrity sha512-FJf4fmFCjt8miOVqv8RYnEsa5VCS9etD5ofZ/BpfbMksjUpwa51id0FlEcfq9dbP/jHnZCr7CGiRYfPAiqiwWQ==
+
+"@casterly/express@^0.4.0":
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/@casterly/express/-/express-0.4.0.tgz#7f2609b1beb66e68bd349ad93db2c21e510c90e5"
+  integrity sha512-hOZOUa79kk0xtIfhKsm2vzFCMHvPy/lS4SySbDbznDeK4kDv7buzf2hMJG1uia6rngslr6J9jefxR5B2xUiBdg==
+  dependencies:
+    casterly "^0.4.0"
+
 "@csstools/convert-colors@^1.4.0":
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/@csstools/convert-colors/-/convert-colors-1.4.0.tgz#ad495dc41b12e75d588c6db8b9834f08fa131eb7"
@@ -2089,6 +2089,18 @@ caseless@~0.12.0:
   version "0.12.0"
   resolved "https://registry.yarnpkg.com/caseless/-/caseless-0.12.0.tgz#1b681c21ff84033c826543090689420d187151dc"
   integrity sha1-G2gcIf+EAzyCZUMJBolCDRhxUdw=
+
+casterly@^0.4.0:
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/casterly/-/casterly-0.4.0.tgz#bbefd647f714c977225ca26bbaf8d891c5f05d39"
+  integrity sha512-sOixqoBjhu6UejLGHvWxdxWjy5upVbaWRHQ2D1xXzUH3h2iVps9YTFBP0HG5PzF3GontgpntqFav9b1IaxePeA==
+  dependencies:
+    etag "^1.8.1"
+    fresh "^0.5.2"
+    history "^5.0.0"
+    make-fetch-happen "^8.0.10"
+    mime "^2.4.6"
+    path-to-regexp "^6.1.0"
 
 chalk@^1.1.1:
   version "1.1.3"
@@ -5475,18 +5487,6 @@ rc@^1.2.8:
     ini "~1.3.0"
     minimist "^1.2.0"
     strip-json-comments "~2.0.1"
-
-react-app-server@^0.3.3:
-  version "0.3.3"
-  resolved "https://registry.yarnpkg.com/react-app-server/-/react-app-server-0.3.3.tgz#cbae6604b727a548ec6bffe66d8017c614c52a3f"
-  integrity sha512-znYugbY8e1mlcKpumFKzRK0XnRtTdFhVbGD5zmgXjUVJfHqaGW4KRXTgNk4+tICJdZEVUa598en9HEjCaDFiNg==
-  dependencies:
-    etag "^1.8.1"
-    fresh "^0.5.2"
-    history "^5.0.0"
-    make-fetch-happen "^8.0.10"
-    mime "^2.4.6"
-    path-to-regexp "^6.1.0"
 
 react-dom@^16.14.0:
   version "16.14.0"

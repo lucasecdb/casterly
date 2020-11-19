@@ -1,11 +1,11 @@
-# `@app-server/components`
+# `@casterly/components`
 
 > TODO: description
 
 ## Usage
 
 ```
-const components = require('@app-server/components');
+const components = require('@casterly/components');
 
 // TODO: DEMONSTRATE API
 ```

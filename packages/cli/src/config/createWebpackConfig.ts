@@ -180,7 +180,7 @@ const getBaseWebpackConfig = async (
             return callback()
           }
 
-          if (res.match(/react-app-server[/\\]lib[/\\]/)) {
+          if (res.match(/casterly[/\\]lib[/\\]/)) {
             return callback()
           }
 

@@ -1,9 +1,9 @@
 {
-  "name": "@app-server/express",
+  "name": "@casterly/express",
   "version": "0.4.0",
-  "description": "React App Server bindings for Express.js",
+  "description": "Casterly bindings for Express.js",
   "author": "Lucas Cordeiro <ecdb.lucas@gmail.com>",
-  "homepage": "https://github.com/lucasecdb/react-app-server#readme",
+  "homepage": "https://github.com/lucasecdb/casterly#readme",
   "license": "MIT",
   "main": "index.js",
   "directories": {
@@ -21,7 +21,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/lucasecdb/react-app-server.git",
+    "url": "git+https://github.com/lucasecdb/casterly.git",
     "directory": "packages/express"
   },
   "scripts": {
@@ -33,10 +33,10 @@
     "prepublishOnly": "yarn build"
   },
   "bugs": {
-    "url": "https://github.com/lucasecdb/react-app-server/issues"
+    "url": "https://github.com/lucasecdb/casterly/issues"
   },
   "peerDependencies": {
-    "@app-server/components": "^0.2.0",
+    "@casterly/components": "^0.4.0",
     "express": "^4.17.1",
     "react": "^16.9.0 || ^17.0.0",
     "react-dom": "^16.9.0 || ^17.0.0",
@@ -49,6 +49,6 @@
     "rimraf": "^3.0.2"
   },
   "dependencies": {
-    "react-app-server": "^0.4.0"
+    "casterly": "^0.4.0"
   }
 }

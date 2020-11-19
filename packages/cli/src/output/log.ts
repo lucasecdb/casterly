@@ -1,11 +1,11 @@
 import chalk from 'chalk'
 
 const prefixes = {
-  wait: chalk`{dim react-app-server} {magenta wait}:`,
-  error: chalk`{dim react-app-server} {red error}:`,
-  warn: chalk`{dim react-app-server} {yellow warn}:`,
-  ready: chalk`{dim react-app-server} {green ready}:`,
-  info: chalk`{dim react-app-server} {cyan info}:`,
+  wait: chalk`{dim casterly} {magenta wait}:`,
+  error: chalk`{dim casterly} {red error}:`,
+  warn: chalk`{dim casterly} {yellow warn}:`,
+  ready: chalk`{dim casterly} {green ready}:`,
+  info: chalk`{dim casterly} {cyan info}:`,
 }
 
 export function wait(...message: any[]) {

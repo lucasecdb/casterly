@@ -1,4 +1,4 @@
-import { RoutesManifest } from '@app-server/cli'
+import { RoutesManifest } from '@casterly/cli'
 import * as React from 'react'
 import { RouteMatch, RouteObject, matchRoutes } from 'react-router'
 

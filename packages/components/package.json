@@ -1,8 +1,9 @@
 {
-  "name": "@app-server/components",
+  "name": "@casterly/components",
   "version": "0.4.0",
+  "description": "Base Casterly components",
   "author": "Lucas Cordeiro <ecdb.lucas@gmail.com>",
-  "homepage": "https://github.com/lucasecdb/react-app-server#readme",
+  "homepage": "https://github.com/lucasecdb/casterly#readme",
   "license": "MIT",
   "main": "index.js",
   "types": "index.d.ts",
@@ -21,7 +22,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/lucasecdb/react-app-server.git",
+    "url": "git+https://github.com/lucasecdb/casterly.git",
     "directory": "packages/components"
   },
   "scripts": {
@@ -33,7 +34,7 @@
     "prepublishOnly": "yarn build"
   },
   "bugs": {
-    "url": "https://github.com/lucasecdb/react-app-server/issues"
+    "url": "https://github.com/lucasecdb/casterly/issues"
   },
   "peerDependencies": {
     "react": "^16.9.0 || ^17.0.1",
