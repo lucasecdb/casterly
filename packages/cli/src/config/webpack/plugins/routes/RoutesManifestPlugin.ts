@@ -1,5 +1,5 @@
 import { Compilation, EntryPlugin, NormalModule, node, sources } from 'webpack'
-import type { Compiler, javascript } from 'webpack'
+import type { Compiler } from 'webpack'
 // @ts-ignore: no declaration file
 import ImportDependency from 'webpack/lib/dependencies/ImportDependency'
 
@@ -22,16 +22,38 @@ const { RawSource } = sources
 
 const PLUGIN_NAME = 'RoutesManifestPlugin'
 
+const routeAssetsFilename = STATIC_ENTRYPOINTS_ROUTES_ASSETS + '.js'
+
+const countNumberOfRoutes = (routes: RouteAssetComponent[]): number => {
+  return routes.reduce((total, route) => {
+    const childrenCount = route.children
+      ? countNumberOfRoutes(route.children)
+      : 0
+
+    return total + 1 + childrenCount
+  }, 0)
+}
+
 export default class RoutesManifestPlugin {
   private routeModuleIdMap: Map<string, string | number> = new Map()
-  private numberOfRoutes = 0
 
-  public getNumberOfRoutes() {
-    return this.numberOfRoutes
+  private getRoutesFromCompilation = (
+    compiler: Compiler,
+    assets: Compilation['assets']
+  ) => {
+    const routes: RouteAssetComponent[] = evalModuleCode(
+      compiler.context,
+      assets[routeAssetsFilename].source().toString(),
+      routeAssetsFilename
+    ).default
+
+    return routes
   }
 
+  public getNumberOfRoutes = () => 0
+
   public apply(compiler: Compiler) {
-    compiler.hooks.make.tapAsync(PLUGIN_NAME, async (compilation, cb) => {
+    compiler.hooks.make.tapAsync(PLUGIN_NAME, (compilation, cb) => {
       const childCompiler = compilation.createChildCompiler(
         'routeAssets',
         compiler.options.output,
@@ -77,146 +99,114 @@ export default class RoutesManifestPlugin {
       }
     )
 
-    compiler.hooks.thisCompilation.tap(
-      PLUGIN_NAME,
-      (compilation, { normalModuleFactory }) => {
-        compilation.hooks.processAssets.tap(
-          {
-            name: PLUGIN_NAME,
-            stage: Compilation.PROCESS_ASSETS_STAGE_ADDITIONS,
-          },
-          (assets) => {
-            const stats = compilation
-              .getStats()
-              .toJson({ all: false, entrypoints: true })
-
-            const getNamedEntrypointAssets = (name: string) =>
-              ((stats.entrypoints[name]?.assets ?? []) as { name: string }[])
-                .map((asset) => asset.name)
-                .filter((file) => file.indexOf('hot-update') === -1)
-                .map((filePath) =>
-                  !filePath.startsWith('/') ? '/' + filePath : filePath
-                )
-
-            const mainEntrypointAssets = getNamedEntrypointAssets(
-              STATIC_RUNTIME_MAIN
-            )
-            const hotEntrypointAssets = getNamedEntrypointAssets(
-              STATIC_RUNTIME_HOT
-            )
-
-            const mainAssets = mainEntrypointAssets.concat(
-              hotEntrypointAssets.filter(
-                (file) => !mainEntrypointAssets.includes(file)
-              )
-            )
-
-            const compilationModules = Array.from(compilation.modules.values())
-
-            // Create a map of the module name to its assets, to
-            // be later used with the routes-assets.js file to
-            // gather the chunks for a particular route.
-            const routeComponentsAssets = Object.fromEntries(
-              Array.from(this.routeModuleIdMap.values())
-                .map((moduleId) => {
-                  const routeModule = compilationModules.find(
-                    (module) =>
-                      compilation.chunkGraph.getModuleId(module) === moduleId
-                  )
-
-                  if (!routeModule) {
-                    return null
-                  }
-
-                  const routeFiles = compilation.chunkGraph
-                    .getModuleChunks(routeModule)
-                    .flatMap((chunk) => {
-                      const referencedChunksFiles = Array.from(
-                        chunk.getAllReferencedChunks()
-                      )
-                        .flatMap((referencedChunk) =>
-                          Array.from(referencedChunk.files.values())
-                        )
-                        .filter((file) => file.indexOf('hot-update') === -1)
-                        .filter((file) => !mainAssets.includes(file))
-                        .map((filePath) =>
-                          !filePath.startsWith('/') ? '/' + filePath : filePath
-                        )
-
-                      return referencedChunksFiles
-                    })
-
-                  return [moduleId, routeFiles]
-                })
-                .filter(<T>(value: T | null): value is T => value != null)
-            )
-
-            const routeAssetsFilename = STATIC_ENTRYPOINTS_ROUTES_ASSETS + '.js'
-
-            const routes: RouteAssetComponent[] = evalModuleCode(
-              compiler.context,
-              assets[routeAssetsFilename].source().toString(),
-              routeAssetsFilename
-            ).default
-
-            const routesManifest = parseRoutesAndAssets(
-              mainAssets,
-              routeComponentsAssets,
-              routes,
-              this.routeModuleIdMap
-            )
-
-            assets[ROUTES_MANIFEST_FILE] = new RawSource(
-              JSON.stringify(routesManifest, null, 2),
-              true
-            )
-          }
+    compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation) => {
+      this.getNumberOfRoutes = () => {
+        const routes = this.getRoutesFromCompilation(
+          compiler,
+          compilation.assets
         )
 
-        // Hook to clear the routeImports array when the routes
-        // file is built (either on first compilation or on rebuilds).
-        compilation.hooks.buildModule.tap(PLUGIN_NAME, (module) => {
-          const normalModule = module as NormalModule
-
-          const resource = normalModule.resource
-
-          if (resource === paths.appRoutesJs) {
-            this.routeModuleIdMap.clear()
-            this.numberOfRoutes = 0
-          }
-        })
-
-        // Collect the path for the dynamic import statements inside
-        // the routes file.
-        const importParserHandler = (parser: javascript.JavascriptParser) => {
-          parser.hooks.importCall.tap(PLUGIN_NAME, (expr) => {
-            const parserModule = parser.state.current as NormalModule
-            const module = compilation.getModule(parserModule)
-
-            const resource = (module as NormalModule).resource
-
-            if (resource !== paths.appRoutesJs) {
-              return
-            }
-
-            if (expr.type !== 'ImportExpression') {
-              return
-            }
-
-            this.numberOfRoutes++
-          })
-        }
-
-        normalModuleFactory.hooks.parser
-          .for('javascript/auto')
-          .tap(PLUGIN_NAME, importParserHandler)
-        normalModuleFactory.hooks.parser
-          .for('javascript/dynamic')
-          .tap(PLUGIN_NAME, importParserHandler)
-        normalModuleFactory.hooks.parser
-          .for('javascript/esm')
-          .tap(PLUGIN_NAME, importParserHandler)
+        return countNumberOfRoutes(routes)
       }
-    )
+
+      compilation.hooks.processAssets.tap(
+        {
+          name: PLUGIN_NAME,
+          stage: Compilation.PROCESS_ASSETS_STAGE_ADDITIONS,
+        },
+        (assets) => {
+          const stats = compilation
+            .getStats()
+            .toJson({ all: false, entrypoints: true })
+
+          const getNamedEntrypointAssets = (name: string) =>
+            ((stats.entrypoints[name]?.assets ?? []) as { name: string }[])
+              .map((asset) => asset.name)
+              .filter((file) => file.indexOf('hot-update') === -1)
+              .map((filePath) =>
+                !filePath.startsWith('/') ? '/' + filePath : filePath
+              )
+
+          const mainEntrypointAssets = getNamedEntrypointAssets(
+            STATIC_RUNTIME_MAIN
+          )
+          const hotEntrypointAssets = getNamedEntrypointAssets(
+            STATIC_RUNTIME_HOT
+          )
+
+          const mainAssets = mainEntrypointAssets.concat(
+            hotEntrypointAssets.filter(
+              (file) => !mainEntrypointAssets.includes(file)
+            )
+          )
+
+          const compilationModules = Array.from(compilation.modules.values())
+
+          // Create a map of the module name to its assets, to
+          // be later used with the routes-assets.js file to
+          // gather the chunks for a particular route.
+          const routeComponentsAssets = Object.fromEntries(
+            Array.from(this.routeModuleIdMap.values())
+              .map((moduleId) => {
+                const routeModule = compilationModules.find(
+                  (module) =>
+                    compilation.chunkGraph.getModuleId(module) === moduleId
+                )
+
+                if (!routeModule) {
+                  return null
+                }
+
+                const routeFiles = compilation.chunkGraph
+                  .getModuleChunks(routeModule)
+                  .flatMap((chunk) => {
+                    const referencedChunksFiles = Array.from(
+                      chunk.getAllReferencedChunks()
+                    )
+                      .flatMap((referencedChunk) =>
+                        Array.from(referencedChunk.files.values())
+                      )
+                      .filter((file) => file.indexOf('hot-update') === -1)
+                      .filter((file) => !mainAssets.includes(file))
+                      .map((filePath) =>
+                        !filePath.startsWith('/') ? '/' + filePath : filePath
+                      )
+
+                    return referencedChunksFiles
+                  })
+
+                return [moduleId, routeFiles]
+              })
+              .filter(<T>(value: T | null): value is T => value != null)
+          )
+
+          const routes = this.getRoutesFromCompilation(compiler, assets)
+
+          const routesManifest = parseRoutesAndAssets(
+            mainAssets,
+            routeComponentsAssets,
+            routes,
+            this.routeModuleIdMap
+          )
+
+          assets[ROUTES_MANIFEST_FILE] = new RawSource(
+            JSON.stringify(routesManifest, null, 2),
+            true
+          )
+        }
+      )
+
+      // Hook to clear the routeImports array when the routes
+      // file is built (either on first compilation or on rebuilds).
+      compilation.hooks.buildModule.tap(PLUGIN_NAME, (module) => {
+        const normalModule = module as NormalModule
+
+        const resource = normalModule.resource
+
+        if (resource === paths.appRoutesJs) {
+          this.routeModuleIdMap.clear()
+        }
+      })
+    })
   }
 }
