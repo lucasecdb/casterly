@@ -10,14 +10,19 @@ Isomorphic server rendering library for React apps.
 
 To install and start using react-app-server, run the following commands
 
-```
-npm i --save react react-dom react-router@next react-router-dom@next @app-server/components @app-server/express
+```sh
+npm i --save react \
+  react-dom \
+  react-router@next \
+  react-router-dom@next \
+  @app-server/components \
+  @app-server/express
 npm i --save-dev @app-server/cli
 ```
 
 ## Getting started
 
-Then, create the files `server.js`, `app-server.jsx`, `app-browser.jsx`, `src/App.jsx`, `src/routes.js` and `src/index.jsx` with the following content:
+To start developing with React App Server, you need to create a few files with the following content:
 
 ```js
 // server.js
@@ -32,6 +37,8 @@ app.listen(3000, () => {
   console.log('Server started on http://localhost:3000')
 })
 ```
+
+This file is your app entrypoint, you have full control over the server and can add any other express middlewares you'd like or need.
 
 ```jsx
 // app-server.jsx
@@ -82,6 +89,8 @@ export default function (request, statusCode, headers, context) {
 }
 ```
 
+This file contains your SSR entrypoint, you can render you HTML however you'd like and place your scripts in either the `<head>` or `<body>` section according to your needs. You should **always** render you root component in this file wrapped in the `<RootServer>` component, passing in the required props as above, else your app won't work correctly.
+
 ```jsx
 // app-browser.jsx
 import { RootBrowser } from '@app-server/components/browser'
@@ -98,6 +107,8 @@ ReactDOM.hydrate(
 )
 ```
 
+This is the same as the above, but for the browser. You can choose to use either `ReactDOM.hydrate` or the new (unstable) `ReactDOM.unstable_createRoot` to opt-in React's [concurrent mode](https://reactjs.org/docs/concurrent-mode-intro.html). Similar to its server counterpart, you should **always** render your app wrapped in the `<RootBrowser>` component.
+
 ```jsx
 // src/App.jsx
 import { Routes } from '@app-server/components'
@@ -109,6 +120,8 @@ const App = () => {
 export default App
 ```
 
+This is you root component, where you should place any components that is common in every page of your app, such as Redux or Apollo's context providers.
+
 ```js
 // src/routes.js
 export default [
@@ -119,6 +132,8 @@ export default [
 ]
 ```
 
+The `routes.js` file is where you should add your app routes. It follows a similar format to [React Router's object-based routes config](https://github.com/ReactTraining/react-router/blob/dev/docs/api-reference.md#useroutes) (because we use React Router under the hood), but instead of adding your component directly into this file, you should pass in a *function* that returns a Promise that resolves to the module of that route's component. You can use React Router hooks to get routes parameters and to navigate to other routes. For more information, check their docs.
+
 ```jsx
 const IndexPage = () => {
   return <h1>Hello world</h1>
@@ -127,7 +142,9 @@ const IndexPage = () => {
 export default IndexPage
 ```
 
-Now, you can start you server with `node server.js` and then, in another terminal window, run `npm run rs watch`.
+Last but not least, you have your index page component, which is now only rendering the default "hello world" message.
+
+Now, you can start you server by running `node server.js` and, in another terminal window, running `npm run rs watch`. Your app will be running in localhost in the port 3000. The `rs watch` command will spin up a *build server* that will build your app into a bundle that we can serve in the browser, which your app server (the one in `server.js`) will use during development and production to render the app.
 
 ## License
 
