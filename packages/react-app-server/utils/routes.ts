@@ -11,6 +11,7 @@ export type RoutePromiseComponent = {
   >
   path: string
   children?: RoutePromiseComponent[]
+  props?: Record<string, unknown>
 }
 
 export type RouteObjectWithAssets = RouteObject & {
@@ -39,7 +40,8 @@ export const mergeRouteAssetsAndRoutes = (
         ...route,
         caseSensitive: route.caseSensitive === true,
         element: React.createElement(
-          await route.component().then(interopDefault)
+          await route.component().then(interopDefault),
+          route.props
         ),
         assets: routesManifestRoutes[index].assets ?? [],
         componentName: routesManifestRoutes[index].componentName,

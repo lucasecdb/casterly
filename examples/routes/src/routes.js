@@ -6,6 +6,9 @@ export default [
   {
     component: () => import('./OtherPage'),
     path: '/other-page',
+    props: {
+      name: 'Jon',
+    },
     children: [
       {
         component: () => import('./OtherPageChildren'),

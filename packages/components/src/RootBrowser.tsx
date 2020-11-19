@@ -40,7 +40,7 @@ const parseRouteMatch = (
   return [
     {
       ...route,
-      element: <Component />,
+      element: <Component {...route.props} />,
       children: routes,
     },
   ]
