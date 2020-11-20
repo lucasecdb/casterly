@@ -1,5 +1,5 @@
-import { Scripts, Styles } from '@app-server/components'
-import { RootServer } from '@app-server/components/server'
+import { Scripts, Styles } from '@casterly/components'
+import { RootServer } from '@casterly/components/server'
 import { renderToNodeStream, renderToString } from 'react-dom/server'
 
 import App from './src/App'

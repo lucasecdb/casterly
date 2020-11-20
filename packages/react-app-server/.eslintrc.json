@@ -1,5 +1,0 @@
-{
-  "parserOptions": {
-    "project": "./packages/react-app-server/tsconfig.json"
-  }
-}

@@ -1,6 +1,6 @@
-# React App Server
+# Casterly
 
-![CI](https://github.com/lucasecdb/react-app-server/workflows/CI/badge.svg?branch=main)
+![CI](https://github.com/lucasecdb/casterly/workflows/CI/badge.svg?branch=main)
 
 Isomorphic server rendering library for React apps.
 
@@ -8,25 +8,25 @@ Isomorphic server rendering library for React apps.
 
 ## Installation
 
-To install and start using react-app-server, run the following commands
+To install and start using Casterly, run the following commands
 
 ```sh
 npm i --save react \
   react-dom \
   react-router@next \
   react-router-dom@next \
-  @app-server/components \
-  @app-server/express
-npm i --save-dev @app-server/cli
+  @casterly/components \
+  @casterly/express
+npm i --save-dev @casterly/cli
 ```
 
 ## Getting started
 
-To start developing with React App Server, you need to create a few files with the following content:
+To start developing with Casterly, you need to create a few files with the following content:
 
 ```js
 // server.js
-const { createRequestHandler } = require('@app-server/express')
+const { createRequestHandler } = require('@casterly/express')
 const express = require('express')
 
 const app = express()
@@ -42,8 +42,8 @@ This file is your app entrypoint, you have full control over the server and can 
 
 ```jsx
 // app-server.jsx
-import { Scripts, Styles } from '@app-server/components'
-import { RootServer } from '@app-server/components/server'
+import { Scripts, Styles } from '@casterly/components'
+import { RootServer } from '@casterly/components/server'
 import React from 'react'
 import { renderToNodeStream } from 'react-dom/server'
 
@@ -93,7 +93,7 @@ This file contains your SSR entrypoint, you can render you HTML however you'd li
 
 ```jsx
 // app-browser.jsx
-import { RootBrowser } from '@app-server/components/browser'
+import { RootBrowser } from '@casterly/components/browser'
 import React from 'react'
 import ReactDOM from 'react-dom'
 
@@ -111,7 +111,7 @@ This is the same as the above, but for the browser. You can choose to use either
 
 ```jsx
 // src/App.jsx
-import { Routes } from '@app-server/components'
+import { Routes } from '@casterly/components'
 
 const App = () => {
   return <Routes />
@@ -144,7 +144,7 @@ export default IndexPage
 
 Last but not least, you have your index page component, which is now only rendering the default "hello world" message.
 
-Now, you can start you server by running `node server.js` and, in another terminal window, running `npm run rs watch`. Your app will be running in localhost in the port 3000. The `rs watch` command will spin up a *build server* that will build your app into a bundle that we can serve in the browser, which your app server (the one in `server.js`) will use during development and production to render the app.
+Now, you can start you server by running `node server.js` and, in another terminal window, running `npm run casterly watch`. Your app will be running in localhost in the port 3000. The `casterly watch` command will spin up a *build server* that will build your app into a bundle that we can serve in the browser, which your app server (the one in `server.js`) will use during development and production to render the app.
 
 ## License
 

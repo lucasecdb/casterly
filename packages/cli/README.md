@@ -1,11 +1,11 @@
-# `@app-server/cli`
+# `@casterly/cli`
 
 > TODO: description
 
 ## Usage
 
 ```
-const cli = require('@app-server/cli');
+const cli = require('@casterly/cli');
 
 // TODO: DEMONSTRATE API
 ```

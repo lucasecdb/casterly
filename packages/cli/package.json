@@ -1,12 +1,12 @@
 {
-  "name": "@app-server/cli",
+  "name": "@casterly/cli",
   "version": "0.4.0",
-  "description": "CLI for React App Server",
+  "description": "CLI for Casterly",
   "author": "Lucas Cordeiro <ecdb.lucas@gmail.com>",
-  "homepage": "https://github.com/lucasecdb/react-app-server#readme",
+  "homepage": "https://github.com/lucasecdb/casterly#readme",
   "license": "MIT",
   "bin": {
-    "rs": "./bin/rs-bin.js"
+    "casterly": "./bin/casterly-bin.js"
   },
   "directories": {
     "lib": "lib",
@@ -24,7 +24,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/lucasecdb/react-app-server.git",
+    "url": "git+https://github.com/lucasecdb/casterly.git",
     "directory": "packages/cli"
   },
   "scripts": {
@@ -36,7 +36,7 @@
     "prepublishOnly": "yarn build"
   },
   "bugs": {
-    "url": "https://github.com/lucasecdb/react-app-server/issues"
+    "url": "https://github.com/lucasecdb/casterly/issues"
   },
   "dependencies": {
     "@babel/core": "^7.11.4",

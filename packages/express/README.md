@@ -1,11 +1,11 @@
-# `@app-server/express`
+# `@casterly/express`
 
 > TODO: description
 
 ## Usage
 
 ```
-const express = require('@app-server/express');
+const express = require('@casterly/express');
 
 // TODO: DEMONSTRATE API
 ```

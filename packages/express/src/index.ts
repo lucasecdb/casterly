@@ -1,7 +1,7 @@
+import { createRequestHandler as defaultCreateRequestHandler } from 'casterly'
 import { RequestHandler } from 'express'
 // @ts-ignore
 import { Response } from 'minipass-fetch'
-import { createRequestHandler as defaultCreateRequestHandler } from 'react-app-server'
 
 export const createRequestHandler = (): RequestHandler => {
   const handleRequest = defaultCreateRequestHandler()

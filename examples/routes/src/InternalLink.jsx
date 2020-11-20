@@ -1,4 +1,4 @@
-import { useIsRoutePending } from '@app-server/components'
+import { useIsRoutePending } from '@casterly/components'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 

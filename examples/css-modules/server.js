@@ -1,4 +1,4 @@
-const { createRequestHandler } = require('@app-server/express')
+const { createRequestHandler } = require('@casterly/express')
 const express = require('express')
 
 const app = express()
