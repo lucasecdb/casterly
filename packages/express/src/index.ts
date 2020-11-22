@@ -15,10 +15,20 @@ export const createRequestHandler = (): RequestHandler => {
       ]) as Array<[string, string]>,
     })
 
-    // @ts-ignore
-    handleRequest(request, req, res)
+    const responseHeaders = new Headers(
+      Object.entries(res.getHeaders()).map(([key, value]) => [
+        key,
+        Array.isArray(value) ? value : value?.toString(),
+      ]) as Array<[string, string]>
+    )
+
+    handleRequest(request, responseHeaders)
       .then((response) => {
         res.statusCode = response.status
+
+        for (const header of Object.keys(res.getHeaders())) {
+          res.removeHeader(header)
+        }
 
         response.headers.forEach((value, key) => {
           res.setHeader(key, value)
