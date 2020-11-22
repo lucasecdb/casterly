@@ -65,7 +65,14 @@ class DefaultServer {
     return fileContent.toString()
   }
 
-  protected async handleRequest(req: Request) {
+  protected async handleRequest(req: Request, responseHeaders?: Headers) {
+    if (!(responseHeaders instanceof Headers)) {
+      console.warn(
+        'handleRequest did not receive a Headers instance for its second argument.'
+      )
+      responseHeaders = new Headers()
+    }
+
     const matches = [
       matchRoute<{ path: string }>({
         route: '/:path*',
@@ -170,7 +177,7 @@ class DefaultServer {
     }
 
     try {
-      return await this.renderDocument(req)
+      return await this.renderDocument(req, responseHeaders)
     } catch (err) {
       console.log('[ERROR]:', err)
       return new Response('error', {
@@ -244,14 +251,22 @@ class DefaultServer {
     return handleRequest
   }
 
-  private renderDocument = async (request: Request) => {
+  private renderDocument = async (
+    request: Request,
+    responseHeaders?: Headers
+  ) => {
     const serverContext = await this.getServerContextForRoute(request.url)
 
     global.fetch = require('make-fetch-happen')
 
     const handleRequest = await this.getAppRequestHandler()
 
-    let response = handleRequest(request, 200, request.headers, serverContext)
+    let response = handleRequest(
+      request,
+      200,
+      responseHeaders ?? new Headers(),
+      serverContext
+    )
 
     if ('then' in response) {
       response = await response
