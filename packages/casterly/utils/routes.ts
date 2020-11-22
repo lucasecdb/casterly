@@ -71,9 +71,11 @@ export const getMatchedRoutes = async ({
 
   const matchedRoutesAssets = Array.from(
     new Set(
-      matchedRoutes.flatMap((routeMatched) => {
-        return (routeMatched.route as RouteObjectWithAssets).assets
-      }) ?? []
+      (
+        matchedRoutes.flatMap((routeMatched) => {
+          return (routeMatched.route as RouteObjectWithAssets).assets
+        }) ?? []
+      ).filter((file) => !routesManifest.main.includes(file))
     )
   )
 
