@@ -167,10 +167,10 @@ export default class RoutesManifestPlugin {
                         Array.from(referencedChunk.files.values())
                       )
                       .filter((file) => file.indexOf('hot-update') === -1)
-                      .filter((file) => !mainAssets.includes(file))
                       .map((filePath) =>
                         !filePath.startsWith('/') ? '/' + filePath : filePath
                       )
+                      .filter((file) => !mainAssets.includes(file))
 
                     return referencedChunksFiles
                   })
