@@ -66,7 +66,10 @@ class DefaultServer {
   }
 
   protected async handleRequest(req: Request, responseHeaders?: Headers) {
-    if (!(responseHeaders instanceof Headers)) {
+    if (
+      responseHeaders !== undefined &&
+      !(responseHeaders instanceof Headers)
+    ) {
       console.warn(
         'handleRequest did not receive a Headers instance for its second argument.'
       )

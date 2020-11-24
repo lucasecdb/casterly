@@ -22,7 +22,7 @@ class DevServer extends DefaultServer {
     return Promise.resolve(undefined)
   }
 
-  protected async handleRequest(req: Request) {
+  protected async handleRequest(req: Request, responseHeaders?: Headers) {
     try {
       await fetch('http://localhost:8081/server-ready')
     } catch {
@@ -31,7 +31,7 @@ class DevServer extends DefaultServer {
       })
     }
 
-    return super.handleRequest(req)
+    return super.handleRequest(req, responseHeaders)
   }
 }
 
