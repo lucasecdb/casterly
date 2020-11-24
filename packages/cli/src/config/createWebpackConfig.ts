@@ -30,10 +30,10 @@ import RequireCacheHotReloaderPlugin from './webpack/plugins/RequireCacheHotRelo
 import SSRImportPlugin from './webpack/plugins/SSRImportPlugin'
 import RoutesManifestPlugin from './webpack/plugins/routes/RoutesManifestPlugin'
 import {
-  cssModuleRegex,
+  cssGlobalRegex,
   cssRegex,
   getStyleLoaders,
-  sassModuleRegex,
+  sassGlobalRegex,
   sassRegex,
 } from './webpack/styles'
 import { Options } from './webpack/types'
@@ -72,22 +72,32 @@ const getBaseWebpackConfig = async (
 
   const cssRules = [
     {
-      test: cssRegex,
+      test: cssGlobalRegex,
       use: cssConfig,
     },
     {
-      test: cssModuleRegex,
-      exclude: [cssRegex, /node_modules/],
+      test: cssRegex,
+      exclude: [cssGlobalRegex, /node_modules/],
       use: cssModuleConfig,
     },
     {
-      test: sassRegex,
+      test: cssRegex,
+      include: [{ not: [paths.appSrc] }],
+      use: cssConfig,
+    },
+    {
+      test: sassGlobalRegex,
       use: sassConfig,
     },
     {
-      test: sassModuleRegex,
-      exclude: [sassRegex, /node_modules/],
+      test: sassRegex,
+      exclude: [sassGlobalRegex, /node_modules/],
       use: sassModuleConfig,
+    },
+    {
+      test: sassRegex,
+      include: [{ not: [paths.appSrc] }],
+      use: sassConfig,
     },
   ]
 
