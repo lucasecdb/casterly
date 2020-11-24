@@ -10,10 +10,10 @@ interface StyleOptions extends Options {
 }
 
 // style files regexes
-export const cssRegex = /\.global\.css$/
-export const cssModuleRegex = /\.css$/
-export const sassRegex = /\.global\.(scss|sass)$/
-export const sassModuleRegex = /\.(scss|sass)$/
+export const cssGlobalRegex = /\.global\.css$/
+export const cssRegex = /\.css$/
+export const sassGlobalRegex = /\.global\.(scss|sass)$/
+export const sassRegex = /\.(scss|sass)$/
 
 // common function to get style loaders
 export const getStyleLoaders = ({
