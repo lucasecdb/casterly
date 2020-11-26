@@ -2,13 +2,17 @@ import { RoutesManifest } from '@casterly/cli'
 import * as React from 'react'
 import { RouteMatch, RouteObject, matchRoutes } from 'react-router'
 
-import { interopDefault } from '../server/utils'
+export type RouteModule = {
+  default: React.ComponentType
+  headers?: (headersParams: {
+    params: RouteMatch['params']
+    parentHeaders: Headers
+  }) => Record<string, string>
+}
 
 export type RoutePromiseComponent = {
   caseSensitive?: boolean
-  component: () => Promise<
-    React.ComponentType | { default: React.ComponentType }
-  >
+  component: () => Promise<RouteModule>
   path: string
   children?: RoutePromiseComponent[]
   props?: Record<string, unknown>
@@ -18,6 +22,7 @@ export type RouteObjectWithAssets = RouteObject & {
   children?: RouteObjectWithAssets[]
   assets: string[]
   componentName: string | number
+  headers: RouteModule['headers']
   key: number
 }
 
@@ -36,13 +41,13 @@ export const mergeRouteAssetsAndRoutes = (
           )
         : []
 
+      const routeComponentModule = await route.component()
+
       return {
         ...route,
         caseSensitive: route.caseSensitive === true,
-        element: React.createElement(
-          await route.component().then(interopDefault),
-          route.props
-        ),
+        element: React.createElement(routeComponentModule.default, route.props),
+        headers: routeComponentModule.headers,
         assets: routesManifestRoutes[index].assets ?? [],
         componentName: routesManifestRoutes[index].componentName,
         children,
@@ -69,6 +74,17 @@ export const getMatchedRoutes = async ({
   const matchedRoutes = (matchRoutes(routes, location) ??
     []) as RouteMatchWithKey[]
 
+  const routeHeaders = matchedRoutes.reduce(
+    (headers, matchedRoute) =>
+      new Headers(
+        matchedRoute.route.headers?.({
+          params: matchedRoute.params,
+          parentHeaders: headers,
+        }) ?? headers
+      ),
+    new Headers()
+  )
+
   const matchedRoutesAssets = Array.from(
     new Set(
       (
@@ -79,5 +95,5 @@ export const getMatchedRoutes = async ({
     )
   )
 
-  return { routes, matchedRoutes, matchedRoutesAssets }
+  return { routes, matchedRoutes, matchedRoutesAssets, routeHeaders }
 }

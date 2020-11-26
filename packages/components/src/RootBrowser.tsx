@@ -76,6 +76,89 @@ const mergeRoutes = (
   return routes.sort((routeA, routeB) => routeA.key - routeB.key)
 }
 
+const addScript = (scriptAsset: string) => {
+  if (document.querySelector(`script[src="${scriptAsset}"]`)) {
+    return Promise.resolve()
+  }
+
+  const script = document.createElement('script')
+
+  return new Promise((resolve, reject) => {
+    script.src = scriptAsset
+    script.defer = true
+    script.onload = resolve
+    script.onerror = reject
+
+    document.body.appendChild(script)
+  })
+}
+
+const addStylesheet = (styleAsset: string) => {
+  if (document.querySelector(`link[href="${styleAsset}"]`)) {
+    return Promise.resolve()
+  }
+
+  const link = document.createElement('link')
+
+  return new Promise((resolve, reject) => {
+    link.href = styleAsset
+    link.type = 'text/css'
+    link.rel = 'stylesheet'
+    link.onload = resolve
+    link.onerror = reject
+
+    document.head.appendChild(link)
+  })
+}
+
+const fetchRouteData = async (path: string, version: string | null) => {
+  const res = await fetch(
+    `/__route-manifest?${new URLSearchParams({
+      path,
+      v: version ?? '',
+    })}`
+  )
+
+  if (res.status === 200 && res.headers.get('Etag') === version) {
+    return res.json() as Promise<Omit<RootContext, 'routes'>>
+  }
+
+  return null
+}
+
+const fetchRouteAssets = async (
+  path: string,
+  version: string | null,
+  reloadOnMismatch = process.env.NODE_ENV === 'production'
+) => {
+  const routeClientContext = await fetchRouteData(path, version)
+
+  if (!routeClientContext && reloadOnMismatch) {
+    window.location.reload()
+    return { routes: [] }
+  } else if (!routeClientContext) {
+    return { routes: [] }
+  }
+
+  const scriptAssets = routeClientContext.matchedRoutesAssets.filter((file) =>
+    file.endsWith('.js')
+  )
+  const styleAssets = routeClientContext.matchedRoutesAssets.filter((file) =>
+    file.endsWith('.css')
+  )
+
+  await Promise.all(
+    scriptAssets.map(addScript).concat(styleAssets.map(addStylesheet))
+  )
+
+  const routes = routeClientContext.matchedRoutes.reduceRight(
+    parseRouteMatch,
+    []
+  )
+
+  return { routes }
+}
+
 const InternalRoot: React.FC<RouterProps> = ({
   location,
   action,
@@ -113,89 +196,35 @@ const InternalRoot: React.FC<RouterProps> = ({
 
     setRoutePending(true)
 
-    fetch(
-      `/__route-manifest?${new URLSearchParams({
-        path: location.pathname,
-        v: context.version ?? '',
-      })}`
-    )
-      .then((res) => res.json())
-      .then((routeClientContext: Omit<RootContext, 'routes'>) => {
+    const handleRouteChange = async () => {
+      try {
+        const { routes } = await fetchRouteAssets(
+          location.pathname,
+          context.version
+        )
+
         if (cancelled) {
           return
         }
 
-        const scriptAssets = routeClientContext.matchedRoutesAssets.filter(
-          (file) => file.endsWith('.js')
-        )
-        const styleAssets = routeClientContext.matchedRoutesAssets.filter(
-          (file) => file.endsWith('.css')
-        )
-
-        Promise.all(
-          scriptAssets
-            .map((scriptAsset) => {
-              if (document.querySelector(`script[src="${scriptAsset}"]`)) {
-                return Promise.resolve()
-              }
-
-              const script = document.createElement('script')
-
-              return new Promise((resolve, reject) => {
-                script.src = scriptAsset
-                script.defer = true
-                script.onload = resolve
-                script.onerror = reject
-
-                document.body.appendChild(script)
-              })
-            })
-            .concat(
-              styleAssets.map((styleAsset) => {
-                if (document.querySelector(`link[href="${styleAsset}"]`)) {
-                  return Promise.resolve()
-                }
-
-                const link = document.createElement('link')
-
-                return new Promise((resolve, reject) => {
-                  link.href = styleAsset
-                  link.type = 'text/css'
-                  link.rel = 'stylesheet'
-                  link.onload = resolve
-                  link.onerror = reject
-
-                  document.head.appendChild(link)
-                })
-              })
-            )
-        ).then(() => {
-          if (cancelled) {
-            return
-          }
-
-          const routes = routeClientContext.matchedRoutes.reduceRight(
-            parseRouteMatch,
-            []
-          )
-
-          setContext((prevContext) => ({
-            ...prevContext,
-            routes: mergeRoutes(prevContext.routes, routes),
-          }))
-          setStateLocation(location)
-          setRoutePending(false)
-        })
-      })
-      .catch(() => {
+        setContext((prevContext) => ({
+          ...prevContext,
+          routes: mergeRoutes(prevContext.routes, routes),
+        }))
         setStateLocation(location)
         setRoutePending(false)
-      })
+      } catch {
+        setStateLocation(location)
+        setRoutePending(false)
+      }
+    }
+
+    handleRouteChange()
 
     return () => {
       cancelled = true
     }
-  }, [location])
+  }, [location, context.version])
 
   return (
     <RootContextProvider value={context}>
