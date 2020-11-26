@@ -26,7 +26,6 @@ import {
 import getClientEnvironment from './env'
 import * as paths from './paths'
 import { createOptimizationConfig } from './webpack/optimization'
-import RequireCacheHotReloaderPlugin from './webpack/plugins/RequireCacheHotReloaderPlugin'
 import SSRImportPlugin from './webpack/plugins/SSRImportPlugin'
 import RoutesManifestPlugin from './webpack/plugins/routes/RoutesManifestPlugin'
 import {
@@ -466,9 +465,6 @@ const getBaseWebpackConfig = async (
       // Enable HMR for react components
       dev && !isServer && new webpack.HotModuleReplacementPlugin(),
       dev && !isServer && new ReactRefreshWebpackPlugin(),
-      // Even though require.cache is server only we have to clear assets from both compilations
-      // This is because the client compilation generates the asset manifest that's used on the server side
-      dev && new RequireCacheHotReloaderPlugin(),
       routesManifestPluginInstance,
       !isServer && hasServiceWorker && createWorkboxPlugin({ dev, isServer }),
       // Fix dynamic imports on server bundle

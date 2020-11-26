@@ -5,6 +5,7 @@ import { constants, paths } from '@casterly/cli'
 import fetch from 'make-fetch-happen'
 
 import { _private_DefaultServer as DefaultServer } from './defaultServer'
+import { readJSON } from './utils'
 
 class DevServer extends DefaultServer {
   constructor() {
@@ -12,10 +13,9 @@ class DevServer extends DefaultServer {
   }
 
   protected getRoutesManifestFile = () => {
-    return require(path.join(
-      paths.appBuildFolder,
-      constants.ROUTES_MANIFEST_FILE
-    ))
+    return readJSON(
+      path.join(paths.appBuildFolder, constants.ROUTES_MANIFEST_FILE)
+    )
   }
 
   protected getBuildId() {

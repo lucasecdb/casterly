@@ -13,6 +13,7 @@ import { serveStatic } from './serveStatic'
 import {
   interopDefault,
   isPreconditionFailure,
+  readJSON,
   requestContainsPrecondition,
   requestHeadersToNodeHeaders,
 } from './utils'
@@ -23,11 +24,6 @@ const {
   STATIC_ENTRYPOINTS_ROUTES,
   STATIC_RUNTIME_MAIN,
 } = constants
-
-const readJSON = (filePath: string) => {
-  const file = fs.readFileSync(filePath)
-  return JSON.parse(file.toString())
-}
 
 export interface ServerOptions {
   dev?: boolean
