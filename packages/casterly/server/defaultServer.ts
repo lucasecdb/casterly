@@ -25,6 +25,10 @@ const {
   STATIC_RUNTIME_MAIN,
 } = constants
 
+interface ServerContext extends RootContext {
+  routeHeaders: Headers
+}
+
 export interface ServerOptions {
   dev?: boolean
 }
@@ -53,7 +57,7 @@ class DefaultServer {
     return this.handleRequest.bind(this)
   }
 
-  protected async getBuildId(): Promise<string | undefined> {
+  protected async getBuildId(): Promise<string | null> {
     const fileContent = await fs.promises.readFile(
       path.join(paths.appBuildFolder, BUILD_ID_FILE)
     )
@@ -131,7 +135,11 @@ class DefaultServer {
               })
             }
 
-            if (fresh(requestHeadersToNodeHeaders(req.headers), { etag })) {
+            if (
+              fresh(requestHeadersToNodeHeaders(req.headers), {
+                etag: etag ?? undefined,
+              })
+            ) {
               return new Response(null, {
                 status: 304,
                 headers,
@@ -152,6 +160,7 @@ class DefaultServer {
 
             const {
               routes,
+              routeHeaders,
               ...clientContext
             } = await this.getServerContextForRoute(url.pathname!)
 
@@ -201,13 +210,14 @@ class DefaultServer {
       routes,
       matchedRoutes,
       matchedRoutesAssets,
+      routeHeaders,
     } = await getMatchedRoutes({
       location: url,
       routesPromiseComponent: appRoutesPromises,
       routesManifest,
     })
 
-    const serverContext: RootContext = {
+    const serverContext: ServerContext = {
       version: await this.getBuildId(),
       routes,
       matchedRoutes: matchedRoutes.map((routeMatch) => {
@@ -230,6 +240,7 @@ class DefaultServer {
       }),
       matchedRoutesAssets,
       mainAssets: routesManifest.main,
+      routeHeaders,
     }
 
     return serverContext
@@ -254,18 +265,19 @@ class DefaultServer {
     request: Request,
     responseHeaders?: Headers
   ) => {
+    const headers = new Headers(responseHeaders)
+
     const serverContext = await this.getServerContextForRoute(request.url)
+
+    serverContext.routeHeaders?.forEach((value, key) => {
+      headers.set(key, value)
+    })
 
     global.fetch = require('make-fetch-happen')
 
     const handleRequest = await this.getAppRequestHandler()
 
-    let response = handleRequest(
-      request,
-      200,
-      responseHeaders ?? new Headers(),
-      serverContext
-    )
+    let response = handleRequest(request, 200, headers, serverContext)
 
     if ('then' in response) {
       response = await response

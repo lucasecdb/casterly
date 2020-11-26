@@ -19,7 +19,7 @@ class DevServer extends DefaultServer {
   }
 
   protected getBuildId() {
-    return Promise.resolve(undefined)
+    return Promise.resolve(null)
   }
 
   protected async handleRequest(req: Request, responseHeaders?: Headers) {

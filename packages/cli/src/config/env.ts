@@ -7,7 +7,7 @@ import * as paths from './paths'
 delete require.cache[require.resolve('./paths')]
 
 if (!process.env.NODE_ENV) {
-  process.env.NODE_ENV = 'development'
+  process.env.NODE_ENV = 'production'
 }
 
 const NODE_ENV = process.env.NODE_ENV
@@ -54,9 +54,9 @@ process.env.NODE_PATH = (process.env.NODE_PATH || '')
   .map((folder) => path.resolve(appDirectory, folder))
   .join(path.delimiter)
 
-// Grab NODE_ENV and REACT_APP_* environment variables and prepare them to be
+// Grab NODE_ENV and CASTERLY_PUBLIC_* environment variables and prepare them to be
 // injected into the application via DefinePlugin in Webpack configuration.
-const REACT_APP = /^REACT_APP_/i
+const CASTERLY_PUBLIC = /^CASTERLY_PUBLIC_/i
 
 interface Env {
   [key: string]: string
@@ -67,11 +67,11 @@ function getClientEnvironment({ isServer = false, worker = false } = {}) {
   const baseEnv: Env = {
     // Useful for determining whether we’re running in production mode.
     // Most importantly, it switches React into the correct mode.
-    NODE_ENV: process.env.NODE_ENV || 'development',
+    NODE_ENV: process.env.NODE_ENV!,
   }
 
   const raw = Object.keys(process.env)
-    .filter((key) => REACT_APP.test(key))
+    .filter((key) => CASTERLY_PUBLIC.test(key))
     .reduce((env, key) => {
       env[key] = process.env[key]!
       return env

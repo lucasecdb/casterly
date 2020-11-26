@@ -10,7 +10,7 @@ export type RouteObjectWithKey = RouteObject & {
 export type RouteMatchWithKey = RouteMatch & { route: RouteObjectWithKey }
 
 export interface RootContext {
-  version?: string
+  version: string | null
   routes: RouteObjectWithKey[]
   matchedRoutes: RouteMatchWithKey[]
   matchedRoutesAssets: string[]
