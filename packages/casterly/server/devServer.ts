@@ -31,6 +31,12 @@ class DevServer extends DefaultServer {
       })
     }
 
+    for (const key in require.cache) {
+      if (key.startsWith(paths.appServerBuildFolder)) {
+        delete require.cache[key]
+      }
+    }
+
     return super.handleRequest(req, responseHeaders)
   }
 }
