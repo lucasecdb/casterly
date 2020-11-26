@@ -1,3 +1,10 @@
+import * as fs from 'fs'
+
+export const readJSON = (filePath: string) => {
+  const file = fs.readFileSync(filePath)
+  return JSON.parse(file.toString())
+}
+
 export function interopDefault(mod: any) {
   return mod.default || mod
 }
