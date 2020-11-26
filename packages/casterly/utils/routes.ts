@@ -2,12 +2,18 @@ import { RoutesManifest } from '@casterly/cli'
 import * as React from 'react'
 import { RouteMatch, RouteObject, matchRoutes } from 'react-router'
 
+export type MetaConfig = {
+  title?: string
+  [key: string]: string | undefined
+}
+
 export type RouteModule = {
   default: React.ComponentType
   headers?: (headersParams: {
     params: RouteMatch['params']
     parentHeaders: Headers
   }) => Record<string, string>
+  meta?: (metaParams: { params: RouteMatch['params'] }) => MetaConfig
 }
 
 export type RoutePromiseComponent = {
@@ -22,6 +28,7 @@ export type RouteObjectWithAssets = RouteObject & {
   children?: RouteObjectWithAssets[]
   assets: string[]
   componentName: string | number
+  meta: RouteModule['meta']
   headers: RouteModule['headers']
   key: number
 }
@@ -48,6 +55,7 @@ export const mergeRouteAssetsAndRoutes = (
         caseSensitive: route.caseSensitive === true,
         element: React.createElement(routeComponentModule.default, route.props),
         headers: routeComponentModule.headers,
+        meta: routeComponentModule.meta,
         assets: routesManifestRoutes[index].assets ?? [],
         componentName: routesManifestRoutes[index].componentName,
         children,
@@ -85,6 +93,14 @@ export const getMatchedRoutes = async ({
     new Headers()
   )
 
+  const routeMeta = matchedRoutes.reduce<MetaConfig>(
+    (meta, matchedRoute) => ({
+      ...meta,
+      ...matchedRoute.route.meta?.({ params: matchedRoute.params }),
+    }),
+    {}
+  )
+
   const matchedRoutesAssets = Array.from(
     new Set(
       (
@@ -95,5 +111,5 @@ export const getMatchedRoutes = async ({
     )
   )
 
-  return { routes, matchedRoutes, matchedRoutesAssets, routeHeaders }
+  return { routes, matchedRoutes, matchedRoutesAssets, routeHeaders, routeMeta }
 }

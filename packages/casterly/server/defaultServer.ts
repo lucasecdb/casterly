@@ -7,7 +7,11 @@ import { RootContext } from '@casterly/components'
 import fresh from 'fresh'
 
 import { MAX_AGE_LONG } from '../utils/maxAge'
-import { RoutePromiseComponent, getMatchedRoutes } from '../utils/routes'
+import {
+  MetaConfig,
+  RoutePromiseComponent,
+  getMatchedRoutes,
+} from '../utils/routes'
 import matchRoute from './matchRoute'
 import { serveStatic } from './serveStatic'
 import {
@@ -27,6 +31,7 @@ const {
 
 interface ServerContext extends RootContext {
   routeHeaders: Headers
+  routeMeta: MetaConfig
 }
 
 export interface ServerOptions {
@@ -161,6 +166,7 @@ class DefaultServer {
             const {
               routes,
               routeHeaders,
+              routeMeta,
               ...clientContext
             } = await this.getServerContextForRoute(url.pathname!)
 
@@ -211,6 +217,7 @@ class DefaultServer {
       matchedRoutes,
       matchedRoutesAssets,
       routeHeaders,
+      routeMeta,
     } = await getMatchedRoutes({
       location: url,
       routesPromiseComponent: appRoutesPromises,
@@ -241,6 +248,7 @@ class DefaultServer {
       matchedRoutesAssets,
       mainAssets: routesManifest.main,
       routeHeaders,
+      routeMeta,
     }
 
     return serverContext

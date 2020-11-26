@@ -5,9 +5,16 @@ export type RouteObjectWithKey = RouteObject & {
   key: number
   children?: RouteObjectWithKey[]
   props?: Record<string, unknown>
+  meta?: (metaParams: { params: RouteMatch['params'] }) => MetaConfig
+  params?: RouteMatch['params']
 }
 
 export type RouteMatchWithKey = RouteMatch & { route: RouteObjectWithKey }
+
+export type MetaConfig = {
+  title?: string
+  [key: string]: string | undefined
+}
 
 export interface RootContext {
   version: string | null
@@ -15,6 +22,7 @@ export interface RootContext {
   matchedRoutes: RouteMatchWithKey[]
   matchedRoutesAssets: string[]
   mainAssets: string[]
+  routeMeta?: MetaConfig
 }
 
 const ctx = React.createContext<RootContext | null>(null)

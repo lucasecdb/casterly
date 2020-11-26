@@ -6,9 +6,10 @@ import React, {
   useRef,
   useState,
 } from 'react'
-import { Router, RouterProps } from 'react-router'
+import { RouteMatch, Router, RouterProps } from 'react-router'
 
 import {
+  MetaConfig,
   RootContext,
   RootContextProvider,
   RouteMatchWithKey,
@@ -29,19 +30,22 @@ const parseRouteMatch = (
   routes: RouteObjectWithKey[],
   routeMatch: RouteMatchWithKey
 ): RouteObjectWithKey[] => {
-  const { route } = routeMatch
+  const { route, params } = routeMatch
 
   const routeEntrypoint = (route as any).componentName as string
 
-  const { default: Component } = __webpack_require__(routeEntrypoint) as {
+  const { default: Component, meta } = __webpack_require__(routeEntrypoint) as {
     default: React.ComponentType
+    meta?: (metaParams: { params: RouteMatch['params'] }) => MetaConfig
   }
 
   return [
     {
       ...route,
       element: <Component {...route.props} />,
+      meta,
       children: routes,
+      params,
     },
   ]
 }
@@ -120,7 +124,7 @@ const fetchRouteData = async (path: string, version: string | null) => {
   )
 
   if (res.status === 200 && res.headers.get('Etag') === version) {
-    return res.json() as Promise<Omit<RootContext, 'routes'>>
+    return res.json() as Promise<Omit<RootContext, 'routes' | 'routeMeta'>>
   }
 
   return null
@@ -156,7 +160,13 @@ const fetchRouteAssets = async (
     []
   )
 
-  return { routes }
+  const routeMeta = routes.reduce(
+    (meta, route) =>
+      Object.assign({}, meta, route.meta?.({ params: route.params! })),
+    {}
+  )
+
+  return { routes, routeMeta }
 }
 
 const InternalRoot: React.FC<RouterProps> = ({
@@ -198,7 +208,7 @@ const InternalRoot: React.FC<RouterProps> = ({
 
     const handleRouteChange = async () => {
       try {
-        const { routes } = await fetchRouteAssets(
+        const { routes, routeMeta } = await fetchRouteAssets(
           location.pathname,
           context.version
         )
@@ -210,6 +220,7 @@ const InternalRoot: React.FC<RouterProps> = ({
         setContext((prevContext) => ({
           ...prevContext,
           routes: mergeRoutes(prevContext.routes, routes),
+          routeMeta,
         }))
         setStateLocation(location)
         setRoutePending(false)

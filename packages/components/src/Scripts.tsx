@@ -23,6 +23,7 @@ export const Scripts: React.FC<Omit<
     matchedRoutesAssets,
     matchedRoutes,
     mainAssets,
+    routeMeta,
     version,
   } = useRootContext()
 
@@ -42,6 +43,7 @@ export const Scripts: React.FC<Omit<
                 matchedRoutesAssets,
                 matchedRoutes,
                 mainAssets,
+                routeMeta,
               })
             ) +
             ')',
