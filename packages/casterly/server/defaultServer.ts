@@ -199,6 +199,10 @@ class DefaultServer {
 
   protected getRoutesManifestFile = (): RoutesManifest => this._routesManifest
 
+  protected getDevServerPort(): undefined | number {
+    return undefined
+  }
+
   private getServerContextForRoute = async (url: string) => {
     const routesManifest = this.getRoutesManifestFile()
 
@@ -219,6 +223,7 @@ class DefaultServer {
 
     const serverContext: ServerContext = {
       version: await this.getBuildId(),
+      devServerPort: this.getDevServerPort(),
       routes,
       matchedRoutes: matchedRoutes.map((routeMatch) => {
         const {

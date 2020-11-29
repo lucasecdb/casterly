@@ -1,6 +1,8 @@
 import * as fs from 'fs'
 import * as path from 'path'
 
+import { defaultConfig, userConfig } from './userConfig'
+
 const appDirectory = fs.realpathSync(process.cwd())
 const resolveApp = (relativePath: string) =>
   path.resolve(appDirectory, relativePath)
@@ -30,7 +32,9 @@ export const resolveModule = (resolveFn = resolveApp, filePath: string) => {
 export const dotenv = resolveApp('.env')
 
 export const appPath = resolveApp('.')
-export const appBuildFolder = resolveApp('.dist')
+export const appBuildFolder = resolveApp(
+  userConfig.buildFolder ?? defaultConfig.buildFolder
+)
 export const appServerBuildFolder = path.join(appBuildFolder, 'server')
 export const appPublicBuildFolder = path.join(appBuildFolder, 'public')
 export const appPublic = resolveApp('public')
