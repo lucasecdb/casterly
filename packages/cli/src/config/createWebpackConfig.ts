@@ -41,7 +41,8 @@ import { createWorkboxPlugin } from './webpack/workbox'
 const getBaseWebpackConfig = async (
   options?: Options
 ): Promise<Configuration> => {
-  const { isServer = false, dev = false, profile = false } = options ?? {}
+  const { isServer = false, dev = false, profile = false, configFn } =
+    options ?? {}
 
   // Get environment variables to inject into our app.
   const env = getClientEnvironment({ isServer })
@@ -250,7 +251,7 @@ const getBaseWebpackConfig = async (
     paths.appBrowserEntry,
   ]
 
-  return {
+  let config: Configuration = {
     mode: webpackMode,
     name: isServer ? 'server' : 'client',
     target: isServer ? 'node' : 'web',
@@ -500,6 +501,12 @@ const getBaseWebpackConfig = async (
         }),
     ].filter(filterBoolean),
   }
+
+  if (configFn) {
+    config = configFn(config, { isServer, dev })
+  }
+
+  return config
 }
 
 export default getBaseWebpackConfig

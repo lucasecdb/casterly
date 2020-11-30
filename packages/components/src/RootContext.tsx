@@ -15,6 +15,7 @@ export interface RootContext {
   matchedRoutes: RouteMatchWithKey[]
   matchedRoutesAssets: string[]
   mainAssets: string[]
+  devServerPort?: number
 }
 
 const ctx = React.createContext<RootContext | null>(null)

@@ -3,15 +3,16 @@ const log = (...messages) => {
 }
 
 class HMRClient {
-  constructor() {
+  constructor(devServerPort) {
     this.es = null
     this.lastHash = null
+    this.port = devServerPort
 
     window.addEventListener('beforeunload', this.close)
   }
 
   init = () => {
-    const es = new EventSource('http://localhost:8081/__webpack-hmr')
+    const es = new EventSource(`http://localhost:${this.port}/__webpack-hmr`)
 
     this.es = es
 
@@ -112,6 +113,6 @@ class HMRClient {
   }
 }
 
-const hmrClient = new HMRClient()
+const hmrClient = new HMRClient(window.__serverContext.devServerPort)
 
 hmrClient.init()

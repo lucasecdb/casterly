@@ -5,12 +5,15 @@ import whm from 'webpack-hot-middleware'
 
 import { paths } from '..'
 import createWebpackConfig from '../config/createWebpackConfig'
+import { defaultConfig, userConfig } from '../config/userConfig'
 import { logStore } from '../output/logger'
 import { watchCompilers } from '../output/watcher'
 import fileExists from '../utils/fileExists'
 
 export default async function startWatch() {
   process.env.NODE_ENV = 'development'
+
+  const webpackConfigFn = userConfig.webpack
 
   const app = express()
 
@@ -25,11 +28,13 @@ export default async function startWatch() {
     const clientConfig = await createWebpackConfig({
       dev: true,
       isServer: false,
+      configFn: webpackConfigFn,
     })
 
     const serverConfig = await createWebpackConfig({
       dev: true,
       isServer: true,
+      configFn: webpackConfigFn,
     })
 
     const multiCompiler = webpack([clientConfig, serverConfig])
@@ -64,7 +69,9 @@ export default async function startWatch() {
     })
   })
 
-  app.listen(8081, () => {
-    logStore.setState({ port: 8081 })
+  const port = userConfig.buildServer?.port ?? defaultConfig.buildServer.port
+
+  app.listen(port, () => {
+    logStore.setState({ port })
   })
 }

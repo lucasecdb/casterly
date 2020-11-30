@@ -1,6 +1,6 @@
 import * as path from 'path'
 
-import { constants, paths } from '@casterly/cli'
+import { config, constants, paths } from '@casterly/cli'
 // @ts-ignore
 import fetch from 'make-fetch-happen'
 
@@ -22,9 +22,16 @@ class DevServer extends DefaultServer {
     return Promise.resolve(null)
   }
 
+  protected getDevServerPort() {
+    return (
+      config.userConfig.buildServer?.port ??
+      config.defaultConfig.buildServer.port
+    )
+  }
+
   protected async handleRequest(req: Request, responseHeaders?: Headers) {
     try {
-      await fetch('http://localhost:8081/server-ready')
+      await fetch(`http://localhost:${this.getDevServerPort()}/server-ready`)
     } catch {
       return new Response("The build server isn't running.", {
         status: 500,

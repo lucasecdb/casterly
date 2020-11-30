@@ -176,10 +176,6 @@ const InternalRoot: React.FC<RouterProps> = ({
     }
   })
 
-  useEffect(() => {
-    delete window.__serverContext
-  }, [])
-
   const [stateLocation, setStateLocation] = useState(location)
   const [routePending, setRoutePending] = useState(false)
 
