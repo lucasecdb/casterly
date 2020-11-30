@@ -1,6 +1,6 @@
 {
   "name": "casterly",
-  "version": "0.4.4",
+  "version": "0.4.5",
   "license": "MIT",
   "files": [
     "lib",
@@ -35,7 +35,7 @@
     "path-to-regexp": "^6.1.0"
   },
   "devDependencies": {
-    "@casterly/components": "^0.4.2",
+    "@casterly/components": "^0.4.5",
     "@types/etag": "^1.8.0",
     "@types/fresh": "^0.5.0",
     "@types/mime": "^2.0.3",
