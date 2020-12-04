@@ -36,7 +36,6 @@ import {
   sassRegex,
 } from './webpack/styles'
 import { Options } from './webpack/types'
-import { createWorkboxPlugin } from './webpack/workbox'
 
 const getBaseWebpackConfig = async (
   options?: Options
@@ -120,8 +119,6 @@ const getBaseWebpackConfig = async (
 
   const useTypescript =
     !!typescriptPath && (await fileExists(paths.appTsConfig))
-
-  const hasServiceWorker = await fileExists(paths.appServiceWorker)
 
   const chunkFilename = dev ? '[name]' : '[name].[contenthash]'
   const extractedCssFilename = dev ? '[name]' : '[name].[contenthash:8]'
@@ -467,7 +464,6 @@ const getBaseWebpackConfig = async (
       dev && !isServer && new webpack.HotModuleReplacementPlugin(),
       dev && !isServer && new ReactRefreshWebpackPlugin(),
       routesManifestPluginInstance,
-      !isServer && hasServiceWorker && createWorkboxPlugin({ dev, isServer }),
       // Fix dynamic imports on server bundle
       isServer && new SSRImportPlugin(),
       // Watcher doesn't work well if you mistype casing in a path so we use
