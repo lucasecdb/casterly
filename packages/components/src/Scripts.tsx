@@ -2,13 +2,15 @@ import React from 'react'
 
 import { useRootContext } from './RootContext'
 
-export const Scripts: React.FC<Omit<
-  React.DetailedHTMLProps<
-    React.ScriptHTMLAttributes<HTMLScriptElement>,
-    HTMLScriptElement
-  >,
-  'src' | 'type' | 'async'
->> = ({
+export const Scripts: React.FC<
+  Omit<
+    React.DetailedHTMLProps<
+      React.ScriptHTMLAttributes<HTMLScriptElement>,
+      HTMLScriptElement
+    >,
+    'src' | 'type' | 'async'
+  >
+> = ({
   nonce,
   // @ts-ignore: You could still pass them if you're
   // using pure JavaScript
