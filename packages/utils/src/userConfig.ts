@@ -55,7 +55,7 @@ export const loadUserConfig = (dir: string): CasterlyConfig => {
   const configWithDifferentExtension = ['.tsx', '.ts', '.jsx', '.json']
     .map((ext) => join(dir, configFileBasename + ext))
     .map(fileExistsSync)
-    .every(Boolean)
+    .some(Boolean)
 
   if (configWithDifferentExtension) {
     console.warn(
