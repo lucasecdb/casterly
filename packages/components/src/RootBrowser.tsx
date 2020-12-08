@@ -119,7 +119,9 @@ const fetchRouteData = async (path: string, version: string | null) => {
     })}`
   )
 
-  if (res.status === 200 && res.headers.get('Etag') === version) {
+  const resEtag = res.headers.get('Etag')?.match(/W\/"(.*)"/)?.[1]
+
+  if (res.status === 200 && resEtag === version) {
     return res.json() as Promise<Omit<RootContext, 'routes'>>
   }
 
