@@ -7,10 +7,6 @@ const appDirectory = fs.realpathSync(process.cwd())
 const resolveApp = (relativePath: string) =>
   path.resolve(appDirectory, relativePath)
 
-const serverDirectory = path.resolve(__dirname, '..')
-const resolveServer = (relativePath: string) =>
-  path.resolve(serverDirectory, relativePath)
-
 export const moduleFileExtensions = ['mjs', 'js', 'json', 'jsx']
 
 export const typescriptFileExtensions = ['ts', 'tsx']
@@ -59,6 +55,3 @@ const buildNodePath = (basePath: string) => {
 }
 
 export const appNodePath = buildNodePath(appPath)
-
-export const serverPath = resolveServer('.')
-export const serverClientHot = resolveServer('client/hot.js')
