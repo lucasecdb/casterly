@@ -1,7 +1,8 @@
 import { promises as fsp } from 'fs'
 import * as path from 'path'
 
-import fileExists from './fileExists'
+import { fileExists } from '@casterly/utils'
+
 import resolveRequest from './resolveRequest'
 
 const PACKAGE_JSON = 'package.json'

@@ -27,6 +27,7 @@
     "url": "https://github.com/lucasecdb/casterly/issues"
   },
   "dependencies": {
+    "@casterly/utils": "^0.4.5",
     "etag": "^1.8.1",
     "fresh": "^0.5.2",
     "history": "^5.0.0",
@@ -57,5 +58,10 @@
     "react-dom": "^16.9.0 || ^17.0.0",
     "react-router": "^6.0.0-beta.0",
     "react-router-dom": "^6.0.0-beta.0"
+  },
+  "peerDependenciesMeta": {
+    "@casterly/cli": {
+      "optional": true
+    }
   }
 }

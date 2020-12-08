@@ -1,6 +1,6 @@
 import fs, { promises as fsp } from 'fs'
 
-const fileExists = async (filePath: string) => {
+export const fileExists = async (filePath: string) => {
   try {
     await fsp.access(filePath, fs.constants.F_OK)
     return true
@@ -25,5 +25,3 @@ export const fileExistsSync = (filePath: string) => {
     throw err
   }
 }
-
-export default fileExists
