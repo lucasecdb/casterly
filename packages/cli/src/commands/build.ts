@@ -18,7 +18,7 @@ import { formatWebpackMessages } from '../build/formatWebpackMessages'
 import { checkRequiredFiles, printBuildError } from '../build/utils'
 import { BUILD_ID_FILE } from '../config/constants'
 import getBaseWebpackConfig from '../config/createWebpackConfig'
-import * as paths from '../config/paths'
+import paths from '../config/paths'
 
 // Makes the script crash on unhandled rejections instead of silently
 // ignoring them. In the future, promise rejections that are not handled will

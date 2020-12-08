@@ -1,6 +1,7 @@
 import { realpathSync } from 'fs'
 import path from 'path'
 
+import { fileExists } from '@casterly/utils'
 import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin'
 // @ts-ignore: typings not up-to-date
 import CaseSensitivePathsPlugin from 'case-sensitive-paths-webpack-plugin'
@@ -11,7 +12,6 @@ import semver from 'semver'
 import webpack, { Compiler, Configuration } from 'webpack'
 
 import { getDependencyVersion } from '../utils/dependencies'
-import fileExists from '../utils/fileExists'
 import { filterBoolean } from '../utils/filterBoolean'
 import resolveRequest from '../utils/resolveRequest'
 import {
@@ -24,7 +24,7 @@ import {
   STATIC_WEBPACK_PATH,
 } from './constants'
 import getClientEnvironment from './env'
-import * as paths from './paths'
+import paths from './paths'
 import { createOptimizationConfig } from './webpack/optimization'
 import SSRImportPlugin from './webpack/plugins/SSRImportPlugin'
 import RoutesManifestPlugin from './webpack/plugins/routes/RoutesManifestPlugin'

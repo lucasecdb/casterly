@@ -1,3 +1,4 @@
+import { fileExists } from '@casterly/utils'
 import cors from 'cors'
 import express from 'express'
 import { webpack } from 'webpack'
@@ -8,7 +9,6 @@ import createWebpackConfig from '../config/createWebpackConfig'
 import { defaultConfig, userConfig } from '../config/userConfig'
 import { logStore } from '../output/logger'
 import { watchCompilers } from '../output/watcher'
-import fileExists from '../utils/fileExists'
 
 export default async function startWatch() {
   process.env.NODE_ENV = 'development'

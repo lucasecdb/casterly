@@ -1,6 +1,6 @@
 import * as path from 'path'
 
-import { config, constants, paths } from '@casterly/cli'
+import { config, constants, paths } from '@casterly/utils'
 // @ts-ignore
 import fetch from 'make-fetch-happen'
 

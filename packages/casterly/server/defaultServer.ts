@@ -2,8 +2,9 @@ import * as fs from 'fs'
 import * as path from 'path'
 import { parse as parseUrl } from 'url'
 
-import { RoutesManifest, constants, paths } from '@casterly/cli'
+import type { RoutesManifest } from '@casterly/cli'
 import { RootContext } from '@casterly/components'
+import { constants, paths } from '@casterly/utils'
 import fresh from 'fresh'
 
 import { MAX_AGE_LONG } from '../utils/maxAge'

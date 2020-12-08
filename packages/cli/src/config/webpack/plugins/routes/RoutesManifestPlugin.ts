@@ -9,7 +9,7 @@ import {
   STATIC_RUNTIME_HOT,
   STATIC_RUNTIME_MAIN,
 } from '../../../constants'
-import * as paths from '../../../paths'
+import paths from '../../../paths'
 import RouteAssetsChildPlugin from './RouteAssetsChildPlugin'
 import RouteModuleIdCollectorImportDependencyTemplate from './RouteModuleIdCollectorImportDependencyTemplate'
 import {

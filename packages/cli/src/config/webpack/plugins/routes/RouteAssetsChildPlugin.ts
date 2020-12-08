@@ -5,7 +5,7 @@ import ImportDependency from 'webpack/lib/dependencies/ImportDependency'
 // @ts-ignore: no declaration file
 import { getEntryRuntime, mergeRuntimeOwned } from 'webpack/lib/util/runtime'
 
-import { appRoutesJs } from '../../../paths'
+import paths from '../../../paths'
 import RouteImportDependencyTemplate from './RouteImportDependencyTemplate'
 
 const { ReplaceSource } = sources
@@ -49,7 +49,7 @@ export default class RouteAssetsChildPlugin {
         for (const module of modules) {
           if (
             module instanceof NormalModule &&
-            module.userRequest === appRoutesJs
+            module.userRequest === paths.appRoutesJs
           ) {
             // Mark the exports of the routes files as used (in an unknown way)
             // so they don't get optimized away from the final build

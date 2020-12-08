@@ -47,6 +47,7 @@
     "@babel/preset-env": "^7.11.0",
     "@babel/preset-react": "^7.12.5",
     "@babel/preset-typescript": "^7.10.4",
+    "@casterly/utils": "^0.4.5",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.4.3",
     "@svgr/webpack": "^5.4.0",
     "babel-core": "^7.0.0-bridge.0",
@@ -85,7 +86,7 @@
     "terser-webpack-plugin": "^5.0.3",
     "unistore": "^3.5.2",
     "url-loader": "^4.1.0",
-    "webpack": "^5.4.0",
+    "webpack": "^5.10.0",
     "webpack-hot-middleware": "^2.25.0"
   },
   "devDependencies": {

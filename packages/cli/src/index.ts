@@ -1,6 +1,4 @@
-import * as constants from './config/constants'
-import * as paths from './config/paths'
-import * as config from './config/userConfig'
+import { config, constants, paths } from '@casterly/utils'
 
 export * from './config/webpack/plugins/routes/utils'
 

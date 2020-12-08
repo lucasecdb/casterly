@@ -41,6 +41,6 @@ jobs:
     - name: Build
       run: |
         yarn lerna bootstrap
-        yarn lerna run build
+        yarn lerna run --concurrency 1 build
       env:
         CI: true
