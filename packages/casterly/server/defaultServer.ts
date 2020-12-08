@@ -115,7 +115,9 @@ class DefaultServer {
         fn: async (req, __, url) => {
           const query = url.query as { path?: string }
 
-          const etag = await this.getBuildId()
+          const buildId = await this.getBuildId()
+
+          const etag = `W/"${buildId}"`
 
           let status = 200
 
@@ -124,12 +126,12 @@ class DefaultServer {
           headers.set('content-type', 'application/json')
 
           if (!this.dev) {
-            headers.set('etag', etag!)
+            headers.set('etag', etag)
             headers.set('cache-control', 'public, max-age=' + MAX_AGE_LONG)
           }
 
           if (requestContainsPrecondition(req)) {
-            if (isPreconditionFailure(req, new Headers({ etag: etag || '' }))) {
+            if (isPreconditionFailure(req, new Headers({ etag }))) {
               return new Response(null, {
                 status: 412,
                 headers,
@@ -138,7 +140,7 @@ class DefaultServer {
 
             if (
               fresh(requestHeadersToNodeHeaders(req.headers), {
-                etag: etag ?? undefined,
+                etag,
               })
             ) {
               return new Response(null, {
