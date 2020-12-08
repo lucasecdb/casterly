@@ -1,7 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 
-import * as paths from './paths'
+import paths from './paths'
 
 // Make sure that including paths.js after env.js will read .env variables.
 delete require.cache[require.resolve('./paths')]

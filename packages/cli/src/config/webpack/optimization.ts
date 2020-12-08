@@ -7,7 +7,7 @@ import TerserPlugin, { TerserPluginOptions } from 'terser-webpack-plugin'
 import { Chunk, Configuration, Module } from 'webpack'
 
 import { STATIC_CHUNKS_PATH, STATIC_RUNTIME_WEBPACK } from '../constants'
-import { appPath } from '../paths'
+import paths from '../paths'
 import { Options as ArgOptions } from './types'
 
 const isModuleCSS = (module: Module): boolean => {
@@ -99,7 +99,7 @@ export const createOptimizationConfig = ({
           )
         }
 
-        hash.update(module.libIdent({ context: appPath }))
+        hash.update(module.libIdent({ context: paths.appPath }))
 
         return (
           STATIC_CHUNKS_PATH + sep + 'lib-' + hash.digest('hex').substring(0, 8)

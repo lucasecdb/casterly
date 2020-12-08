@@ -1,6 +1,6 @@
 import { Compiler, NormalModule } from 'webpack'
 
-import * as paths from '../../paths'
+import paths from '../../paths'
 
 const PLUGIN_NAME = 'RouteChunksRegisterPlugin'
 

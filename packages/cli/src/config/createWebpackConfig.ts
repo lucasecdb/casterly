@@ -24,7 +24,7 @@ import {
   STATIC_WEBPACK_PATH,
 } from './constants'
 import getClientEnvironment from './env'
-import * as paths from './paths'
+import paths from './paths'
 import { createOptimizationConfig } from './webpack/optimization'
 import SSRImportPlugin from './webpack/plugins/SSRImportPlugin'
 import RoutesManifestPlugin from './webpack/plugins/routes/RoutesManifestPlugin'

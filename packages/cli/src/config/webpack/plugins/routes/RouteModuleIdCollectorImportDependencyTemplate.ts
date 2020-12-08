@@ -5,7 +5,7 @@ import type { sources } from 'webpack'
 // @ts-ignore
 import ImportDependency from 'webpack/lib/dependencies/ImportDependency'
 
-import * as paths from '../../../paths'
+import paths from '../../../paths'
 
 export default class RouteModuleIdCollectorImportDependencyTemplate extends ImportDependency.Template {
   private routeImportModuleIdMap
