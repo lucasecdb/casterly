@@ -55,7 +55,12 @@ export const Scripts: React.FC<
         .concat(mainAssets)
         .filter((file) => file.endsWith('.js'))
         .map((scriptSource) => (
-          <script key={scriptSource} {...props} defer src={scriptSource} />
+          <script
+            key={scriptSource}
+            {...props}
+            defer
+            src={`/_casterly${scriptSource}`}
+          />
         ))}
     </>
   )
