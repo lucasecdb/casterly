@@ -1,6 +1,6 @@
 {
   "name": "@casterly/utils",
-  "version": "0.4.5",
+  "version": "0.5.0",
   "description": "Common utilities used throughout Casterly packages",
   "author": "Lucas Cordeiro <ecdb.lucas@gmail.com>",
   "homepage": "https://github.com/lucasecdb/casterly#readme",
@@ -34,7 +34,6 @@
   "bugs": {
     "url": "https://github.com/lucasecdb/casterly/issues"
   },
-  "dependencies": {},
   "devDependencies": {
     "@types/node": "^14.14.10",
     "rimraf": "^3.0.0",

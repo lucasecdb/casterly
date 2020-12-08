@@ -1,6 +1,6 @@
 {
   "name": "casterly",
-  "version": "0.4.5",
+  "version": "0.5.0",
   "license": "MIT",
   "files": [
     "lib",
@@ -27,7 +27,7 @@
     "url": "https://github.com/lucasecdb/casterly/issues"
   },
   "dependencies": {
-    "@casterly/utils": "^0.4.5",
+    "@casterly/utils": "^0.5.0",
     "etag": "^1.8.1",
     "fresh": "^0.5.2",
     "history": "^5.0.0",
@@ -36,8 +36,8 @@
     "path-to-regexp": "^6.1.0"
   },
   "devDependencies": {
-    "@casterly/cli": "^0.4.0",
-    "@casterly/components": "^0.4.5",
+    "@casterly/cli": "^0.5.0",
+    "@casterly/components": "^0.5.0",
     "@types/etag": "^1.8.0",
     "@types/fresh": "^0.5.0",
     "@types/mime": "^2.0.3",
