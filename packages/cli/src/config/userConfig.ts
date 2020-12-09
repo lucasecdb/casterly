@@ -1,3 +1,3 @@
-import { config } from '@casterly/utils'
+import * as config from '@casterly/utils/config'
 
 export = config
