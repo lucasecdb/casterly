@@ -23,6 +23,8 @@ declare global {
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
   function __webpack_require__(assetPath: string): any
+
+  const __webpack_public_path__: string
 }
 
 const parseRouteMatch = (
@@ -77,14 +79,19 @@ const mergeRoutes = (
 }
 
 const addScript = (scriptAsset: string) => {
-  if (document.querySelector(`script[src="${scriptAsset}"]`)) {
+  const url =
+    __webpack_public_path__ +
+    // remove leading slash
+    scriptAsset.slice(1)
+
+  if (document.querySelector(`script[src="${url}"]`)) {
     return Promise.resolve()
   }
 
   const script = document.createElement('script')
 
   return new Promise((resolve, reject) => {
-    script.src = scriptAsset
+    script.src = url
     script.defer = true
     script.onload = resolve
     script.onerror = reject
@@ -94,14 +101,19 @@ const addScript = (scriptAsset: string) => {
 }
 
 const addStylesheet = (styleAsset: string) => {
-  if (document.querySelector(`link[href="${styleAsset}"]`)) {
+  const url =
+    __webpack_public_path__ +
+    // remove leading slash
+    styleAsset.slice(1)
+
+  if (document.querySelector(`link[href="${url}"]`)) {
     return Promise.resolve()
   }
 
   const link = document.createElement('link')
 
   return new Promise((resolve, reject) => {
-    link.href = styleAsset
+    link.href = url
     link.type = 'text/css'
     link.rel = 'stylesheet'
     link.onload = resolve
@@ -113,7 +125,7 @@ const addStylesheet = (styleAsset: string) => {
 
 const fetchRouteData = async (path: string, version: string | null) => {
   const res = await fetch(
-    `/__route-manifest?${new URLSearchParams({
+    `/_casterly/route-manifest?${new URLSearchParams({
       path,
       v: version ?? '',
     })}`

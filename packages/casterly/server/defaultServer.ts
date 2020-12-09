@@ -96,22 +96,8 @@ class DefaultServer {
           }
         },
       }),
-      matchRoute<{ path: string }>({
-        route: '/static/:path*',
-        fn: async (req, _, url) => {
-          try {
-            return await serveStatic(
-              req,
-              path.join(paths.appBuildFolder, url.pathname!),
-              !this.dev
-            )
-          } catch {
-            return new Response(null, { status: 404 })
-          }
-        },
-      }),
       matchRoute({
-        route: '/__route-manifest',
+        route: '/_casterly/route-manifest',
         fn: async (req, __, url) => {
           const query = url.query as { path?: string }
 
@@ -174,6 +160,26 @@ class DefaultServer {
             status,
             headers,
           })
+        },
+      }),
+      matchRoute<{ filePath: string }>({
+        route: '/_casterly/static/:filePath*',
+        fn: async (req, { filePath }) => {
+          try {
+            return await serveStatic(
+              req,
+              path.join(paths.appBuildFolder, 'static', ...filePath),
+              !this.dev
+            )
+          } catch {
+            return new Response(null, { status: 404 })
+          }
+        },
+      }),
+      matchRoute<{ filePath: string }>({
+        route: '/_casterly/:path*',
+        fn: async () => {
+          return new Response(null, { status: 404 })
         },
       }),
     ]

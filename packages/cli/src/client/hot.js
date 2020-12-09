@@ -12,7 +12,9 @@ class HMRClient {
   }
 
   init = () => {
-    const es = new EventSource(`http://localhost:${this.port}/__webpack-hmr`)
+    const es = new EventSource(
+      `http://localhost:${this.port}/_casterly/__webpack-hmr`
+    )
 
     this.es = es
 

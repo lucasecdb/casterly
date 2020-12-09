@@ -79,10 +79,11 @@ function getClientEnvironment({ isServer = false, worker = false } = {}) {
 
   // Stringify all values so we can feed into Webpack DefinePlugin
   const stringified = {
-    'process.env': Object.keys(raw).reduce<Env>((env, key) => {
-      env[key] = JSON.stringify(raw[key])
+    ...Object.keys(raw).reduce<Env>((env, key) => {
+      env['process.env.' + key] = JSON.stringify(raw[key])
       return env
     }, {}),
+    'process.env.ASSET_PATH': '/_casterly/',
     'process.browser': JSON.stringify(!isServer),
     // Allow browser-only and server-only code to be eliminated
     'typeof window': JSON.stringify(

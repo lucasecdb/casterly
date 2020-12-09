@@ -268,7 +268,7 @@ const getBaseWebpackConfig = async (
       ignored: ['**/.git/**', '**/node_modules/**', '**/.dist/**'],
     },
     output: {
-      publicPath: '/',
+      publicPath: '/_casterly/',
       path: outputPath,
       filename: isServer
         ? '[name].js'
@@ -475,7 +475,7 @@ const getBaseWebpackConfig = async (
         new ForkTsCheckerPlugin({
           typescript: {
             typescriptPath,
-            mode: 'write-references',
+            mode: 'readonly',
             diagnosticOptions: {
               syntactic: true,
             },

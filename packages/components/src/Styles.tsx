@@ -33,7 +33,7 @@ export const Styles: React.FC<
             {...props}
             rel="stylesheet"
             type="text/css"
-            href={file}
+            href={`/_casterly${file}`}
           />
         ))}
     </>
