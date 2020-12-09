@@ -1,6 +1,6 @@
 {
   "name": "@casterly/cli",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "CLI for Casterly",
   "author": "Lucas Cordeiro <ecdb.lucas@gmail.com>",
   "homepage": "https://github.com/lucasecdb/casterly#readme",
