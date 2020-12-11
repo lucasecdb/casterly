@@ -11,6 +11,7 @@ import MiniCssExtractPlugin from 'mini-css-extract-plugin'
 import semver from 'semver'
 import webpack, { Compiler, Configuration } from 'webpack'
 
+import { warn } from '../output/log'
 import { getDependencyVersion } from '../utils/dependencies'
 import { filterBoolean } from '../utils/filterBoolean'
 import resolveRequest from '../utils/resolveRequest'
@@ -499,7 +500,19 @@ const getBaseWebpackConfig = async (
   }
 
   if (configFn) {
-    config = configFn(config, { isServer, dev })
+    const userConfig = configFn(config, { isServer, dev })
+
+    if (typeof userConfig !== 'object' || 'then' in userConfig) {
+      warn(
+        `Webpack config function expected to return an object, but instead received "${typeof userConfig}".${
+          typeof userConfig === 'object' && 'then' in userConfig
+            ? ' Did you accidentally return a Promise?'
+            : ''
+        }`
+      )
+    } else {
+      config = userConfig
+    }
   }
 
   return config

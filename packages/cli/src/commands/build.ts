@@ -19,6 +19,7 @@ import { checkRequiredFiles, printBuildError } from '../build/utils'
 import { BUILD_ID_FILE } from '../config/constants'
 import getBaseWebpackConfig from '../config/createWebpackConfig'
 import paths from '../config/paths'
+import config from '../config/userConfig'
 
 // Makes the script crash on unhandled rejections instead of silently
 // ignoring them. In the future, promise rejections that are not handled will
@@ -35,9 +36,15 @@ async function build(
 ) {
   console.log('Creating an optimized production build...')
 
+  const webpackConfigFn = config.loadWebpackConfig()
+
   const compiler = webpack([
-    await getBaseWebpackConfig({ profile }),
-    await getBaseWebpackConfig({ isServer: true, profile }),
+    await getBaseWebpackConfig({ profile, configFn: webpackConfigFn }),
+    await getBaseWebpackConfig({
+      isServer: true,
+      profile,
+      configFn: webpackConfigFn,
+    }),
   ])
 
   const run = util.promisify(compiler.run)
