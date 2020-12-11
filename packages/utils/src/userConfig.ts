@@ -1,8 +1,6 @@
 import fs from 'fs'
 import { basename, extname, join } from 'path'
 
-import type { Configuration } from 'webpack'
-
 import { CONFIG_FILE } from './constants'
 import { fileExistsSync } from './fileExists'
 
@@ -20,16 +18,11 @@ interface BuildServerConfig {
 }
 
 export interface CasterlyConfig {
-  webpack?: (
-    config: Configuration,
-    options: { isServer: boolean; dev: boolean }
-  ) => Configuration
   buildServer?: BuildServerConfig
   buildFolder?: string
 }
 
 export const defaultConfig: RecursiveRequired<CasterlyConfig> = {
-  webpack: (config) => config,
   buildServer: {
     port: 8081,
   },

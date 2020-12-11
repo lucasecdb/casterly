@@ -24,3 +24,4 @@ export const STATIC_ENTRYPOINTS_ROUTES_ASSETS = path.join(
 export const ROUTES_MANIFEST_FILE = 'routes-manifest.json'
 export const BUILD_ID_FILE = 'build-id.txt'
 export const CONFIG_FILE = 'casterly.config.js'
+export const WEBPACK_CONFIG_FILE = 'webpack.config.js'

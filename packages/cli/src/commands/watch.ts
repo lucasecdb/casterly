@@ -6,14 +6,14 @@ import whm from 'webpack-hot-middleware'
 
 import { paths } from '..'
 import createWebpackConfig from '../config/createWebpackConfig'
-import { defaultConfig, userConfig } from '../config/userConfig'
+import config from '../config/userConfig'
 import { logStore } from '../output/logger'
 import { watchCompilers } from '../output/watcher'
 
 export default async function startWatch() {
   process.env.NODE_ENV = 'development'
 
-  const webpackConfigFn = userConfig.webpack
+  const webpackConfigFn = config.loadWebpackConfig()
 
   const app = express()
 
@@ -71,7 +71,8 @@ export default async function startWatch() {
     })
   })
 
-  const port = userConfig.buildServer?.port ?? defaultConfig.buildServer.port
+  const port =
+    config.userConfig.buildServer?.port ?? config.defaultConfig.buildServer.port
 
   app.listen(port, () => {
     logStore.setState({ port })

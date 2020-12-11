@@ -1,8 +1,8 @@
-import { CasterlyConfig } from '../userConfig'
+import config from '../userConfig'
 
 export interface Options {
   isServer?: boolean
   dev?: boolean
   profile?: boolean
-  configFn?: CasterlyConfig['webpack']
+  configFn?: ReturnType<typeof config.loadWebpackConfig>
 }
