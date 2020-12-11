@@ -1,6 +1,6 @@
 {
   "name": "@casterly/express",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "description": "Casterly bindings for Express.js",
   "author": "Lucas Cordeiro <ecdb.lucas@gmail.com>",
   "homepage": "https://github.com/lucasecdb/casterly#readme",
@@ -49,6 +49,6 @@
     "rimraf": "^3.0.2"
   },
   "dependencies": {
-    "casterly": "^0.5.2"
+    "casterly": "^0.5.3"
   }
 }
