@@ -1,4 +1,4 @@
-import { createRequestHandler as defaultCreateRequestHandler } from 'casterly'
+import { createRequestHandler as defaultCreateRequestHandler } from '@casterly/core'
 import { RequestHandler } from 'express'
 // @ts-ignore
 import { Response } from 'minipass-fetch'

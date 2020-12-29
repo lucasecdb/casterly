@@ -11,13 +11,13 @@ Isomorphic server rendering library for React apps.
 To install and start using Casterly, run the following commands
 
 ```sh
+npm i --save-dev casterly
 npm i --save react \
   react-dom \
   react-router@next \
   react-router-dom@next \
   @casterly/components \
   @casterly/express
-npm i --save-dev @casterly/cli
 ```
 
 ## Getting started
