@@ -266,7 +266,11 @@ const getBaseWebpackConfig = async (
         : { [STATIC_RUNTIME_MAIN]: paths.appServerEntry }),
     }),
     watchOptions: {
-      ignored: ['**/.git/**', '**/node_modules/**', '**/.dist/**'],
+      ignored: [
+        '**/.git/**',
+        '**/node_modules/**',
+        paths.appBuildFolder + '/**',
+      ],
     },
     output: {
       publicPath: '/_casterly/',
