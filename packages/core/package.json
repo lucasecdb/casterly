@@ -1,0 +1,65 @@
+{
+  "name": "@casterly/core",
+  "version": "0.5.3",
+  "description": "Core package for Casterly",
+  "author": "Lucas Cordeiro <ecdb.lucas@gmail.com>",
+  "homepage": "https://github.com/lucasecdb/casterly#readme",
+  "license": "MIT",
+  "files": [
+    "lib",
+    "*.js",
+    "*.d.ts"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lucasecdb/casterly.git",
+    "directory": "packages/core"
+  },
+  "scripts": {
+    "clean": "rimraf lib",
+    "ts": "tsc",
+    "build": "yarn clean && yarn ts",
+    "dev": "tsc --watch --preserveWatchOutput",
+    "prepublishOnly": "yarn build"
+  },
+  "bugs": {
+    "url": "https://github.com/lucasecdb/casterly/issues"
+  },
+  "dependencies": {
+    "@casterly/utils": "^0.5.3",
+    "etag": "^1.8.1",
+    "fresh": "^0.5.2",
+    "history": "^5.0.0",
+    "make-fetch-happen": "^8.0.10",
+    "mime": "^2.4.6",
+    "path-to-regexp": "^6.1.0"
+  },
+  "devDependencies": {
+    "@casterly/components": "^0.5.1",
+    "@types/etag": "^1.8.0",
+    "@types/fresh": "^0.5.0",
+    "@types/mime": "^2.0.3",
+    "@types/minipass": "^2.2.0",
+    "@types/node": "^14.14.6",
+    "@types/react": "^17.0.0",
+    "@types/react-dom": "^17.0.0",
+    "casterly": "^0.5.3",
+    "cross-env": "^7.0.2",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
+    "react-router": "^6.0.0-beta.0",
+    "react-router-dom": "^6.0.0-beta.0",
+    "rimraf": "^3.0.0"
+  },
+  "peerDependencies": {
+    "@casterly/components": "^0.4.0",
+    "react": "^16.9.0 || ^17.0.0",
+    "react-dom": "^16.9.0 || ^17.0.0",
+    "react-router": "^6.0.0-beta.0",
+    "react-router-dom": "^6.0.0-beta.0"
+  }
+}

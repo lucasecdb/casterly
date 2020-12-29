@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "lib": ["ESNext", "DOM"],
+    "lib": ["ES6", "DOM"],
     "target": "es2017",
     "module": "commonjs",
     "esModuleInterop": true,
@@ -8,7 +8,9 @@
     "strict": true,
     "declaration": true,
     "outDir": "lib",
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "allowJs": true
   },
-  "exclude": ["lib", "./*.js", "./*.d.ts"]
+  "include": ["./src/**/*.ts", "./src/**/*.js", "./bin/*"],
+  "exclude": ["lib/**/*", "./*.js", "./*.d.ts"]
 }

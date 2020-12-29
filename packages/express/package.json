@@ -49,6 +49,6 @@
     "rimraf": "^3.0.2"
   },
   "dependencies": {
-    "casterly": "^0.5.3"
+    "@casterly/core": "^0.5.3"
   }
 }
