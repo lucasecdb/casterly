@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "types": ["jest", "node"]
+  },
+  "include": [
+    "./test/**/*.ts",
+    "./test/**/*.js",
+    "./test/**/*.jsx",
+    "./test/**/*.tsx",
+    "./test/.eslintrc.js"
+  ]
+}

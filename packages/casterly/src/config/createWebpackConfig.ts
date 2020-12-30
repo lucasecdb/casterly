@@ -110,9 +110,13 @@ const getBaseWebpackConfig = async (
   const outputPath = path.join(dir, outputDir)
   const webpackMode = dev ? 'development' : 'production'
 
-  const reactVersion = await getDependencyVersion(paths.appPath, 'react')
+  const reactVersion = await getDependencyVersion('react')
   const hasJsxRuntime =
-    reactVersion != null && semver.satisfies(reactVersion, '^16.4.0 || >=17')
+    reactVersion != null &&
+    semver.satisfies(
+      semver.coerce(reactVersion) ?? '-1',
+      '^16.4.0 || >=17 || ~0.0.0'
+    )
 
   const typescriptPath = require.resolve('typescript', {
     paths: [paths.appNodeModules],
