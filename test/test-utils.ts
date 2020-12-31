@@ -162,21 +162,24 @@ export const startServer = async (
 ): Promise<TestServerHandle> => {
   const casterlyPort = await findPort()
 
-  const [casterlyProcess, serverProcess] = await Promise.all([
-    runCasterlyCmd([prod ? 'build' : 'watch'], projectDirectory, {
+  const casterlyProcess = await runCasterlyCmd(
+    [prod ? 'build' : 'watch'],
+    projectDirectory,
+    {
       prod,
       port: casterlyPort,
       stdout: !!process.env.DEBUG_TEST,
-    }),
-    startServerProcess({
-      serverFilename: 'express-server',
-      port,
-      buildServerPort: casterlyPort,
-      prod,
-      directory: projectDirectory,
-      debug: !!process.env.DEBUG_TEST,
-    }),
-  ])
+    }
+  )
+
+  const serverProcess = await startServerProcess({
+    serverFilename: 'express-server',
+    port,
+    buildServerPort: casterlyPort,
+    prod,
+    directory: projectDirectory,
+    debug: !!process.env.DEBUG_TEST,
+  })
 
   return { casterlyProcess, serverProcess }
 }
