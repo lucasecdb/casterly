@@ -131,7 +131,7 @@ const fetchRouteData = async (path: string, version: string | null) => {
     })}`
   )
 
-  const resEtag = res.headers.get('Etag')?.match(/W\/"(.*)"/)?.[1]
+  const resEtag = res.headers.get('Etag')?.match(/W\/"(.*)"/)?.[1] ?? null
 
   if (res.status === 200 && resEtag === version) {
     return res.json() as Promise<Omit<RootContext, 'routes'>>
@@ -143,7 +143,7 @@ const fetchRouteData = async (path: string, version: string | null) => {
 const fetchRouteAssets = async (
   path: string,
   version: string | null,
-  reloadOnMismatch = process.env.NODE_ENV === 'production'
+  reloadOnMismatch = true
 ) => {
   const routeClientContext = await fetchRouteData(path, version)
 
