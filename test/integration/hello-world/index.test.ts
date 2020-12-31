@@ -1,7 +1,5 @@
 import { resolve } from 'path'
 
-import puppeteer from 'puppeteer'
-
 import { killServer, startServer } from '../../test-utils'
 
 describe('Hello World', () => {
@@ -16,12 +14,8 @@ describe('Hello World', () => {
   })
 
   it('should render a hello world page', async () => {
-    const browser = await puppeteer.launch()
-
-    const page = await browser.newPage()
-
     await page.goto('http://localhost:3000/')
 
-    expect(await page.content()).toMatch('<p>Hello world!</p>')
+    await expect(page.content()).resolves.toMatch('<p>Hello world!</p>')
   })
 })

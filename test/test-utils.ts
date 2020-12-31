@@ -1,7 +1,8 @@
+// eslint-disable-next-line
+/// <reference path="./global.d.ts" />
+
 import { ChildProcess, spawn } from 'child_process'
 import { dirname, join } from 'path'
-
-import treeKill from 'tree-kill'
 
 interface RunOptions {
   stdout?: boolean
@@ -117,18 +118,6 @@ export const startServer = async (
   return { casterlyProcess, serverProcess }
 }
 
-const killProcess = (childProcess: ChildProcess) => {
-  return new Promise<void>((resolve, reject) => {
-    treeKill(childProcess.pid, (err) => {
-      if (err) {
-        reject(err)
-      } else {
-        resolve()
-      }
-    })
-  })
-}
-
 export const killServer = async (handle?: TestServerHandle) => {
   if (!handle) {
     return
@@ -137,8 +126,8 @@ export const killServer = async (handle?: TestServerHandle) => {
   const { casterlyProcess, serverProcess } = handle
 
   if (casterlyProcess) {
-    await killProcess(casterlyProcess)
+    casterlyProcess.kill('SIGTERM')
   }
 
-  await killProcess(serverProcess)
+  serverProcess.kill('SIGTERM')
 }
