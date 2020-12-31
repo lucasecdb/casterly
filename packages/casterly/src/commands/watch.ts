@@ -71,8 +71,11 @@ export default async function startWatch() {
     })
   })
 
-  const port =
-    config.userConfig.buildServer?.port ?? config.defaultConfig.buildServer.port
+  const port = process.env.PORT
+    ? parseInt(process.env.PORT, 10)
+    : undefined ??
+      config.userConfig.buildServer?.port ??
+      config.defaultConfig.buildServer.port
 
   app.listen(port, () => {
     logStore.setState({ port })

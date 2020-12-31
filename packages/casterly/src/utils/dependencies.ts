@@ -1,7 +1,8 @@
 import { promises as fsp } from 'fs'
 import * as path from 'path'
+import { dirname } from 'path'
 
-import { fileExists } from '@casterly/utils'
+import { fileExists, paths } from '@casterly/utils'
 
 import resolveRequest from './resolveRequest'
 
@@ -17,28 +18,12 @@ export const getPackageJson = async (baseDir: string) => {
   return JSON.parse(packageJson.toString())
 }
 
-export const getDependencyVersion = async (
-  baseDir: string,
-  dependencyName: string
-) => {
-  const packageJson = await getPackageJson(baseDir)
-
-  if (!packageJson) {
-    return null
-  }
-
-  const dependency =
-    packageJson.dependencies?.[dependencyName] ??
-    packageJson.devDependencies?.[dependencyName]
-
-  if (!dependency) {
-    return null
-  }
-
-  const cwd =
-    baseDir.endsWith(path.posix.sep) || baseDir.endsWith(path.win32.sep)
-      ? baseDir
-      : `${baseDir}/`
+export const getDependencyVersion = async (dependencyName: string) => {
+  const cwd = dirname(
+    require.resolve(`${dependencyName}/package.json`, {
+      paths: paths.appNodePath,
+    })
+  )
 
   try {
     const target = resolveRequest(`${dependencyName}/package.json`, cwd)

@@ -30,9 +30,9 @@
   "scripts": {
     "test": "echo \"Error: run tests from root\" && exit 1",
     "clean": "rimraf lib",
-    "ts": "tsc",
+    "ts": "tsc -b",
     "build": "yarn clean && yarn ts",
-    "dev": "tsc --watch --preserveWatchOutput",
+    "dev": "tsc -b --watch --preserveWatchOutput",
     "prepublishOnly": "yarn build"
   },
   "bugs": {

@@ -26,6 +26,29 @@ jobs:
       env:
         CI: true
 
+  test:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Use Node.js 12.x
+      uses: actions/setup-node@v1
+      with:
+        node-version: 12.x
+    - name: Install dependencies
+      run: yarn
+    - name: Build and link packages
+      run: |
+        yarn lerna bootstrap
+        yarn lerna run --concurrency 1 build
+        yarn lerna exec 'yarn link'
+        yarn --silent lerna ls | xargs yarn link
+    - name: Run tests
+      run: yarn test
+      env:
+        CI: true
+
   build:
 
     runs-on: ubuntu-latest

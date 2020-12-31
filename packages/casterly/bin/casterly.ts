@@ -35,4 +35,12 @@ if (!hasCommand) {
 const defaultEnv = command === 'dev' ? 'development' : 'production'
 process.env.NODE_ENV = process.env.NODE_ENV || defaultEnv
 
+// Make sure commands gracefully respect termination signals (e.g. from Docker)
+process.on('SIGTERM', () => {
+  process.exit(0)
+})
+process.on('SIGINT', () => {
+  process.exit(0)
+})
+
 commands[command]()

@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "types": ["jest", "node"],
+    "strict": true,
+    "strictNullChecks": true,
+    "alwaysStrict": true
+  },
+  "include": [
+    "./test/**/*.ts",
+    "./test/**/*.js",
+    "./test/**/*.jsx",
+    "./test/**/*.tsx",
+    "./test/.eslintrc.js"
+  ]
+}

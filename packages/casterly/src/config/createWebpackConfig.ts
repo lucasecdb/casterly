@@ -110,9 +110,13 @@ const getBaseWebpackConfig = async (
   const outputPath = path.join(dir, outputDir)
   const webpackMode = dev ? 'development' : 'production'
 
-  const reactVersion = await getDependencyVersion(paths.appPath, 'react')
+  const reactVersion = await getDependencyVersion('react')
   const hasJsxRuntime =
-    reactVersion != null && semver.satisfies(reactVersion, '^16.4.0 || >=17')
+    reactVersion != null &&
+    semver.satisfies(
+      semver.coerce(reactVersion) ?? '-1',
+      '^16.4.0 || >=17 || ~0.0.0'
+    )
 
   const typescriptPath = require.resolve('typescript', {
     paths: [paths.appNodeModules],
@@ -249,6 +253,13 @@ const getBaseWebpackConfig = async (
     paths.appBrowserEntry,
   ]
 
+  const serverEntry = (await fileExists(paths.appServerEntry))
+    ? paths.appServerEntry
+    : paths.serverDefaultAppServer
+  const browserEntry = (await fileExists(paths.appBrowserEntry))
+    ? paths.appBrowserEntry
+    : paths.serverDefaultAppBrowser
+
   let config: Configuration = {
     mode: webpackMode,
     name: isServer ? 'server' : 'client',
@@ -260,10 +271,10 @@ const getBaseWebpackConfig = async (
       ...entrypoints,
       ...(!isServer
         ? {
-            [STATIC_RUNTIME_MAIN]: paths.appBrowserEntry,
+            [STATIC_RUNTIME_MAIN]: browserEntry,
             ...(dev ? { [STATIC_RUNTIME_HOT]: paths.serverClientHot } : null),
           }
-        : { [STATIC_RUNTIME_MAIN]: paths.appServerEntry }),
+        : { [STATIC_RUNTIME_MAIN]: serverEntry }),
     }),
     watchOptions: {
       ignored: [
@@ -354,7 +365,7 @@ const getBaseWebpackConfig = async (
             },
             {
               test: /\.(jsx|tsx)$/,
-              include: appSrcFiles,
+              include: [appSrcFiles, serverEntry, browserEntry],
               loader: require.resolve('babel-loader'),
               options: {
                 ...baseBabelOptions,
