@@ -1,16 +1,7 @@
 {
-  "compilerOptions": {
-    "lib": ["ES6", "DOM"],
-    "target": "es2017",
-    "module": "commonjs",
-    "esModuleInterop": true,
-    "moduleResolution": "node",
-    "strict": true,
-    "declaration": true,
-    "outDir": "lib",
-    "skipLibCheck": true,
-    "allowJs": true
-  },
-  "include": ["./src/**/*.ts", "./src/**/*.js", "./bin/*"],
-  "exclude": ["lib/**/*", "./*.js", "./*.d.ts"]
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.cli.json" },
+    { "path": "./tsconfig.jsx.json" }
+  ]
 }

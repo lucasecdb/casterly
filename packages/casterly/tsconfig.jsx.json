@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "lib": ["ES6", "DOM"],
+    "target": "es2017",
+    "module": "esnext",
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "strict": true,
+    "declaration": true,
+    "outDir": "lib",
+    "skipLibCheck": true,
+    "jsx": "preserve",
+    "composite": true,
+    "allowJs": true
+  },
+  "include": ["./src/**/*.jsx"]
+}

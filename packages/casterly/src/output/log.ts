@@ -13,11 +13,11 @@ export function wait(...message: any[]) {
 }
 
 export function error(...message: any[]) {
-  console.log(prefixes.error, ...message)
+  console.error(prefixes.error, ...message)
 }
 
 export function warn(...message: any[]) {
-  console.log(prefixes.warn, ...message)
+  console.warn(prefixes.warn, ...message)
 }
 
 export function info(...message: any[]) {

@@ -1,9 +1,7 @@
-import { Scripts, Styles } from '@casterly/components'
+import { Routes, Scripts, Styles } from '@casterly/components'
 import { RootServer } from '@casterly/components/server'
 import React from 'react'
 import { renderToNodeStream } from 'react-dom/server'
-
-import App from './src/App'
 
 const Document = () => {
   return (
@@ -18,7 +16,7 @@ const Document = () => {
       </head>
       <body>
         <div id="root">
-          <App />
+          <Routes />
         </div>
         <Scripts />
       </body>

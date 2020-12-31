@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "lib": ["ES6", "DOM"],
+    "target": "es2017",
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "strict": true,
+    "declaration": true,
+    "outDir": "lib",
+    "skipLibCheck": true,
+    "allowJs": true,
+    "composite": true
+  },
+  "include": ["./src/**/*.ts", "./src/**/*.js", "./bin/*"],
+  "exclude": ["lib/**/*", "./*.js", "./*.d.ts"]
+}

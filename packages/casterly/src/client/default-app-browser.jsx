@@ -1,12 +1,11 @@
+import { Routes } from '@casterly/components'
 import { RootBrowser } from '@casterly/components/browser'
 import React from 'react'
 import ReactDOM from 'react-dom'
 
-import App from './src/App'
-
 ReactDOM.hydrate(
   <RootBrowser>
-    <App />
+    <Routes />
   </RootBrowser>,
   document.getElementById('root')
 )

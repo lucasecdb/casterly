@@ -120,13 +120,7 @@ export default function startBuild() {
   const WARN_AFTER_CHUNK_GZIP_SIZE = 1024 * 1024
 
   // Warn and crash if required files are missing
-  if (
-    !checkRequiredFiles([
-      paths.appRoutesJs,
-      paths.appServerEntry,
-      paths.appBrowserEntry,
-    ])
-  ) {
+  if (!checkRequiredFiles([paths.appRoutesJs])) {
     process.exit(1)
   }
 

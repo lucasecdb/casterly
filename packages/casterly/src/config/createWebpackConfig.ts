@@ -253,6 +253,13 @@ const getBaseWebpackConfig = async (
     paths.appBrowserEntry,
   ]
 
+  const serverEntry = (await fileExists(paths.appServerEntry))
+    ? paths.appServerEntry
+    : paths.serverDefaultAppServer
+  const browserEntry = (await fileExists(paths.appBrowserEntry))
+    ? paths.appBrowserEntry
+    : paths.serverDefaultAppBrowser
+
   let config: Configuration = {
     mode: webpackMode,
     name: isServer ? 'server' : 'client',
@@ -264,10 +271,10 @@ const getBaseWebpackConfig = async (
       ...entrypoints,
       ...(!isServer
         ? {
-            [STATIC_RUNTIME_MAIN]: paths.appBrowserEntry,
+            [STATIC_RUNTIME_MAIN]: browserEntry,
             ...(dev ? { [STATIC_RUNTIME_HOT]: paths.serverClientHot } : null),
           }
-        : { [STATIC_RUNTIME_MAIN]: paths.appServerEntry }),
+        : { [STATIC_RUNTIME_MAIN]: serverEntry }),
     }),
     watchOptions: {
       ignored: [
@@ -358,7 +365,7 @@ const getBaseWebpackConfig = async (
             },
             {
               test: /\.(jsx|tsx)$/,
-              include: appSrcFiles,
+              include: [appSrcFiles, serverEntry, browserEntry],
               loader: require.resolve('babel-loader'),
               options: {
                 ...baseBabelOptions,
