@@ -4,15 +4,23 @@
 import { ChildProcess, spawn } from 'child_process'
 import { dirname, join } from 'path'
 
+import getPort from 'get-port'
+
+export function findPort() {
+  return getPort()
+}
+
 interface RunOptions {
   stdout?: boolean
   stderr?: boolean
+  prod?: boolean
+  port?: number
 }
 
-export const runCasterlyCmd = (
+export const runCasterlyCmd = async (
   argv: string[],
   directory: string,
-  { stdout = false, stderr = true }: RunOptions = {}
+  { stdout = false, stderr = true, port, prod = false }: RunOptions = {}
 ) => {
   const cwd = dirname(require.resolve('casterly/package.json'))
   const casterlyBin = join(cwd, 'lib', 'bin', 'casterly')
@@ -21,7 +29,11 @@ export const runCasterlyCmd = (
     let alreadyResolved = false
     const serverProcess = spawn('node', [casterlyBin, ...argv], {
       cwd: directory,
-      env: { ...process.env },
+      env: {
+        ...process.env,
+        PORT: port.toString(),
+        NODE_ENV: prod ? 'production' : 'development',
+      },
       stdio: ['ignore', 'pipe', 'pipe'],
     })
 
@@ -65,21 +77,33 @@ export const runCasterlyCmd = (
   })
 }
 
-interface TestServerHandle {
-  casterlyProcess: ChildProcess | void
-  serverProcess: ChildProcess
-}
-
-export const startServer = async (
-  projectDirectory: string,
-  port = 3000
-): Promise<TestServerHandle> => {
-  const casterlyProcess = await runCasterlyCmd(['watch'], projectDirectory)
-
+const startServerProcess = async ({
+  serverFilename,
+  port,
+  buildServerPort,
+  directory,
+  prod,
+  debug = false,
+}: {
+  serverFilename: string
+  port: number
+  buildServerPort: number
+  directory: string
+  prod: boolean
+  debug?: boolean
+}) => {
   const serverProcess = spawn(
     'node',
-    [join(__dirname, 'servers', 'express-server')],
-    { env: { ...process.env, PORT: port.toString() }, cwd: projectDirectory }
+    [join(__dirname, 'servers', serverFilename)],
+    {
+      env: {
+        ...process.env,
+        PORT: port.toString(),
+        BUILD_SERVER_PORT: buildServerPort.toString(),
+        NODE_ENV: prod ? 'production' : 'development',
+      },
+      cwd: directory,
+    }
   )
 
   await new Promise<void>((resolve, reject) => {
@@ -91,6 +115,10 @@ export const startServer = async (
       if (/🎬 server started/.test(message) && !resolved) {
         resolved = true
         resolve()
+      }
+
+      if (debug) {
+        process.stdout.write(data)
       }
     }
 
@@ -114,6 +142,41 @@ export const startServer = async (
 
     serverProcess.on('error', reject)
   })
+
+  return serverProcess
+}
+
+interface TestServerHandle {
+  casterlyProcess: ChildProcess | void
+  serverProcess: ChildProcess
+}
+
+interface StartServerOptions {
+  prod?: boolean
+}
+
+export const startServer = async (
+  projectDirectory: string,
+  port: number,
+  { prod = false }: StartServerOptions = {}
+): Promise<TestServerHandle> => {
+  const casterlyPort = await findPort()
+
+  const [casterlyProcess, serverProcess] = await Promise.all([
+    runCasterlyCmd([prod ? 'build' : 'watch'], projectDirectory, {
+      prod,
+      port: casterlyPort,
+      stdout: !!process.env.DEBUG_TEST,
+    }),
+    startServerProcess({
+      serverFilename: 'express-server',
+      port,
+      buildServerPort: casterlyPort,
+      prod,
+      directory: projectDirectory,
+      debug: !!process.env.DEBUG_TEST,
+    }),
+  ])
 
   return { casterlyProcess, serverProcess }
 }
