@@ -50,8 +50,9 @@ const getBaseWebpackConfig = async (
   const sassLoaderConfig = {
     loader: require.resolve('sass-loader'),
     options: {
+      implementation: require('sass'),
       sassOptions: {
-        includePaths: paths.appNodePath,
+        fiber: require('fibers'),
       },
     },
   }
