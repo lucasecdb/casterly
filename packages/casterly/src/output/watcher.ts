@@ -24,7 +24,6 @@ interface BuildStatusStore {
 enum WebpackStatusPhase {
   COMPILING = 1,
   COMPILED_WITH_ERRORS = 2,
-  TYPE_CHECKING = 3,
   COMPILED_WITH_WARNINGS = 4,
   COMPILED = 5,
 }
@@ -34,8 +33,6 @@ function getWebpackStatusPhase(status: WebpackStatus): WebpackStatusPhase {
     return WebpackStatusPhase.COMPILING
   } else if (status.errors) {
     return WebpackStatusPhase.COMPILED_WITH_ERRORS
-  } else if (status.typeChecking) {
-    return WebpackStatusPhase.TYPE_CHECKING
   } else if (status.warnings) {
     return WebpackStatusPhase.COMPILED_WITH_WARNINGS
   }
