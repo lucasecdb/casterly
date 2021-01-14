@@ -26,6 +26,7 @@ import {
 } from './constants'
 import getClientEnvironment from './env'
 import paths from './paths'
+import userConfig from './userConfig'
 import { createOptimizationConfig } from './webpack/optimization'
 import SSRImportPlugin from './webpack/plugins/SSRImportPlugin'
 import RoutesManifestPlugin from './webpack/plugins/routes/RoutesManifestPlugin'
@@ -41,8 +42,13 @@ import { Options } from './webpack/types'
 const getBaseWebpackConfig = async (
   options?: Options
 ): Promise<Configuration> => {
-  const { isServer = false, dev = false, profile = false, configFn } =
-    options ?? {}
+  const {
+    isServer = false,
+    dev = false,
+    profile = false,
+    configFn,
+    babelConfigFn,
+  } = options ?? {}
 
   // Get environment variables to inject into our app.
   const env = getClientEnvironment({ isServer })
@@ -217,7 +223,7 @@ const getBaseWebpackConfig = async (
       ]
     : undefined
 
-  const baseBabelOptions = {
+  let baseBabelOptions = {
     babelrc: false,
     presets: [
       require.resolve('@babel/preset-env'),
@@ -244,6 +250,32 @@ const getBaseWebpackConfig = async (
     cacheCompression: false,
   }
 
+  if (babelConfigFn) {
+    const originalBabelrc = baseBabelOptions.babelrc
+
+    const userBabelConfig = babelConfigFn(baseBabelOptions, { dev, isServer })
+
+    if (typeof userBabelConfig !== 'object') {
+      warn(
+        'Babel config function expected to return an object,' +
+          ` but instead received "${typeof userBabelConfig}".` +
+          (typeof userBabelConfig === 'undefined'
+            ? ' Did you forget to return the config?'
+            : '')
+      )
+    } else {
+      if (userBabelConfig.babelrc !== originalBabelrc) {
+        warn(
+          "We don't support changing the `babelrc` option for the babel config." +
+            ` The value was reverted back to "${originalBabelrc}".`
+        )
+        userBabelConfig.babelrc = originalBabelrc
+      }
+
+      baseBabelOptions = userBabelConfig as any
+    }
+  }
+
   const entrypoints = {
     [STATIC_ENTRYPOINTS_ROUTES]: paths.appRoutesJs,
   }
@@ -265,7 +297,9 @@ const getBaseWebpackConfig = async (
     mode: webpackMode,
     name: isServer ? 'server' : 'client',
     target: isServer ? 'node' : 'web',
-    devtool: dev ? 'cheap-module-source-map' : false,
+    devtool:
+      dev && !isServer ? 'eval-source-map' : !isServer ? 'source-map' : false,
+    bail: webpackMode === 'production',
     context: paths.appPath,
     externals,
     entry: () => ({
@@ -281,7 +315,8 @@ const getBaseWebpackConfig = async (
       ignored: [
         '**/.git/**',
         '**/node_modules/**',
-        paths.appBuildFolder + '/**',
+        '**/' + userConfig.userConfig.buildFolder ??
+          userConfig.defaultConfig.buildFolder + '/**',
       ],
     },
     output: {
@@ -319,7 +354,7 @@ const getBaseWebpackConfig = async (
       library: isServer ? undefined : '_RS',
       libraryTarget: isServer ? 'commonjs2' : 'assign',
     },
-    performance: { hints: false },
+    performance: false,
     optimization: createOptimizationConfig({
       dev,
       isServer,
@@ -349,121 +384,115 @@ const getBaseWebpackConfig = async (
       strictExportPresence: true,
       rules: [
         {
-          oneOf: [
-            {
-              test: [/\.bmp$/, /\.gif$/, /\.jpe?g$/, /\.png$/],
-              loader: require.resolve('url-loader'),
-              options: {
-                limit: 10000,
-                name: `${STATIC_MEDIA_PATH}/[name].[hash:8].[ext]`,
-              },
-            },
-            {
-              test: /\.(js|mjs|ts)$/,
-              include: appSrcFiles,
-              loader: require.resolve('babel-loader'),
-              options: baseBabelOptions,
-            },
-            {
-              test: /\.(jsx|tsx)$/,
-              include: [appSrcFiles, serverEntry, browserEntry],
-              loader: require.resolve('babel-loader'),
-              options: {
-                ...baseBabelOptions,
-                presets: [
-                  ...baseBabelOptions.presets,
-                  [
-                    require.resolve('@babel/preset-react'),
-                    {
-                      runtime: hasJsxRuntime ? 'automatic' : 'classic',
-                    },
-                  ],
-                ],
-                plugins: [
-                  ...baseBabelOptions.plugins,
-                  !isServer && dev && 'react-refresh/babel',
-                ].filter(Boolean),
-              },
-            },
-            {
-              test: /\.(js|mjs)$/,
-              exclude: /@babel(?:\/|\\{1,2})runtime/,
-              loader: require.resolve('babel-loader'),
-              options: {
-                babelrc: false,
-                configFile: false,
-                compact: false,
-                cacheDirectory: true,
-                // Don't waste time on Gzipping the cache
-                cacheCompression: false,
-
-                presets: [
-                  [
-                    require.resolve('@babel/preset-env'),
-                    {
-                      useBuiltIns: 'entry',
-                      corejs: 3,
-                      modules: false,
-                      exclude: ['transform-typeof-symbol'],
-                    },
-                  ],
-                ],
-                plugins: [
-                  [
-                    require.resolve('@babel/plugin-transform-destructuring'),
-                    {
-                      loose: false,
-                      selectiveLoose: [
-                        'useState',
-                        'useEffect',
-                        'useContext',
-                        'useReducer',
-                        'useCallback',
-                        'useMemo',
-                        'useRef',
-                        'useImperativeHandle',
-                        'useLayoutEffect',
-                        'useDebugValue',
-                      ],
-                    },
-                  ],
-                  require.resolve('@babel/plugin-transform-runtime'),
-                  require.resolve('@babel/plugin-syntax-dynamic-import'),
-                ],
-
-                // If an error happens in a package, it's possible to be
-                // because it was compiled. Thus, we don't want the browser
-                // debugger to show the original code. Instead, the code
-                // being evaluated would be much more helpful.
-                sourceMaps: false,
-              },
-            },
-            ...cssRules,
-            {
-              test: /\.(graphql|gql)$/,
-              exclude: /node_modules/,
-              loader: 'graphql-tag/loader',
-            },
-            // "file" loader makes sure those assets get served by WebpackDevServer.
-            // When you `import` an asset, you get its (virtual) filename.
-            // In production, they would get copied to the `build` folder.
-            // This loader doesn't use a "test" so it will catch all modules
-            // that fall through the other loaders.
-            {
-              // Exclude `js` files to keep "css" loader working as it injects
-              // its runtime that would otherwise be processed through "file" loader.
-              // Also exclude `html` and `json` extensions so they get processed
-              // by webpacks internal loaders.
-              exclude: [/\.(js|mjs|jsx)$/, /\.html$/, /\.json$/],
-              loader: require.resolve('file-loader'),
-              options: {
-                name: `${STATIC_MEDIA_PATH}/[name].[hash:8].[ext]`,
-              },
-            },
-          ],
+          test: [/\.bmp$/, /\.gif$/, /\.jpe?g$/, /\.png$/],
+          loader: require.resolve('url-loader'),
+          options: {
+            limit: 10000,
+            name: `${STATIC_MEDIA_PATH}/[name].[hash:8].[ext]`,
+          },
         },
-        // ** STOP ** Are you adding a new loader?
-        // Make sure to add the new loader(s) before the "file" loader.
+        {
+          test: /\.(js|mjs|ts)$/,
+          include: appSrcFiles,
+          loader: require.resolve('babel-loader'),
+          options: baseBabelOptions,
+        },
+        {
+          test: /\.(jsx|tsx)$/,
+          include: [appSrcFiles, serverEntry, browserEntry],
+          loader: require.resolve('babel-loader'),
+          options: {
+            ...baseBabelOptions,
+            presets: [
+              ...baseBabelOptions.presets,
+              [
+                require.resolve('@babel/preset-react'),
+                {
+                  runtime: hasJsxRuntime ? 'automatic' : 'classic',
+                },
+              ],
+            ],
+            plugins: [
+              ...baseBabelOptions.plugins,
+              !isServer && dev && 'react-refresh/babel',
+            ].filter(Boolean),
+          },
+        },
+        {
+          test: /\.(js|mjs)$/,
+          exclude: /@babel(?:\/|\\{1,2})runtime/,
+          loader: require.resolve('babel-loader'),
+          options: {
+            babelrc: false,
+            configFile: false,
+            compact: false,
+            cacheDirectory: true,
+            // Don't waste time on Gzipping the cache
+            cacheCompression: false,
+
+            presets: [
+              [
+                require.resolve('@babel/preset-env'),
+                {
+                  useBuiltIns: 'entry',
+                  corejs: 3,
+                  modules: false,
+                  exclude: ['transform-typeof-symbol'],
+                },
+              ],
+            ],
+            plugins: [
+              [
+                require.resolve('@babel/plugin-transform-destructuring'),
+                {
+                  loose: false,
+                  selectiveLoose: [
+                    'useState',
+                    'useEffect',
+                    'useContext',
+                    'useReducer',
+                    'useCallback',
+                    'useMemo',
+                    'useRef',
+                    'useImperativeHandle',
+                    'useLayoutEffect',
+                    'useDebugValue',
+                  ],
+                },
+              ],
+              require.resolve('@babel/plugin-transform-runtime'),
+              require.resolve('@babel/plugin-syntax-dynamic-import'),
+            ],
+
+            // If an error happens in a package, it's possible to be
+            // because it was compiled. Thus, we don't want the browser
+            // debugger to show the original code. Instead, the code
+            // being evaluated would be much more helpful.
+            sourceMaps: false,
+          },
+        },
+        ...cssRules,
+        {
+          test: /\.(graphql|gql)$/,
+          exclude: /node_modules/,
+          loader: 'graphql-tag/loader',
+        },
+        // "file" loader makes sure those assets get served by WebpackDevServer.
+        // When you `import` an asset, you get its (virtual) filename.
+        // In production, they would get copied to the `build` folder.
+        // This loader doesn't use a "test" so it will catch all modules
+        // that fall through the other loaders.
+        {
+          // Exclude `js` files to keep "css" loader working as it injects
+          // its runtime that would otherwise be processed through "file" loader.
+          // Also exclude `html` and `json` extensions so they get processed
+          // by webpacks internal loaders.
+          exclude: [/\.(js|mjs|jsx)$/, /\.html$/, /\.json$/],
+          loader: require.resolve('file-loader'),
+          options: {
+            name: `${STATIC_MEDIA_PATH}/[name].[hash:8].[ext]`,
+          },
+        },
       ],
     },
     plugins: [
@@ -520,11 +549,11 @@ const getBaseWebpackConfig = async (
 
     if (typeof userConfig !== 'object' || 'then' in userConfig) {
       warn(
-        `Webpack config function expected to return an object, but instead received "${typeof userConfig}".${
-          typeof userConfig === 'object' && 'then' in userConfig
+        'Webpack config function expected to return an object,' +
+          ` but instead received "${typeof userConfig}".` +
+          (typeof userConfig === 'object' && 'then' in userConfig
             ? ' Did you accidentally return a Promise?'
-            : ''
-        }`
+            : '')
       )
     } else {
       config = userConfig

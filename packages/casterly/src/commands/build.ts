@@ -37,13 +37,19 @@ async function build(
   console.log('Creating an optimized production build...')
 
   const webpackConfigFn = config.loadWebpackConfig()
+  const babelConfigFn = config.loadBabelConfig()
 
   const compiler = webpack([
-    await getBaseWebpackConfig({ profile, configFn: webpackConfigFn }),
+    await getBaseWebpackConfig({
+      profile,
+      configFn: webpackConfigFn,
+      babelConfigFn,
+    }),
     await getBaseWebpackConfig({
       isServer: true,
       profile,
       configFn: webpackConfigFn,
+      babelConfigFn,
     }),
   ])
 
