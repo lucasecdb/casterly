@@ -14,7 +14,6 @@ export default async function startWatch() {
   process.env.NODE_ENV = 'development'
 
   const webpackConfigFn = config.loadWebpackConfig()
-  const babelConfigFn = config.loadBabelConfig()
 
   const app = express()
 
@@ -30,14 +29,12 @@ export default async function startWatch() {
       dev: true,
       isServer: false,
       configFn: webpackConfigFn,
-      babelConfigFn,
     })
 
     const serverConfig = await createWebpackConfig({
       dev: true,
       isServer: true,
       configFn: webpackConfigFn,
-      babelConfigFn,
     })
 
     const multiCompiler = webpack([clientConfig, serverConfig])

@@ -3,7 +3,7 @@ import * as path from 'path'
 
 import { defaultConfig, userConfig } from './userConfig'
 
-const appDirectory = fs.realpathSync(process.cwd())
+export const appDirectory = fs.realpathSync(process.cwd())
 const resolveApp = (relativePath: string) =>
   path.resolve(appDirectory, relativePath)
 
