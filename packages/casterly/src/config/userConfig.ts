@@ -5,6 +5,7 @@ import { constants, fileExistsSync, paths } from '@casterly/utils'
 import * as config from '@casterly/utils/config'
 import { Configuration } from 'webpack'
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const resolveConfig = (configName: string) => {
   const possibleConfigs = [
     `.${configName}rc`,
