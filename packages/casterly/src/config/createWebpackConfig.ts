@@ -42,13 +42,8 @@ import { Options } from './webpack/types'
 const getBaseWebpackConfig = async (
   options?: Options
 ): Promise<Configuration> => {
-  const {
-    isServer = false,
-    dev = false,
-    profile = false,
-    configFn,
-    babelConfigFn,
-  } = options ?? {}
+  const { isServer = false, dev = false, profile = false, configFn } =
+    options ?? {}
 
   // Get environment variables to inject into our app.
   const env = getClientEnvironment({ isServer })
@@ -223,68 +218,9 @@ const getBaseWebpackConfig = async (
       ]
     : undefined
 
-  let baseBabelOptions = {
-    babelrc: false,
-    presets: [
-      require.resolve('@babel/preset-env'),
-      require.resolve('@babel/preset-typescript'),
-    ],
-    plugins: [
-      [
-        require.resolve('babel-plugin-named-asset-import'),
-        {
-          loaderMap: {
-            svg: {
-              ReactComponent: '@svgr/webpack?-prettier,-svgo![path]',
-            },
-          },
-        },
-      ],
-      require.resolve('@babel/plugin-transform-runtime'),
-      require.resolve('@babel/plugin-proposal-class-properties'),
-      require.resolve('@babel/plugin-syntax-dynamic-import'),
-      require.resolve('babel-plugin-macros'),
-    ],
-    cacheDirectory: path.join(paths.appBuildFolder, 'cache', 'webpack'),
-    // Don't waste time on Gzipping the cache
-    cacheCompression: false,
-  }
-
-  if (babelConfigFn) {
-    const originalBabelrc = baseBabelOptions.babelrc
-
-    const userBabelConfig = babelConfigFn(baseBabelOptions, { dev, isServer })
-
-    if (typeof userBabelConfig !== 'object') {
-      warn(
-        'Babel config function expected to return an object,' +
-          ` but instead received "${typeof userBabelConfig}".` +
-          (typeof userBabelConfig === 'undefined'
-            ? ' Did you forget to return the config?'
-            : '')
-      )
-    } else {
-      if (userBabelConfig.babelrc !== originalBabelrc) {
-        warn(
-          "We don't support changing the `babelrc` option for the babel config." +
-            ` The value was reverted back to "${originalBabelrc}".`
-        )
-        userBabelConfig.babelrc = originalBabelrc
-      }
-
-      baseBabelOptions = userBabelConfig as any
-    }
-  }
-
   const entrypoints = {
     [STATIC_ENTRYPOINTS_ROUTES]: paths.appRoutesJs,
   }
-
-  const appSrcFiles = [
-    paths.appSrc,
-    paths.appServerEntry,
-    paths.appBrowserEntry,
-  ]
 
   const serverEntry = (await fileExists(paths.appServerEntry))
     ? paths.appServerEntry
@@ -292,6 +228,8 @@ const getBaseWebpackConfig = async (
   const browserEntry = (await fileExists(paths.appBrowserEntry))
     ? paths.appBrowserEntry
     : paths.serverDefaultAppBrowser
+
+  const appSrcFiles = [paths.appSrc, serverEntry, browserEntry]
 
   let config: Configuration = {
     mode: webpackMode,
@@ -361,6 +299,17 @@ const getBaseWebpackConfig = async (
       getNumberOfRoutes: () =>
         routesManifestPluginInstance?.getNumberOfRoutes() ?? 0,
     }),
+    resolveLoader: {
+      alias: ['custom-babel-loader'].reduce<Record<string, string>>(
+        (alias, loader) => {
+          // using multiple aliases to replace `resolveLoader.modules`
+          alias[loader] = path.join(__dirname, 'webpack', 'loaders', loader)
+
+          return alias
+        },
+        {}
+      ),
+    },
     resolve: {
       modules: ['node_modules'].concat(
         process.env.NODE_PATH!.split(path.delimiter).filter(Boolean)
@@ -384,38 +333,15 @@ const getBaseWebpackConfig = async (
       strictExportPresence: true,
       rules: [
         {
-          test: [/\.bmp$/, /\.gif$/, /\.jpe?g$/, /\.png$/],
-          loader: require.resolve('url-loader'),
-          options: {
-            limit: 10000,
-            name: `${STATIC_MEDIA_PATH}/[name].[hash:8].[ext]`,
-          },
-        },
-        {
-          test: /\.(js|mjs|ts)$/,
+          test: /\.(tsx|ts|js|mjs|jsx)$/,
           include: appSrcFiles,
-          loader: require.resolve('babel-loader'),
-          options: baseBabelOptions,
-        },
-        {
-          test: /\.(jsx|tsx)$/,
-          include: [appSrcFiles, serverEntry, browserEntry],
-          loader: require.resolve('babel-loader'),
+          exclude: (excludePath) => /node_modules/.test(excludePath),
+          loader: 'custom-babel-loader',
           options: {
-            ...baseBabelOptions,
-            presets: [
-              ...baseBabelOptions.presets,
-              [
-                require.resolve('@babel/preset-react'),
-                {
-                  runtime: hasJsxRuntime ? 'automatic' : 'classic',
-                },
-              ],
-            ],
-            plugins: [
-              ...baseBabelOptions.plugins,
-              !isServer && dev && 'react-refresh/babel',
-            ].filter(Boolean),
+            isServer,
+            dev,
+            hasReactRefresh: dev && !isServer,
+            hasJsxRuntime,
           },
         },
         {
@@ -426,9 +352,6 @@ const getBaseWebpackConfig = async (
             babelrc: false,
             configFile: false,
             compact: false,
-            cacheDirectory: true,
-            // Don't waste time on Gzipping the cache
-            cacheCompression: false,
 
             presets: [
               [
@@ -472,22 +395,16 @@ const getBaseWebpackConfig = async (
           },
         },
         ...cssRules,
-        {
-          test: /\.(graphql|gql)$/,
-          exclude: /node_modules/,
-          loader: 'graphql-tag/loader',
-        },
-        // "file" loader makes sure those assets get served by WebpackDevServer.
+        // "file" loader makes sure those assets get served by build server.
         // When you `import` an asset, you get its (virtual) filename.
         // In production, they would get copied to the `build` folder.
-        // This loader doesn't use a "test" so it will catch all modules
-        // that fall through the other loaders.
         {
-          // Exclude `js` files to keep "css" loader working as it injects
-          // its runtime that would otherwise be processed through "file" loader.
-          // Also exclude `html` and `json` extensions so they get processed
-          // by webpacks internal loaders.
-          exclude: [/\.(js|mjs|jsx)$/, /\.html$/, /\.json$/],
+          exclude: [
+            /\.(js|mjs|jsx|ts|tsx)$/,
+            /\.(scss|sass|css)$/,
+            /\.html$/,
+            /\.json$/,
+          ],
           loader: require.resolve('file-loader'),
           options: {
             name: `${STATIC_MEDIA_PATH}/[name].[hash:8].[ext]`,
