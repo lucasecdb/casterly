@@ -3,12 +3,11 @@ import { join } from 'path'
 
 import { constants, fileExistsSync, paths } from '@casterly/utils'
 import * as config from '@casterly/utils/config'
+import JSON5 from 'json5'
 import { Configuration } from 'webpack'
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const resolveConfig = (configName: string) => {
+const resolveConfigPath = (configName: string) => {
   const possibleConfigs = [
-    `.${configName}rc`,
     `.${configName}rc.js`,
     `.${configName}rc.json`,
     `${configName}.config.js`,
@@ -40,4 +39,21 @@ const loadWebpackConfig = () => {
   return require(file) as WebpackConfigFn
 }
 
-export = { loadWebpackConfig, ...config }
+const loadConfig = <T>(configName: string) => {
+  const filePath = resolveConfigPath(configName)
+
+  if (filePath == null) {
+    return null
+  }
+
+  if (filePath.endsWith('js')) {
+    return require(filePath) as T
+  }
+
+  const fileContents = fs.readFileSync(filePath, 'utf8')
+  return JSON5.parse(fileContents) as T
+}
+
+const postcssRc = loadConfig<{ plugins: any[] }>('postcss')
+
+export = { loadWebpackConfig, postcssRc, ...config }

@@ -7,6 +7,7 @@ import { Options } from './types'
 interface StyleOptions extends Options {
   cssModules?: boolean
   loaders?: RuleSetUse[]
+  postcssPlugins: any[]
 }
 
 // style files regexes
@@ -21,6 +22,7 @@ export const getStyleLoaders = ({
   dev = false,
   cssModules = false,
   loaders = [],
+  postcssPlugins,
 }: StyleOptions): RuleSetUse => {
   const postcssLoader = {
     // Options for PostCSS as we reference these options twice
@@ -36,18 +38,7 @@ export const getStyleLoaders = ({
           inline: false,
           annotate: false,
         },
-        plugins: [
-          require.resolve('postcss-flexbugs-fixes'),
-          [
-            require.resolve('postcss-preset-env'),
-            {
-              autoprefixer: {
-                flexbox: 'no-2009',
-              },
-              stage: 3,
-            },
-          ],
-        ],
+        plugins: postcssPlugins,
       },
     },
   }

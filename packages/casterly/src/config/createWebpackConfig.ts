@@ -12,6 +12,7 @@ import semver from 'semver'
 import webpack, { Compiler, Configuration } from 'webpack'
 
 import { warn } from '../output/log'
+import * as Log from '../output/log'
 import { getDependencyVersion } from '../utils/dependencies'
 import { filterBoolean } from '../utils/filterBoolean'
 import resolveRequest from '../utils/resolveRequest'
@@ -39,6 +40,38 @@ import {
 } from './webpack/styles'
 import { Options } from './webpack/types'
 
+const loadPostcssPlugins = () => {
+  const postcssRc = userConfig.postcssRc
+
+  if (postcssRc == null) {
+    return [
+      require.resolve('postcss-flexbugs-fixes'),
+      [
+        require.resolve('postcss-preset-env'),
+        {
+          autoprefixer: {
+            flexbox: 'no-2009',
+          },
+          stage: 3,
+        },
+      ],
+    ]
+  }
+
+  if (Object.keys(postcssRc).some((key) => key !== 'plugins')) {
+    Log.warn(
+      'You PostCSS configuration export unknown attributes.' +
+        ' Please remove the following fields to suppress this' +
+        ' warning: ' +
+        Object.keys(postcssRc)
+          .filter((key) => key !== 'plugins')
+          .join(', ')
+    )
+  }
+
+  return postcssRc.plugins
+}
+
 const getBaseWebpackConfig = async (
   options?: Options
 ): Promise<Configuration> => {
@@ -58,18 +91,29 @@ const getBaseWebpackConfig = async (
     },
   }
 
-  const cssConfig = getStyleLoaders({ dev, isServer })
-  const cssModuleConfig = getStyleLoaders({ dev, isServer, cssModules: true })
+  const postcssPlugins = loadPostcssPlugins()
+
+  console.log(postcssPlugins)
+
+  const cssConfig = getStyleLoaders({ dev, isServer, postcssPlugins })
+  const cssModuleConfig = getStyleLoaders({
+    dev,
+    isServer,
+    cssModules: true,
+    postcssPlugins,
+  })
   const sassConfig = getStyleLoaders({
     dev,
     isServer,
     loaders: [sassLoaderConfig],
+    postcssPlugins,
   })
   const sassModuleConfig = getStyleLoaders({
     dev,
     isServer,
     cssModules: true,
     loaders: [sassLoaderConfig],
+    postcssPlugins,
   })
 
   const cssRules = [
