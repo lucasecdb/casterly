@@ -93,8 +93,6 @@ const getBaseWebpackConfig = async (
 
   const postcssPlugins = loadPostcssPlugins()
 
-  console.log(postcssPlugins)
-
   const cssConfig = getStyleLoaders({ dev, isServer, postcssPlugins })
   const cssModuleConfig = getStyleLoaders({
     dev,
