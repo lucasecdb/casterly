@@ -30,7 +30,9 @@ import paths from './paths'
 import userConfig from './userConfig'
 import { createOptimizationConfig } from './webpack/optimization'
 import SSRImportPlugin from './webpack/plugins/SSRImportPlugin'
-import RoutesManifestPlugin from './webpack/plugins/routes/RoutesManifestPlugin'
+import RoutesManifestPlugin, {
+  CHILD_COMPILER_NAME,
+} from './webpack/plugins/routes/RoutesManifestPlugin'
 import {
   cssGlobalRegex,
   cssRegex,
@@ -71,6 +73,11 @@ const loadPostcssPlugins = () => {
 
   return postcssRc.plugins
 }
+
+const not = <T>(fn: (...args: T[]) => boolean) => (...args: T[]) => !fn(...args)
+
+const isRouteManifestChildCompiler = (name: string) =>
+  name === CHILD_COMPILER_NAME
 
 const getBaseWebpackConfig = async (
   options?: Options
@@ -118,30 +125,41 @@ const getBaseWebpackConfig = async (
     {
       test: cssGlobalRegex,
       use: cssConfig,
+      compiler: not(isRouteManifestChildCompiler),
     },
     {
       test: cssRegex,
       exclude: [cssGlobalRegex, /node_modules/],
       use: cssModuleConfig,
+      compiler: not(isRouteManifestChildCompiler),
     },
     {
       test: cssRegex,
       include: [{ not: [paths.appSrc] }],
       use: cssConfig,
+      compiler: not(isRouteManifestChildCompiler),
     },
     {
       test: sassGlobalRegex,
       use: sassConfig,
+      compiler: not(isRouteManifestChildCompiler),
     },
     {
       test: sassRegex,
       exclude: [sassGlobalRegex, /node_modules/],
       use: sassModuleConfig,
+      compiler: not(isRouteManifestChildCompiler),
     },
     {
       test: sassRegex,
       include: [{ not: [paths.appSrc] }],
       use: sassConfig,
+      compiler: not(isRouteManifestChildCompiler),
+    },
+    {
+      test: [sassRegex, cssRegex],
+      use: ['ignore-loader'],
+      compiler: isRouteManifestChildCompiler,
     },
   ]
 
