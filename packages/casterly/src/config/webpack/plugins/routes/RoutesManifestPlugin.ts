@@ -34,6 +34,8 @@ const countNumberOfRoutes = (routes: RouteAssetComponent[]): number => {
   }, 0)
 }
 
+export const CHILD_COMPILER_NAME = 'routeAssets'
+
 export default class RoutesManifestPlugin {
   private routeModuleIdMap: Map<string, string | number> = new Map()
 
@@ -55,7 +57,7 @@ export default class RoutesManifestPlugin {
   public apply(compiler: Compiler) {
     compiler.hooks.make.tapAsync(PLUGIN_NAME, (compilation, cb) => {
       const childCompiler = compilation.createChildCompiler(
-        'routeAssets',
+        CHILD_COMPILER_NAME,
         compiler.options.output,
         []
       )
@@ -82,7 +84,7 @@ export default class RoutesManifestPlugin {
           return cb(childCompilation.errors[0])
         }
 
-        cb()
+        childCompiler.close(cb)
       })
     })
 
