@@ -1,10 +1,8 @@
 {
-  "packages": [
-    "packages/*"
-  ],
+  "packages": ["packages/*"],
   "npmClient": "yarn",
   "useWorkspaces": true,
-  "version": "0.7.1",
+  "version": "0.7.2",
   "registry": "https://registry.npmjs.org/",
   "ignoreChanges": [
     "CHANGELOG.md",
