@@ -20,6 +20,7 @@ import { BUILD_ID_FILE } from '../config/constants'
 import getBaseWebpackConfig from '../config/createWebpackConfig'
 import paths from '../config/paths'
 import config from '../config/userConfig'
+import * as Log from '../output/log'
 
 // Makes the script crash on unhandled rejections instead of silently
 // ignoring them. In the future, promise rejections that are not handled will
@@ -34,7 +35,7 @@ async function build(
   writeStatsJson = false,
   profile = false
 ) {
-  console.log('Creating an optimized production build...')
+  Log.info('Creating an optimized production build...')
 
   const webpackConfigFn = config.loadWebpackConfig()
 
@@ -84,7 +85,7 @@ async function build(
       process.env.CI.toLowerCase() !== 'false') &&
     messages.warnings.length
   ) {
-    console.log(
+    Log.warn(
       chalk.yellow(
         '\nTreating warnings as errors because process.env.CI = true.\n' +
           'Most CI servers set it automatically.\n'
@@ -147,7 +148,7 @@ export default function startBuild() {
     .then(
       ({ stats, previousFileSizes, warnings }) => {
         if (warnings.length) {
-          console.log(chalk.yellow('Compiled with warnings.\n'))
+          Log.warn(chalk.yellow('Compiled with warnings.\n'))
           console.log(warnings.join('\n\n'))
           console.log(
             '\nSearch for the ' +
@@ -160,7 +161,7 @@ export default function startBuild() {
               ' to the line before.\n'
           )
         } else {
-          console.log(chalk.green('Compiled successfully.\n'))
+          Log.ready('Compiled successfully.\n')
         }
 
         const buildId = nanoid()
@@ -179,7 +180,7 @@ export default function startBuild() {
         )
       },
       (err: Error) => {
-        console.log(chalk.red('Failed to compile.\n'))
+        Log.error('Failed to compile.\n')
         printBuildError(err)
         process.exit(1)
       }
