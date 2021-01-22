@@ -20,7 +20,6 @@ import {
   STATIC_ASSETS_PATH,
   STATIC_CHUNKS_PATH,
   STATIC_ENTRYPOINTS_ROUTES,
-  STATIC_MEDIA_PATH,
   STATIC_RUNTIME_HOT,
   STATIC_RUNTIME_MAIN,
   STATIC_WEBPACK_PATH,
@@ -406,6 +405,7 @@ const getBaseWebpackConfig = async (
         },
         {
           test: /\.(js|mjs)$/,
+          include: /node_modules/,
           exclude: /@babel(?:\/|\\{1,2})runtime/,
           loader: require.resolve('babel-loader'),
           options: {
@@ -455,21 +455,6 @@ const getBaseWebpackConfig = async (
           },
         },
         ...cssRules,
-        // "file" loader makes sure those assets get served by build server.
-        // When you `import` an asset, you get its (virtual) filename.
-        // In production, they would get copied to the `build` folder.
-        {
-          exclude: [
-            /\.(js|mjs|jsx|ts|tsx)$/,
-            /\.(scss|sass|css)$/,
-            /\.html$/,
-            /\.json$/,
-          ],
-          loader: require.resolve('file-loader'),
-          options: {
-            name: `${STATIC_MEDIA_PATH}/[name].[hash:8].[ext]`,
-          },
-        },
       ],
     },
     plugins: [
