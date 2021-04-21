@@ -414,7 +414,7 @@ const getBaseWebpackConfig = async (
       path: outputPath,
       filename: isServer
         ? '[name].js'
-        : `[name]${dev ? '' : '-[chunkhash]'}.js`,
+        : `${STATIC_CHUNKS_PATH}/[name]${dev ? '' : '-[chunkhash]'}.js`,
       chunkFilename: isServer
         ? `${chunkFilename}.js`
         : `${STATIC_CHUNKS_PATH}/${chunkFilename}.js`,
