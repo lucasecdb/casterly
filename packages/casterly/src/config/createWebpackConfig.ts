@@ -5,6 +5,7 @@ import { fileExists } from '@casterly/utils'
 import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin'
 // @ts-ignore: typings not up-to-date
 import CaseSensitivePathsPlugin from 'case-sensitive-paths-webpack-plugin'
+import chalk from 'chalk'
 import ForkTsCheckerPlugin from 'fork-ts-checker-webpack-plugin'
 // @ts-ignore
 import MiniCssExtractPlugin from 'mini-css-extract-plugin'
@@ -43,7 +44,7 @@ import {
 } from './webpack/styles'
 import type { Options } from './webpack/types'
 
-const loadPostcssPlugins = () => {
+const loadPostcssPlugins = async (dir: string) => {
   const postcssRc = userConfig.postcssRc
 
   if (postcssRc == null) {
@@ -72,7 +73,107 @@ const loadPostcssPlugins = () => {
     )
   }
 
-  return postcssRc.plugins
+  let plugins = postcssRc.plugins
+
+  if (!Array.isArray(plugins)) {
+    const pluginsObject = plugins
+
+    plugins = Object.keys(plugins).reduce((acc, pluginName) => {
+      const pluginOptions = pluginsObject[pluginName]
+
+      if (typeof pluginOptions === 'undefined') {
+        throw new Error(
+          `Your PostCSS configuration is invalid, the configuration for the plugin ${pluginName} must not be undefined.`
+        )
+      }
+
+      acc.push([pluginName, pluginOptions])
+      return acc
+    }, [] as Array<[string, Record<string, unknown>]>)
+  }
+
+  plugins = plugins
+    .map((plugin) => {
+      if (plugin == null) {
+        Log.warn(
+          chalk`A {yellow null} PostCSS plugin was provided. This entry will be ignored.`
+        )
+        return false
+      }
+
+      if (typeof plugin === 'string') {
+        return [plugin, true]
+      }
+
+      if (Array.isArray(plugin)) {
+        const [pluginName, pluginConfig] = plugin
+
+        if (
+          typeof pluginName === 'string' &&
+          (typeof pluginConfig === 'boolean' ||
+            typeof pluginConfig === 'object')
+        ) {
+          return [pluginName, pluginConfig]
+        }
+        if (typeof pluginName !== 'string') {
+          Log.error(
+            chalk`A PostCSS plugin must be provided as a {bold 'string'}. Instead we got: '${pluginName}'.`
+          )
+        } else {
+          Log.error(
+            chalk`A PostCSS plugin was passed as an array but did not provide it's configuration object ('${pluginName}').`
+          )
+        }
+        return false
+      }
+
+      if (typeof plugin === 'function') {
+        Log.error(
+          chalk`A PostCSS plugin was passed as a function using require(), but it must be provided as a {bold string}.`
+        )
+        return false
+      }
+
+      Log.error(chalk`An unknown PostCSS plugin was provided (${plugin}).`)
+
+      return false
+    })
+    .filter(<T>(value: T | false): value is T => value !== false)
+    .map(([pluginName, pluginConfig]) => {
+      const resolvedPluginPath = require.resolve(pluginName, { paths: [dir] })
+
+      return [resolvedPluginPath, pluginConfig]
+    })
+
+  const resolvedPlugins = await Promise.all(
+    plugins.map(([plugin, options]) => {
+      if (options === false) {
+        return false
+      }
+
+      if (options == null) {
+        throw new Error(
+          chalk`A {chalk null} PostCSS plugin option was provided (${plugin}).`
+        )
+      }
+
+      if (options === true) {
+        return require(plugin)
+      }
+
+      const keys = Object.keys(options)
+
+      if (keys.length === 0) {
+        return require(plugin)
+      }
+
+      return require(plugin)(options)
+    })
+  )
+
+  return resolvedPlugins.filter(
+    <T>(plugin: T | false): plugin is T => plugin !== false
+  )
 }
 
 const not = <T>(fn: (...args: T[]) => boolean) => (...args: T[]) => !fn(...args)
@@ -99,7 +200,7 @@ const getBaseWebpackConfig = async (
     },
   }
 
-  const postcssPlugins = loadPostcssPlugins()
+  const postcssPlugins = await loadPostcssPlugins(paths.appPath)
 
   const cssConfig = getStyleLoaders({ dev, isServer, postcssPlugins })
   const cssModuleConfig = getStyleLoaders({
