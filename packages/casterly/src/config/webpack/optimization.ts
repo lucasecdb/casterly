@@ -4,7 +4,7 @@ import { sep } from 'path'
 import CssMinimizerPlugin from 'css-minimizer-webpack-plugin'
 // @ts-ignore: TODO: typings incompatible with webpack 5
 import TerserPlugin from 'terser-webpack-plugin'
-import type { Chunk, Configuration, Module } from 'webpack'
+import type { Configuration, Module } from 'webpack'
 
 import { STATIC_CHUNKS_PATH, STATIC_RUNTIME_WEBPACK } from '../constants'
 import paths from '../paths'
@@ -46,10 +46,7 @@ export const createOptimizationConfig = ({
   }
 
   const splitChunks: Required<Configuration>['optimization']['splitChunks'] = {
-    cacheGroups: {
-      default: false,
-      defaultVendors: false,
-    },
+    cacheGroups: {},
   }
 
   const config: Required<Configuration>['optimization'] = {
@@ -87,7 +84,7 @@ export const createOptimizationConfig = ({
         return (
           !isModuleCSS(module) &&
           module.size() > 160 * KILOBYTE &&
-          /node_modules[/\\]/.test(module.identifier())
+          /node_modules[/\\]/.test(module.nameForCondition() || '')
         )
       },
       name(module: Module) {
@@ -114,29 +111,6 @@ export const createOptimizationConfig = ({
       minChunks: Math.max(getNumberOfRoutes(), 2),
       priority: 20,
     }),
-    shared: {
-      test(module: Module) {
-        return !isModuleCSS(module)
-      },
-      name(_: Module, chunks: Chunk[]) {
-        return (
-          STATIC_CHUNKS_PATH +
-          sep +
-          'shared-' +
-          crypto
-            .createHash('sha1')
-            .update(
-              chunks.reduce((acc, chunk) => {
-                return acc + chunk.name
-              }, '')
-            )
-            .digest('hex')
-        )
-      },
-      priority: 10,
-      minChunks: 2,
-      reuseExistingChunk: true,
-    },
     styles: {
       name: 'styles',
       test(module: Module) {
