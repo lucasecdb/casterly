@@ -38,6 +38,7 @@ export const getStyleLoaders = ({
           inline: false,
           annotate: false,
         },
+        config: false,
         plugins: postcssPlugins,
       },
     },
