@@ -1,13 +1,13 @@
 import path from 'path'
 
-import {
+import type {
   ChunkGraph,
   Compilation,
   Dependency,
   ModuleGraph,
   NormalModule,
+  sources,
 } from 'webpack'
-import type { sources } from 'webpack'
 // @ts-ignore
 import ImportDependency from 'webpack/lib/dependencies/ImportDependency'
 

@@ -1,7 +1,12 @@
 import path from 'path'
 
-import { ChunkGraph, Dependency, ModuleGraph, NormalModule } from 'webpack'
-import type { sources } from 'webpack'
+import type {
+  ChunkGraph,
+  Dependency,
+  ModuleGraph,
+  NormalModule,
+  sources,
+} from 'webpack'
 // @ts-ignore
 import ImportDependency from 'webpack/lib/dependencies/ImportDependency'
 

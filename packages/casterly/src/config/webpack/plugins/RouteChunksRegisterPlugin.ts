@@ -1,4 +1,4 @@
-import { Compiler, NormalModule } from 'webpack'
+import type { Compiler, NormalModule } from 'webpack'
 
 import paths from '../../paths'
 

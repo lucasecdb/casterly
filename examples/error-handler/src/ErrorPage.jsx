@@ -5,9 +5,7 @@ const ErrorPage = ({ error }) => {
 
       <p>{error.message}</p>
       <pre>
-        {''}
         <code>{error.stack}</code>
-        {''}
       </pre>
     </div>
   )

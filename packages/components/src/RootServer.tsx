@@ -1,7 +1,8 @@
 import React from 'react'
 import { StaticRouter } from 'react-router-dom/server'
 
-import { RootContext, RootContextProvider } from './RootContext'
+import type { RootContext } from './RootContext'
+import { RootContextProvider } from './RootContext'
 import { RoutePendingContextProvider } from './RoutePendingContext'
 
 export const RootServer: React.FC<{ context: unknown; url: string }> = ({

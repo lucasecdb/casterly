@@ -1,5 +1,5 @@
 import React, { useContext } from 'react'
-import { RouteMatch, RouteObject } from 'react-router'
+import type { RouteMatch, RouteObject } from 'react-router'
 
 export type RouteObjectWithKey = RouteObject & {
   key: number

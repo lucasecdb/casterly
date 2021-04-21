@@ -1,7 +1,7 @@
 import chalk from 'chalk'
 import createStore from 'unistore'
 
-import { WebpackError } from '../build/utils'
+import type { WebpackError } from '../build/utils'
 import * as Log from './log'
 
 type WebpackState =

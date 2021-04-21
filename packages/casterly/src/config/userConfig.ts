@@ -4,7 +4,7 @@ import { join } from 'path'
 import { constants, fileExistsSync, paths } from '@casterly/utils'
 import * as config from '@casterly/utils/config'
 import JSON5 from 'json5'
-import { Configuration } from 'webpack'
+import type { Configuration } from 'webpack'
 
 const resolveConfigPath = (configName: string) => {
   const possibleConfigs = [
