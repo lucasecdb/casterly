@@ -30,7 +30,7 @@ import filesize from 'filesize'
 import { sync as gzipSize } from 'gzip-size'
 import recursive from 'recursive-readdir'
 import stripAnsi from 'strip-ansi'
-import { Stats } from 'webpack'
+import type { Stats } from 'webpack'
 
 function canReadAsset(asset: string) {
   return (

@@ -2,13 +2,14 @@ import * as fs from 'fs'
 import * as path from 'path'
 import { parse as parseUrl } from 'url'
 
-import { RootContext } from '@casterly/components'
+import type { RootContext } from '@casterly/components'
 import { constants, paths } from '@casterly/utils'
 import type { RoutesManifest } from 'casterly'
 import fresh from 'fresh'
 
 import { MAX_AGE_LONG } from '../utils/maxAge'
-import { RoutePromiseComponent, getMatchedRoutes } from '../utils/routes'
+import type { RoutePromiseComponent } from '../utils/routes'
+import { getMatchedRoutes } from '../utils/routes'
 import matchRoute from './matchRoute'
 import { serveStatic } from './serveStatic'
 import {

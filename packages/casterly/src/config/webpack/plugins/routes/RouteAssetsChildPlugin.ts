@@ -18,11 +18,11 @@ export default class RouteAssetsChildPlugin {
     compiler.hooks.compilation.tap(
       { name: PLUGIN_NAME, stage: Infinity },
       (compilation) => {
-        compilation.dependencyTemplates = compiler.parentCompilation.dependencyTemplates.clone()
+        compilation.dependencyTemplates = compiler.parentCompilation!.dependencyTemplates.clone()
 
         compilation.dependencyTemplates.set(
           ImportDependency,
-          new RouteImportDependencyTemplate(compiler.parentCompilation)
+          new RouteImportDependencyTemplate(compiler.parentCompilation!)
         )
       }
     )
@@ -80,7 +80,7 @@ export default class RouteAssetsChildPlugin {
           return
         }
 
-        compilation.chunkGraph.disconnectChunk(chunk)
+        compilation.chunkGraph?.disconnectChunk(chunk)
 
         chunk.files.forEach((file) => {
           compilation.deleteAsset(file)

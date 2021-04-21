@@ -1,4 +1,5 @@
-import { BrowserHistory, Update, createBrowserHistory } from 'history'
+import type { BrowserHistory, Update } from 'history'
+import { createBrowserHistory } from 'history'
 import React, {
   useEffect,
   useLayoutEffect,
@@ -6,14 +7,15 @@ import React, {
   useRef,
   useState,
 } from 'react'
-import { Router, RouterProps } from 'react-router'
+import type { RouterProps } from 'react-router'
+import { Router } from 'react-router'
 
-import {
+import type {
   RootContext,
-  RootContextProvider,
   RouteMatchWithKey,
   RouteObjectWithKey,
 } from './RootContext'
+import { RootContextProvider } from './RootContext'
 import { RoutePendingContextProvider } from './RoutePendingContext'
 
 declare global {

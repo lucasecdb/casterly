@@ -1,6 +1,7 @@
-import { RoutesManifest } from 'casterly'
+import type { RoutesManifest } from 'casterly'
 import * as React from 'react'
-import { RouteMatch, RouteObject, matchRoutes } from 'react-router'
+import type { RouteMatch, RouteObject } from 'react-router'
+import { matchRoutes } from 'react-router'
 
 export type RouteModule = {
   default: React.ComponentType

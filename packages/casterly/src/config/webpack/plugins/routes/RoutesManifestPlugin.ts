@@ -1,5 +1,5 @@
-import { Compilation, EntryPlugin, NormalModule, node, sources } from 'webpack'
-import type { Compiler } from 'webpack'
+import { Compilation, EntryPlugin, node, sources } from 'webpack'
+import type { Compiler, NormalModule } from 'webpack'
 // @ts-ignore: no declaration file
 import ImportDependency from 'webpack/lib/dependencies/ImportDependency'
 
@@ -12,11 +12,8 @@ import {
 import paths from '../../../paths'
 import RouteAssetsChildPlugin from './RouteAssetsChildPlugin'
 import RouteModuleIdCollectorImportDependencyTemplate from './RouteModuleIdCollectorImportDependencyTemplate'
-import {
-  RouteAssetComponent,
-  evalModuleCode,
-  parseRoutesAndAssets,
-} from './utils'
+import type { RouteAssetComponent } from './utils'
+import { evalModuleCode, parseRoutesAndAssets } from './utils'
 
 const { RawSource } = sources
 
@@ -36,7 +33,7 @@ const countNumberOfRoutes = (routes: RouteAssetComponent[]): number => {
 
 export const CHILD_COMPILER_NAME = 'routeAssets'
 
-export default class RoutesManifestPlugin {
+export class RoutesManifestPlugin {
   private routeModuleIdMap: Map<string, string | number> = new Map()
 
   private getRoutesFromCompilation = (
@@ -122,7 +119,7 @@ export default class RoutesManifestPlugin {
             .toJson({ all: false, entrypoints: true })
 
           const getNamedEntrypointAssets = (name: string) =>
-            ((stats.entrypoints[name]?.assets ?? []) as { name: string }[])
+            ((stats.entrypoints?.[name]?.assets ?? []) as { name: string }[])
               .map((asset) => asset.name)
               .filter((file) => file.indexOf('hot-update') === -1)
               .map((filePath) =>
@@ -152,7 +149,7 @@ export default class RoutesManifestPlugin {
               .map((moduleId) => {
                 const routeModule = compilationModules.find(
                   (module) =>
-                    compilation.chunkGraph.getModuleId(module) === moduleId
+                    compilation.chunkGraph?.getModuleId(module) === moduleId
                 )
 
                 if (!routeModule) {
@@ -160,7 +157,7 @@ export default class RoutesManifestPlugin {
                 }
 
                 const routeFiles = compilation.chunkGraph
-                  .getModuleChunks(routeModule)
+                  ?.getModuleChunks(routeModule)
                   .flatMap((chunk) => {
                     const referencedChunksFiles = Array.from(
                       chunk.getAllReferencedChunks()

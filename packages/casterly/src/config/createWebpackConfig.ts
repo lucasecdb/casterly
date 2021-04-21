@@ -9,7 +9,8 @@ import ForkTsCheckerPlugin from 'fork-ts-checker-webpack-plugin'
 // @ts-ignore
 import MiniCssExtractPlugin from 'mini-css-extract-plugin'
 import semver from 'semver'
-import webpack, { Compiler, Configuration } from 'webpack'
+import type { Compiler, Configuration, ExternalsPlugin } from 'webpack'
+import webpack from 'webpack'
 
 import { warn } from '../output/log'
 import * as Log from '../output/log'
@@ -29,8 +30,9 @@ import paths from './paths'
 import userConfig from './userConfig'
 import { createOptimizationConfig } from './webpack/optimization'
 import SSRImportPlugin from './webpack/plugins/SSRImportPlugin'
-import RoutesManifestPlugin, {
+import {
   CHILD_COMPILER_NAME,
+  RoutesManifestPlugin,
 } from './webpack/plugins/routes/RoutesManifestPlugin'
 import {
   cssGlobalRegex,
@@ -39,7 +41,7 @@ import {
   sassGlobalRegex,
   sassRegex,
 } from './webpack/styles'
-import { Options } from './webpack/types'
+import type { Options } from './webpack/types'
 
 const loadPostcssPlugins = () => {
   const postcssRc = userConfig.postcssRc
@@ -189,24 +191,14 @@ const getBaseWebpackConfig = async (
   const chunkFilename = dev ? '[name]' : '[name].[contenthash]'
   const extractedCssFilename = dev ? '[name]' : '[name].[contenthash:8]'
 
-  const externals = isServer
+  const externals: ExternalsPlugin['externals'] | undefined = isServer
     ? [
-        (
-          { context, request }: { context: string; request: string },
-          callbackFn: any
-        ) => {
+        ({ context, request }, callback) => {
           const excludedModules: string[] = [
             // add modules that should be transpiled here
           ]
 
-          // make typescript happy because this function
-          // can be called without arguments
-          const callback = (callbackFn as unknown) as (
-            error?: any,
-            result?: any
-          ) => void
-
-          if (excludedModules.indexOf(request) !== -1) {
+          if (!request || excludedModules.indexOf(request) !== -1) {
             return callback()
           }
 

@@ -1,4 +1,4 @@
-import config from '../userConfig'
+import type config from '../userConfig'
 
 export interface Options {
   isServer?: boolean

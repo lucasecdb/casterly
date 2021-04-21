@@ -3,12 +3,12 @@ import { sep } from 'path'
 
 import CssMinimizerPlugin from 'css-minimizer-webpack-plugin'
 // @ts-ignore: TODO: typings incompatible with webpack 5
-import TerserPlugin, { TerserPluginOptions } from 'terser-webpack-plugin'
-import { Chunk, Configuration, Module } from 'webpack'
+import TerserPlugin from 'terser-webpack-plugin'
+import type { Chunk, Configuration, Module } from 'webpack'
 
 import { STATIC_CHUNKS_PATH, STATIC_RUNTIME_WEBPACK } from '../constants'
 import paths from '../paths'
-import { Options as ArgOptions } from './types'
+import type { Options as ArgOptions } from './types'
 
 const isModuleCSS = (module: Module): boolean => {
   return (
@@ -29,7 +29,7 @@ export const createOptimizationConfig = ({
   isServer,
   getNumberOfRoutes,
 }: Options): Required<Configuration>['optimization'] => {
-  const terserPluginConfig: TerserPluginOptions = {
+  const terserPluginConfig = {
     parallel: true,
   }
 
@@ -99,7 +99,7 @@ export const createOptimizationConfig = ({
           )
         }
 
-        hash.update(module.libIdent({ context: paths.appPath }))
+        hash.update(module.libIdent({ context: paths.appPath }) ?? '')
 
         return (
           STATIC_CHUNKS_PATH + sep + 'lib-' + hash.digest('hex').substring(0, 8)

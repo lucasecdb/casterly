@@ -1,5 +1,5 @@
 import 'expect-puppeteer'
-import puppeteer from 'puppeteer'
+import type puppeteer from 'puppeteer'
 
 declare global {
   const page: puppeteer.Page

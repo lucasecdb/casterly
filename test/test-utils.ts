@@ -1,7 +1,8 @@
 // eslint-disable-next-line
 /// <reference path="./global.d.ts" />
 
-import { ChildProcess, spawn } from 'child_process'
+import type { ChildProcess } from 'child_process'
+import { spawn } from 'child_process'
 import { dirname, join } from 'path'
 
 import getPort from 'get-port'

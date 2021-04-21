@@ -1,6 +1,8 @@
-import { UrlWithParsedQuery, parse as parseUrl } from 'url'
+import type { UrlWithParsedQuery } from 'url'
+import { parse as parseUrl } from 'url'
 
-import { Key, pathToRegexp, regexpToFunction } from 'path-to-regexp'
+import type { Key } from 'path-to-regexp'
+import { pathToRegexp, regexpToFunction } from 'path-to-regexp'
 
 interface MatchRouteOptions<T> {
   route: string

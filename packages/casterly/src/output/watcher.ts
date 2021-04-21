@@ -1,8 +1,9 @@
 import createStore from 'unistore'
-import { Compiler } from 'webpack'
+import type { Compiler } from 'webpack'
 
-import { WebpackError } from '../build/utils'
-import { LoggerStoreStatus, logStore } from './logger'
+import type { WebpackError } from '../build/utils'
+import type { LoggerStoreStatus } from './logger'
+import { logStore } from './logger'
 
 interface CompilerDiagnostics {
   errors: WebpackError[] | null
@@ -121,8 +122,8 @@ export function watchCompilers(
 
       onEvent({
         loading: false,
-        errors: hasErrors ? errors : null,
-        warnings: hasWarnings ? warnings : null,
+        errors: hasErrors ? errors ?? null : null,
+        warnings: hasWarnings ? warnings ?? null : null,
         typeChecking: enableTypecheck,
       })
     })

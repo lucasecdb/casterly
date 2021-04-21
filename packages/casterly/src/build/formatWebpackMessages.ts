@@ -24,7 +24,7 @@ SOFTWARE.
 // originally taken from https://github.com/facebook/create-react-app/blob/master/packages/react-dev-utils/formatWebpackMessages.js
 import chalk from 'chalk'
 
-import { WebpackError } from './utils'
+import type { WebpackError } from './utils'
 
 const friendlySyntaxErrorLabel = 'Syntax error:'
 

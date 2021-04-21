@@ -1,8 +1,8 @@
 // @ts-ignore
 import MiniCssExtractPlugin from 'mini-css-extract-plugin'
-import { RuleSetUse } from 'webpack'
+import type { RuleSetUse } from 'webpack'
 
-import { Options } from './types'
+import type { Options } from './types'
 
 interface StyleOptions extends Options {
   cssModules?: boolean
