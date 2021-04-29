@@ -405,8 +405,10 @@ const getBaseWebpackConfig = async (
       ignored: [
         '**/.git/**',
         '**/node_modules/**',
-        '**/' + userConfig.userConfig.buildFolder ??
-          userConfig.defaultConfig.buildFolder + '/**',
+        '**/' +
+          (userConfig.userConfig.buildFolder ??
+            userConfig.defaultConfig.buildFolder) +
+          '/**',
       ],
     },
     output: {
