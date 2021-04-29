@@ -1,7 +1,7 @@
 import { realpathSync } from 'fs'
 import path from 'path'
 
-import { fileExists } from '@casterly/utils'
+import { constants, fileExists } from '@casterly/utils'
 import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin'
 // @ts-ignore: typings not up-to-date
 import CaseSensitivePathsPlugin from 'case-sensitive-paths-webpack-plugin'
@@ -392,6 +392,20 @@ const getBaseWebpackConfig = async (
     bail: webpackMode === 'production',
     context: paths.appPath,
     externals,
+    cache: dev
+      ? {
+          type: 'filesystem',
+          allowCollectingMemory: true,
+          cacheDirectory: path.join(paths.appBuildFolder, 'cache'),
+          buildDependencies: {
+            config: [
+              __filename,
+              path.join(paths.appPath, constants.WEBPACK_CONFIG_FILE),
+            ],
+          },
+          version: isServer ? 'server' : 'client',
+        }
+      : false,
     entry: () => ({
       ...entrypoints,
       ...(!isServer
