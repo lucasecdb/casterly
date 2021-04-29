@@ -17,9 +17,14 @@ interface BuildServerConfig {
   port?: number
 }
 
+interface ExperimentsConfig {
+  esbuildDependencies?: boolean
+}
+
 export interface CasterlyConfig {
   buildServer?: BuildServerConfig
   buildFolder?: string
+  experiments?: ExperimentsConfig
 }
 
 export const defaultConfig: RecursiveRequired<CasterlyConfig> = {
@@ -27,6 +32,9 @@ export const defaultConfig: RecursiveRequired<CasterlyConfig> = {
     port: 8081,
   },
   buildFolder: '.dist',
+  experiments: {
+    esbuildDependencies: false,
+  },
 }
 
 export const loadUserConfig = (dir: string): CasterlyConfig => {
