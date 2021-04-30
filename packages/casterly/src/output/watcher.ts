@@ -1,6 +1,9 @@
+import * as path from 'path'
+
 import createStore from 'unistore'
 import type { Compiler } from 'webpack'
 
+import { paths } from '..'
 import type { WebpackError } from '../build/utils'
 import type { LoggerStoreStatus } from './logger'
 import { logStore } from './logger'
@@ -8,10 +11,11 @@ import { logStore } from './logger'
 interface CompilerDiagnostics {
   errors: WebpackError[] | null
   warnings: WebpackError[] | null
+  buildDuration: number
 }
 
 type WebpackStatus =
-  | { loading: true }
+  | { loading: true; fileName?: string }
   | ({
       loading: false
       typeChecking: boolean
@@ -62,9 +66,10 @@ buildStore.subscribe((state) => {
       bootstrap: false,
       loading: true,
       port,
+      fileName: status.fileName,
     }
   } else {
-    const { errors, warnings, typeChecking } = status
+    const { errors, warnings, typeChecking, buildDuration } = status
 
     if (errors == null && typeChecking) {
       nextState = {
@@ -74,6 +79,7 @@ buildStore.subscribe((state) => {
         loading: false,
         errors,
         warnings,
+        buildDuration,
       }
     } else {
       nextState = {
@@ -83,6 +89,7 @@ buildStore.subscribe((state) => {
         typeChecking: false,
         errors,
         warnings,
+        buildDuration,
       }
     }
   }
@@ -106,9 +113,17 @@ export function watchCompilers(
     enableTypecheck: boolean,
     onEvent: (status: WebpackStatus) => void
   ) {
-    compiler.hooks.invalid.tap(`BuildInvalid-${key}`, () => {
-      onEvent({ loading: true })
-    })
+    compiler.hooks.invalid.tap(
+      `BuildInvalid-${key}`,
+      (fileName: string | null) => {
+        onEvent({
+          loading: true,
+          fileName: fileName
+            ? path.relative(path.join(paths.appPath), fileName)
+            : undefined,
+        })
+      }
+    )
 
     compiler.hooks.done.tap(`BuildDone-${key}`, (stats) => {
       const { errors, warnings } = stats.toJson({
@@ -120,11 +135,14 @@ export function watchCompilers(
       const hasErrors = !!errors?.length
       const hasWarnings = !!warnings?.length
 
+      const buildDuration = (stats.endTime - stats.startTime) / 1000
+
       onEvent({
         loading: false,
         errors: hasErrors ? errors ?? null : null,
         warnings: hasWarnings ? warnings ?? null : null,
         typeChecking: enableTypecheck,
+        buildDuration,
       })
     })
   }
