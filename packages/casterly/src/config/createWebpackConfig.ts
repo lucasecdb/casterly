@@ -289,6 +289,10 @@ const getBaseWebpackConfig = async (
   const useTypescript =
     !!typescriptPath && (await fileExists(paths.appTsConfig))
 
+  const esbuildForDependencies =
+    userConfig.userConfig.experiments?.esbuildDependencies ??
+    userConfig.defaultConfig.experiments.esbuildDependencies
+
   const chunkFilename = dev ? '[name]' : '[name].[contenthash]'
   const extractedCssFilename = dev ? '[name]' : '[name].[contenthash:8]'
 
@@ -516,52 +520,60 @@ const getBaseWebpackConfig = async (
           test: /\.(js|mjs)$/,
           include: /node_modules/,
           exclude: /@babel(?:\/|\\{1,2})runtime/,
-          loader: require.resolve('babel-loader'),
-          options: {
-            babelrc: false,
-            configFile: false,
-            compact: false,
+          use: [
+            !esbuildForDependencies && {
+              loader: require.resolve('babel-loader'),
+              options: {
+                babelrc: false,
+                configFile: false,
+                compact: false,
 
-            presets: [
-              [
-                require.resolve('@babel/preset-env'),
-                {
-                  useBuiltIns: 'entry',
-                  corejs: 3,
-                  modules: false,
-                  exclude: ['transform-typeof-symbol'],
-                },
-              ],
-            ],
-            plugins: [
-              [
-                require.resolve('@babel/plugin-transform-destructuring'),
-                {
-                  loose: false,
-                  selectiveLoose: [
-                    'useState',
-                    'useEffect',
-                    'useContext',
-                    'useReducer',
-                    'useCallback',
-                    'useMemo',
-                    'useRef',
-                    'useImperativeHandle',
-                    'useLayoutEffect',
-                    'useDebugValue',
+                presets: [
+                  [
+                    require.resolve('@babel/preset-env'),
+                    {
+                      useBuiltIns: 'entry',
+                      corejs: 3,
+                      modules: false,
+                      exclude: ['transform-typeof-symbol'],
+                    },
                   ],
-                },
-              ],
-              require.resolve('@babel/plugin-transform-runtime'),
-              require.resolve('@babel/plugin-syntax-dynamic-import'),
-            ],
+                ],
+                plugins: [
+                  [
+                    require.resolve('@babel/plugin-transform-destructuring'),
+                    {
+                      loose: false,
+                      selectiveLoose: [
+                        'useState',
+                        'useEffect',
+                        'useContext',
+                        'useReducer',
+                        'useCallback',
+                        'useMemo',
+                        'useRef',
+                        'useImperativeHandle',
+                        'useLayoutEffect',
+                        'useDebugValue',
+                      ],
+                    },
+                  ],
+                  require.resolve('@babel/plugin-transform-runtime'),
+                  require.resolve('@babel/plugin-syntax-dynamic-import'),
+                ],
 
-            // If an error happens in a package, it's possible to be
-            // because it was compiled. Thus, we don't want the browser
-            // debugger to show the original code. Instead, the code
-            // being evaluated would be much more helpful.
-            sourceMaps: false,
-          },
+                // If an error happens in a package, it's possible to be
+                // because it was compiled. Thus, we don't want the browser
+                // debugger to show the original code. Instead, the code
+                // being evaluated would be much more helpful.
+                sourceMaps: false,
+              },
+            },
+            esbuildForDependencies && {
+              loader: require.resolve('esbuild-loader'),
+              options: {},
+            },
+          ].filter(filterBoolean),
         },
         ...cssRules,
       ],

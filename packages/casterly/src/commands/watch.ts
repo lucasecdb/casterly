@@ -24,7 +24,8 @@ export default async function startWatch() {
   const serverReadyPromise = new Promise<void>((resolve) => {
     setServerReady = resolve
   })
-  ;(async () => {
+
+  async function startWatch() {
     const clientConfig = await createWebpackConfig({
       dev: true,
       isServer: false,
@@ -63,7 +64,9 @@ export default async function startWatch() {
     })
 
     setServerReady!()
-  })()
+  }
+
+  startWatch()
 
   app.get('/server-ready', (_, res) => {
     serverReadyPromise.then(() => {
