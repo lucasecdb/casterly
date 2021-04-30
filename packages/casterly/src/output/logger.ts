@@ -5,12 +5,13 @@ import type { WebpackError } from '../build/utils'
 import * as Log from './log'
 
 type WebpackState =
-  | { loading: true }
+  | { loading: true; fileName?: string }
   | {
       loading: false
       typeChecking: boolean
       errors: WebpackError[] | null
       warnings: WebpackError[] | null
+      buildDuration: number
     }
 
 export type LoggerStoreStatus =
@@ -58,7 +59,11 @@ logStore.subscribe((state) => {
   }
 
   if (state.loading === true) {
-    Log.wait('compiling...')
+    if (state.fileName) {
+      Log.wait(`${state.fileName} changed, compiling...`)
+    } else {
+      Log.wait('compiling...')
+    }
     return
   }
 
@@ -75,5 +80,5 @@ logStore.subscribe((state) => {
     return
   }
 
-  Log.ready('compiled successfully')
+  Log.ready(`compiled successfully in ${state.buildDuration} seconds`)
 })
