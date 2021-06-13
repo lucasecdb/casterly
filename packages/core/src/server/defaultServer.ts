@@ -8,9 +8,9 @@ import type { RoutesManifest } from 'casterly'
 import fresh from 'fresh'
 
 import { MAX_AGE_LONG } from '../utils/maxAge'
-import type { RoutePromiseComponent } from '../utils/routes'
 import { getMatchedRoutes } from '../utils/routes'
 import matchRoute from './matchRoute'
+import type { ResponseObject } from './response'
 import { serveStatic } from './serveStatic'
 import {
   interopDefault,
@@ -34,10 +34,6 @@ interface ServerContext extends RootContext {
 export interface ServerOptions {
   dev?: boolean
 }
-
-global.Request = require('minipass-fetch').Request
-global.Response = require('minipass-fetch').Response
-global.Headers = require('minipass-fetch').Headers
 
 class DefaultServer {
   private _routesManifest
@@ -67,7 +63,11 @@ class DefaultServer {
     return fileContent.toString()
   }
 
-  protected async handleRequest(req: Request, responseHeaders?: Headers) {
+  protected async handleRequest(
+    req: Request,
+    responseHeaders?: Headers,
+    adapterOptions?: any
+  ): Promise<ResponseObject> {
     if (
       responseHeaders !== undefined &&
       !(responseHeaders instanceof Headers)
@@ -104,25 +104,25 @@ class DefaultServer {
 
           const buildId = await this.getBuildId()
 
-          const etag = `W/"${buildId}"`
+          const etag = this.dev ? '' : `W/"${buildId}"`
 
           let status = 200
 
-          const headers = new Headers()
+          const headers: Record<string, string> = {}
 
-          headers.set('content-type', 'application/json')
+          headers['content-type'] = 'application/json'
 
           if (!this.dev) {
-            headers.set('etag', etag)
-            headers.set('cache-control', 'public, max-age=' + MAX_AGE_LONG)
+            headers['etag'] = etag
+            headers['cache-control'] = 'public, max-age=' + MAX_AGE_LONG
           }
 
           if (requestContainsPrecondition(req)) {
             if (isPreconditionFailure(req, new Headers({ etag }))) {
-              return new Response(null, {
+              return {
                 status: 412,
-                headers,
-              })
+                outgoingHeaders: headers,
+              }
             }
 
             if (
@@ -130,10 +130,10 @@ class DefaultServer {
                 etag,
               })
             ) {
-              return new Response(null, {
+              return {
                 status: 304,
-                headers,
-              })
+                outgoingHeaders: headers,
+              }
             }
           }
 
@@ -157,10 +157,11 @@ class DefaultServer {
             body = JSON.stringify(clientContext)
           }
 
-          return new Response(body, {
+          return {
             status,
-            headers,
-          })
+            outgoingHeaders: headers,
+            body,
+          }
         },
       }),
       matchRoute<{ filePath: string }>({
@@ -173,14 +174,14 @@ class DefaultServer {
               !this.dev
             )
           } catch {
-            return new Response(null, { status: 404 })
+            return { status: 404 }
           }
         },
       }),
       matchRoute<{ filePath: string }>({
         route: '/_casterly/:path*',
         fn: async () => {
-          return new Response(null, { status: 404 })
+          return { status: 404, body: null }
         },
       }),
     ]
@@ -195,15 +196,16 @@ class DefaultServer {
     }
 
     try {
-      return await this.renderDocument(req, responseHeaders)
+      return await this.renderDocument(req, responseHeaders, adapterOptions)
     } catch (err) {
       console.error('[ERROR]:', err)
-      return new Response('error', {
+      return {
         status: 500,
-        headers: {
+        outgoingHeaders: {
           'x-robots-tag': 'noindex, nofollow',
         },
-      })
+        body: 'error',
+      }
     }
   }
 
@@ -216,9 +218,11 @@ class DefaultServer {
   private getServerContextForRoute = async (url: string) => {
     const routesManifest = this.getRoutesManifestFile()
 
-    const appRoutesPromises: RoutePromiseComponent[] = await import(
+    const appRoutesModule = await import(
       path.join(paths.appServerBuildFolder, STATIC_ENTRYPOINTS_ROUTES)
-    ).then(interopDefault)
+    )
+
+    const appRoutes = appRoutesModule.default || appRoutesModule
 
     const {
       routes,
@@ -227,7 +231,7 @@ class DefaultServer {
       routeHeaders,
     } = await getMatchedRoutes({
       location: url,
-      routesPromiseComponent: appRoutesPromises,
+      routesPromiseComponent: appRoutes,
       routesManifest,
     })
 
@@ -266,7 +270,8 @@ class DefaultServer {
       req: Request,
       status: number,
       headers: Headers,
-      context: unknown
+      context: unknown,
+      adapterOptions?: any
     ) => Response | Promise<Response>
   > => {
     const handleRequest = await import(
@@ -278,8 +283,9 @@ class DefaultServer {
 
   private renderDocument = async (
     request: Request,
-    responseHeaders?: Headers
-  ) => {
+    responseHeaders?: Headers,
+    adapterOptions?: any
+  ): Promise<ResponseObject> => {
     const headers = new Headers(responseHeaders)
 
     const serverContext = await this.getServerContextForRoute(request.url)
@@ -288,17 +294,53 @@ class DefaultServer {
       headers.set(key, value)
     })
 
-    global.fetch = require('make-fetch-happen')
-
     const handleRequest = await this.getAppRequestHandler()
 
-    let response = handleRequest(request, 200, headers, serverContext)
+    let status = 200
+
+    let response = handleRequest(
+      request,
+      status,
+      headers,
+      serverContext,
+      adapterOptions
+    )
 
     if ('then' in response) {
       response = await response
     }
 
-    return response
+    let outgoingHeaders: Record<string, string> = {}
+    let onReadyToStream = undefined
+
+    let body = null
+
+    if (response instanceof Response) {
+      status = response.status
+      outgoingHeaders = {}
+
+      response.headers.forEach((key, value) => {
+        outgoingHeaders[key] = value
+      })
+
+      body = await response.body
+        ?.getReader()
+        .read()
+        .then((result) => {
+          return result.value?.toString()
+        })
+    } else if (typeof response === 'string') {
+      body = response
+    } else if (typeof response === 'object') {
+      const recordResponse = response as Record<string, any>
+
+      status = recordResponse.status
+      body = recordResponse.body
+      outgoingHeaders = recordResponse.headers
+      onReadyToStream = recordResponse.onReadyToStream
+    }
+
+    return { status, outgoingHeaders, body, onReadyToStream }
   }
 }
 

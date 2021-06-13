@@ -2,8 +2,6 @@ import * as path from 'path'
 
 import { constants, paths } from '@casterly/utils'
 import * as config from '@casterly/utils/config'
-// @ts-ignore
-import fetch from 'make-fetch-happen'
 
 import { _private_DefaultServer as DefaultServer } from './defaultServer'
 import { readJSON } from './utils'
@@ -47,15 +45,20 @@ class DevServer extends DefaultServer {
         attempts--
 
         if (attempts === 0) {
-          return new Response("The build server isn't running.", {
+          return {
             status: 500,
-          })
+            body: "The build server isn't running.",
+          }
         }
       }
     }
   }
 
-  protected async handleRequest(req: Request, responseHeaders?: Headers) {
+  protected async handleRequest(
+    req: Request,
+    responseHeaders?: Headers,
+    adapterOptions?: any
+  ) {
     if (!this.buildServerReady) {
       const maybeResponse = await this.waitForBuildServer()
 
@@ -70,7 +73,7 @@ class DevServer extends DefaultServer {
       }
     }
 
-    return super.handleRequest(req, responseHeaders)
+    return super.handleRequest(req, responseHeaders, adapterOptions)
   }
 }
 

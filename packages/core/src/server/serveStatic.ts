@@ -5,6 +5,7 @@ import fresh from 'fresh'
 import mime from 'mime'
 
 import { MAX_AGE_LONG } from '../utils/maxAge'
+import type { ResponseObject } from './response'
 import {
   isPreconditionFailure,
   requestContainsPrecondition,
@@ -16,7 +17,7 @@ export const serveStatic = (
   path: string,
   enableCaching: boolean
 ) => {
-  return new Promise<Response>((resolve, reject) => {
+  return new Promise<ResponseObject>((resolve, reject) => {
     fs.stat(path, (err, stats) => {
       if (err) {
         return reject(err)
@@ -34,42 +35,36 @@ export const serveStatic = (
       const fileTag = etag(stats)
       const fileType = mime.getType(path)
 
-      const headers = new Headers({
+      const headers: Record<string, string> = {
         etag: enableCaching ? fileTag : '',
         'cache-control': enableCaching ? `public, max-age=${MAX_AGE_LONG}` : '',
         'content-type': fileType ?? '',
-      })
+      }
+
+      if (!enableCaching) {
+        delete headers.etag
+        delete headers['cache-control']
+      }
 
       if (requestContainsPrecondition(request)) {
         if (
           isPreconditionFailure(request, new Headers({ etag: fileTag || '' }))
         ) {
-          return resolve(
-            new Response(null, {
-              status: 412,
-              headers,
-            })
-          )
+          return resolve({ status: 412, outgoingHeaders: headers })
         }
 
         if (
           fresh(requestHeadersToNodeHeaders(request.headers), { etag: fileTag })
         ) {
-          return resolve(
-            new Response(null, {
-              status: 304,
-              headers,
-            })
-          )
+          return resolve({ status: 304, outgoingHeaders: headers })
         }
       }
 
-      resolve(
-        new Response(request.method === 'HEAD' ? null : (readStream as any), {
-          status: 200,
-          headers,
-        })
-      )
+      resolve({
+        status: 200,
+        outgoingHeaders: headers,
+        body: request.method === 'HEAD' ? null : readStream,
+      })
     })
   })
 }
