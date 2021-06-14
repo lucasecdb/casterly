@@ -4,13 +4,16 @@ import { parse as parseUrl } from 'url'
 import type { Key } from 'path-to-regexp'
 import { pathToRegexp, regexpToFunction } from 'path-to-regexp'
 
+import type { Request } from '../fetch'
+import type { ResponseObject } from './response'
+
 interface MatchRouteOptions<T> {
   route: string
   fn: (
     req: Request,
     params: T,
     url: UrlWithParsedQuery
-  ) => Promise<Response | void>
+  ) => Promise<ResponseObject | void>
 }
 
 export default function matchRoute<

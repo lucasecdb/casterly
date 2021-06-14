@@ -1,5 +1,7 @@
 import * as fs from 'fs'
 
+import type { Headers, Request } from '../fetch'
+
 export const readJSON = (filePath: string) => {
   const file = fs.readFileSync(filePath)
   return JSON.parse(file.toString())

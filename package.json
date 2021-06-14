@@ -37,8 +37,8 @@
     "lint-staged": "^10.5.4",
     "prettier": "^2.1.1",
     "puppeteer": "^5.5.0",
-    "react": "^0.0.0-experimental-48740429b",
-    "react-dom": "^0.0.0-experimental-48740429b",
+    "react": "18.0.0-alpha-c96b78e0e",
+    "react-dom": "18.0.0-alpha-c96b78e0e",
     "react-router": "^6.0.0-beta.0",
     "react-router-dom": "^6.0.0-beta.0",
     "typescript": "^4.2.4"

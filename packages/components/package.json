@@ -1,6 +1,6 @@
 {
   "name": "@casterly/components",
-  "version": "0.8.0",
+  "version": "0.9.0-alpha.0",
   "description": "Base Casterly components",
   "author": "Lucas Cordeiro <ecdb.lucas@gmail.com>",
   "homepage": "https://github.com/lucasecdb/casterly#readme",
@@ -45,8 +45,8 @@
   "devDependencies": {
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
-    "react": "^0.0.0-experimental-48740429b",
-    "react-dom": "^17.0.1",
+    "react": "18.0.0-alpha-c96b78e0e",
+    "react-dom": "18.0.0-alpha-c96b78e0e",
     "react-router": "^6.0.0-beta.0",
     "react-router-dom": "^6.0.0-beta.0",
     "rimraf": "^3.0.2"

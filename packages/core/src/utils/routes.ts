@@ -3,6 +3,8 @@ import * as React from 'react'
 import type { RouteMatch, RouteObject } from 'react-router'
 import { matchRoutes } from 'react-router'
 
+import { Headers } from '../fetch'
+
 export type RouteModule = {
   default: React.ComponentType
   headers?: (headersParams: {
