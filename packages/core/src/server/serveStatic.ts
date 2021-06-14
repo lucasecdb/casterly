@@ -4,6 +4,8 @@ import etag from 'etag'
 import fresh from 'fresh'
 import mime from 'mime'
 
+import type { Request } from '../fetch'
+import { Headers } from '../fetch'
 import { MAX_AGE_LONG } from '../utils/maxAge'
 import type { ResponseObject } from './response'
 import {

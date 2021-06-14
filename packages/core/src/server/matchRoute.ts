@@ -4,6 +4,7 @@ import { parse as parseUrl } from 'url'
 import type { Key } from 'path-to-regexp'
 import { pathToRegexp, regexpToFunction } from 'path-to-regexp'
 
+import type { Request } from '../fetch'
 import type { ResponseObject } from './response'
 
 interface MatchRouteOptions<T> {

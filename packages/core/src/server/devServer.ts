@@ -3,6 +3,8 @@ import * as path from 'path'
 import { constants, paths } from '@casterly/utils'
 import * as config from '@casterly/utils/config'
 
+import type { Headers, Request } from '../fetch'
+import { fetch } from '../fetch'
 import { _private_DefaultServer as DefaultServer } from './defaultServer'
 import { readJSON } from './utils'
 
