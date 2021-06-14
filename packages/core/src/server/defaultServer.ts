@@ -7,6 +7,7 @@ import { constants, paths } from '@casterly/utils'
 import type { RoutesManifest } from 'casterly'
 import fresh from 'fresh'
 
+import { Response } from '../fetch'
 import { MAX_AGE_LONG } from '../utils/maxAge'
 import { getMatchedRoutes } from '../utils/routes'
 import matchRoute from './matchRoute'
@@ -319,16 +320,11 @@ class DefaultServer {
       status = response.status
       outgoingHeaders = {}
 
-      response.headers.forEach((key, value) => {
+      response.headers.forEach((value, key) => {
         outgoingHeaders[key] = value
       })
 
-      body = await response.body
-        ?.getReader()
-        .read()
-        .then((result) => {
-          return result.value?.toString()
-        })
+      body = response.body
     } else if (typeof response === 'string') {
       body = response
     } else if (typeof response === 'object') {

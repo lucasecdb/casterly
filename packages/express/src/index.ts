@@ -9,7 +9,7 @@ export const createRequestHandler = (): RequestHandler => {
   const handleRequest = defaultCreateRequestHandler()
 
   return async (req, res, next) => {
-    const request = new Request(req.url ?? '/', {
+    const request = new global.Request(req.url ?? '/', {
       method: req.method,
       headers: Object.entries(req.headers).map(([key, value]) => [
         key,
@@ -17,7 +17,7 @@ export const createRequestHandler = (): RequestHandler => {
       ]) as Array<[string, string]>,
     })
 
-    const responseHeaders = new Headers(
+    const responseHeaders = new global.Headers(
       Object.entries(res.getHeaders()).map(([key, value]) => [
         key,
         Array.isArray(value) ? value : value?.toString(),
