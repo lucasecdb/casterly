@@ -21,7 +21,7 @@ describe('Hello World', () => {
     let dynamicComponentRequested = false
 
     page.on('request', (request) => {
-      if (request.url().includes('dynamic-component')) {
+      if (request.url().includes('dynamic-component.js')) {
         dynamicComponentRequested = true
       }
 
@@ -32,7 +32,7 @@ describe('Hello World', () => {
 
     let content = await page.content()
 
-    expect(content).toMatch('Hello from dynamic component')
+    expect(content).toMatch('Hello from dynamic component!')
     expect(content).not.toMatch('dynamic-component.js')
 
     expect(dynamicComponentRequested).toBe(false)
@@ -41,8 +41,16 @@ describe('Hello World', () => {
 
     expect(dynamicComponentRequested).toBe(true)
 
+    await page.waitForResponse((req) =>
+      req.url().includes('dynamic-component.js')
+    )
+
+    await page.click('button')
+
     content = await page.content()
 
-    expect(content).toMatch('dynamic-component.js')
+    // Make sure the component is hydrated and
+    // event handlers work as expected
+    expect(content).toMatch('Hello from alternate message!')
   })
 })
