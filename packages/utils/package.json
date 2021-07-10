@@ -1,6 +1,6 @@
 {
   "name": "@casterly/utils",
-  "version": "0.9.0-alpha.0",
+  "version": "0.9.0-alpha.1",
   "description": "Common utilities used throughout Casterly packages",
   "author": "Lucas Cordeiro <ecdb.lucas@gmail.com>",
   "homepage": "https://github.com/lucasecdb/casterly#readme",
