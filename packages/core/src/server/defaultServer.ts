@@ -150,11 +150,8 @@ class DefaultServer {
           } else {
             const url = parseUrl(query.path)
 
-            const {
-              routes,
-              routeHeaders,
-              ...clientContext
-            } = await this.getServerContextForRoute(url.pathname!)
+            const { routes, routeHeaders, ...clientContext } =
+              await this.getServerContextForRoute(url.pathname!)
 
             body = JSON.stringify(clientContext)
           }
@@ -226,16 +223,12 @@ class DefaultServer {
 
     const appRoutes = appRoutesModule.default || appRoutesModule
 
-    const {
-      routes,
-      matchedRoutes,
-      matchedRoutesAssets,
-      routeHeaders,
-    } = await getMatchedRoutes({
-      location: url,
-      routesPromiseComponent: appRoutes,
-      routesManifest,
-    })
+    const { routes, matchedRoutes, matchedRoutesAssets, routeHeaders } =
+      await getMatchedRoutes({
+        location: url,
+        routesPromiseComponent: appRoutes,
+        routesManifest,
+      })
 
     const serverContext: ServerContext = {
       version: await this.getBuildId(),

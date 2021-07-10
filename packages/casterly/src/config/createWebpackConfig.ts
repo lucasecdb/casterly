@@ -30,11 +30,11 @@ import getClientEnvironment from './env'
 import paths from './paths'
 import userConfig from './userConfig'
 import { createOptimizationConfig } from './webpack/optimization'
-import SSRImportPlugin from './webpack/plugins/SSRImportPlugin'
 import {
   CHILD_COMPILER_NAME,
   RoutesManifestPlugin,
-} from './webpack/plugins/routes/RoutesManifestPlugin'
+} from './webpack/plugins/RoutesManifestPlugin'
+import SSRImportPlugin from './webpack/plugins/SSRImportPlugin'
 import {
   cssGlobalRegex,
   cssRegex,
@@ -176,7 +176,10 @@ const loadPostcssPlugins = async (dir: string) => {
   )
 }
 
-const not = <T>(fn: (...args: T[]) => boolean) => (...args: T[]) => !fn(...args)
+const not =
+  <T>(fn: (...args: T[]) => boolean) =>
+  (...args: T[]) =>
+    !fn(...args)
 
 const isRouteManifestChildCompiler = (name: string) =>
   name === CHILD_COMPILER_NAME
@@ -184,8 +187,12 @@ const isRouteManifestChildCompiler = (name: string) =>
 const getBaseWebpackConfig = async (
   options?: Options
 ): Promise<Configuration> => {
-  const { isServer = false, dev = false, profile = false, configFn } =
-    options ?? {}
+  const {
+    isServer = false,
+    dev = false,
+    profile = false,
+    configFn,
+  } = options ?? {}
 
   // Get environment variables to inject into our app.
   const env = getClientEnvironment({ isServer })

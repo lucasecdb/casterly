@@ -1,19 +1,19 @@
-import { Compilation, EntryPlugin, node, sources } from 'webpack'
-import type { Compiler, NormalModule } from 'webpack'
-// @ts-ignore: no declaration file
-import ImportDependency from 'webpack/lib/dependencies/ImportDependency'
+import path from 'path'
+
+import { Compilation, EntryPlugin, NormalModule, node, sources } from 'webpack'
+import type { Compiler } from 'webpack'
 
 import {
   ROUTES_MANIFEST_FILE,
+  STATIC_ENTRYPOINTS_ROUTES,
   STATIC_ENTRYPOINTS_ROUTES_ASSETS,
   STATIC_RUNTIME_HOT,
   STATIC_RUNTIME_MAIN,
-} from '../../../constants'
-import paths from '../../../paths'
+} from '../../constants'
+import paths from '../../paths'
+import type { RouteAssetComponent } from '../utils'
+import { evalModuleCode, parseRoutesAndAssets } from '../utils'
 import RouteAssetsChildPlugin from './RouteAssetsChildPlugin'
-import RouteModuleIdCollectorImportDependencyTemplate from './RouteModuleIdCollectorImportDependencyTemplate'
-import type { RouteAssetComponent } from './utils'
-import { evalModuleCode, parseRoutesAndAssets } from './utils'
 
 const { RawSource } = sources
 
@@ -34,8 +34,6 @@ const countNumberOfRoutes = (routes: RouteAssetComponent[]): number => {
 export const CHILD_COMPILER_NAME = 'routeAssets'
 
 export class RoutesManifestPlugin {
-  private routeModuleIdMap: Map<string, string | number> = new Map()
-
   private getRoutesFromCompilation = (
     compiler: Compiler,
     assets: Compilation['assets']
@@ -85,19 +83,6 @@ export class RoutesManifestPlugin {
       })
     })
 
-    compiler.hooks.compilation.tap(
-      { name: PLUGIN_NAME, stage: Infinity },
-      (compilation) => {
-        compilation.dependencyTemplates.set(
-          ImportDependency,
-          new RouteModuleIdCollectorImportDependencyTemplate(
-            this.routeModuleIdMap,
-            compiler.context
-          )
-        )
-      }
-    )
-
     compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation) => {
       this.getNumberOfRoutes = () => {
         const routes = this.getRoutesFromCompilation(
@@ -126,12 +111,10 @@ export class RoutesManifestPlugin {
                 !filePath.startsWith('/') ? '/' + filePath : filePath
               )
 
-          const mainEntrypointAssets = getNamedEntrypointAssets(
-            STATIC_RUNTIME_MAIN
-          )
-          const hotEntrypointAssets = getNamedEntrypointAssets(
-            STATIC_RUNTIME_HOT
-          )
+          const mainEntrypointAssets =
+            getNamedEntrypointAssets(STATIC_RUNTIME_MAIN)
+          const hotEntrypointAssets =
+            getNamedEntrypointAssets(STATIC_RUNTIME_HOT)
 
           const mainAssets = mainEntrypointAssets.concat(
             hotEntrypointAssets.filter(
@@ -141,11 +124,46 @@ export class RoutesManifestPlugin {
 
           const compilationModules = Array.from(compilation.modules.values())
 
+          const entrypointChunk = Array.from(compilation.chunks).find(
+            (chunk) => chunk.id === STATIC_ENTRYPOINTS_ROUTES
+          )
+
+          const entrypointModules =
+            entrypointChunk &&
+            compilation.chunkGraph.getChunkModules(entrypointChunk)
+
+          const routesModule = entrypointModules?.find(
+            (module) =>
+              module instanceof NormalModule &&
+              module.userRequest === paths.appRoutesJs
+          )
+
+          const dependencies = routesModule?.blocks?.flatMap(
+            (block) => block.dependencies
+          )
+
+          const moduleIdMap = Object.fromEntries(
+            dependencies?.map((dependency) => {
+              const dependencyModule =
+                compilation.moduleGraph.getResolvedModule(dependency)
+
+              const userRequest = (dependencyModule as NormalModule).userRequest
+              const modulePath =
+                '.' + path.sep + path.relative(compiler.context, userRequest)
+
+              const moduleId = compilation.chunkGraph.getModuleId(
+                compilation.moduleGraph.getModule(dependency)
+              )
+
+              return [modulePath, moduleId]
+            }) ?? []
+          )
+
           // Create a map of the module name to its assets, to
           // be later used with the routes-assets.js file to
           // gather the chunks for a particular route.
           const routeComponentsAssets = Object.fromEntries(
-            Array.from(this.routeModuleIdMap.values())
+            Array.from(Object.values(moduleIdMap))
               .map((moduleId) => {
                 const routeModule = compilationModules.find(
                   (module) =>
@@ -159,12 +177,19 @@ export class RoutesManifestPlugin {
                 const routeFiles = compilation.chunkGraph
                   ?.getModuleChunks(routeModule)
                   .flatMap((chunk) => {
+                    const asyncChunks = chunk.hasAsyncChunks()
+                      ? Array.from(chunk.getAllAsyncChunks())
+                      : []
+
                     const referencedChunksFiles = Array.from(
                       chunk.getAllReferencedChunks()
                     )
-                      .flatMap((referencedChunk) =>
-                        Array.from(referencedChunk.files.values())
-                      )
+                      .filter((chunk) => !asyncChunks.includes(chunk))
+                      .flatMap((referencedChunk) => {
+                        const files = Array.from(referencedChunk.files.values())
+
+                        return files
+                      })
                       .filter((file) => file.indexOf('hot-update') === -1)
                       .map((filePath) =>
                         !filePath.startsWith('/') ? '/' + filePath : filePath
@@ -185,7 +210,7 @@ export class RoutesManifestPlugin {
             mainAssets,
             routeComponentsAssets,
             routes,
-            this.routeModuleIdMap
+            moduleIdMap
           )
 
           assets[ROUTES_MANIFEST_FILE] = new RawSource(
@@ -194,18 +219,6 @@ export class RoutesManifestPlugin {
           )
         }
       )
-
-      // Hook to clear the routeImports array when the routes
-      // file is built (either on first compilation or on rebuilds).
-      compilation.hooks.buildModule.tap(PLUGIN_NAME, (module) => {
-        const normalModule = module as NormalModule
-
-        const resource = normalModule.resource
-
-        if (resource === paths.appRoutesJs) {
-          this.routeModuleIdMap.clear()
-        }
-      })
     })
   }
 }
