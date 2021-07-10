@@ -125,7 +125,7 @@ export class RoutesManifestPlugin {
           const compilationModules = Array.from(compilation.modules.values())
 
           const entrypointChunk = Array.from(compilation.chunks).find(
-            (chunk) => chunk.id === STATIC_ENTRYPOINTS_ROUTES
+            (chunk) => chunk.name === STATIC_ENTRYPOINTS_ROUTES
           )
 
           const entrypointModules =
