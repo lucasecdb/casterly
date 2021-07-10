@@ -9316,6 +9316,15 @@ react-dom@18.0.0-alpha-c96b78e0e:
     object-assign "^4.1.1"
     scheduler "0.21.0-alpha-c96b78e0e"
 
+react-dom@18.0.0-alpha-cb8afda18-20210708:
+  version "18.0.0-alpha-cb8afda18-20210708"
+  resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-18.0.0-alpha-cb8afda18-20210708.tgz#31b62b4afc805144b4ba989d74b2170cd3d0ba5c"
+  integrity sha512-J+8NglaCetnB84CA5YTUVel+2PUyKmsDf0nmzB0wlVEVeZkoP9MUG4baCBfHLDSSrCQ8QPSp5iBac1FolJc+oQ==
+  dependencies:
+    loose-envify "^1.1.0"
+    object-assign "^4.1.1"
+    scheduler "0.21.0-alpha-cb8afda18-20210708"
+
 react-is@^16.8.1:
   version "16.13.1"
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.13.1.tgz#789729a4dc36de2999dc156dd6c1d9c18cea56a4"
@@ -9350,6 +9359,14 @@ react@18.0.0-alpha-c96b78e0e:
   version "18.0.0-alpha-c96b78e0e"
   resolved "https://registry.yarnpkg.com/react/-/react-18.0.0-alpha-c96b78e0e.tgz#bdd8e28733cf8954ec86a5bc1c9e88ab967b3581"
   integrity sha512-nBNntTvqhzkNSvSxoLtZ3fzZNfayQL+kpDTS8viDT7+QQbeTbLkpnbIHOTxu2m1VfKugZU99ftPrMQ32AbI22Q==
+  dependencies:
+    loose-envify "^1.1.0"
+    object-assign "^4.1.1"
+
+react@18.0.0-alpha-cb8afda18-20210708:
+  version "18.0.0-alpha-cb8afda18-20210708"
+  resolved "https://registry.yarnpkg.com/react/-/react-18.0.0-alpha-cb8afda18-20210708.tgz#9001938e66618e3e0f8a457b37c6abdab3f9536b"
+  integrity sha512-RG2EmvK5BvMbX/IDh0ubDJW0gxVQVmXpk2hry5W/Sx6DNtkUg3QJ3zySeLzoATAmvahDa/Qq7cxat3rVpSQEEQ==
   dependencies:
     loose-envify "^1.1.0"
     object-assign "^4.1.1"
@@ -9795,6 +9812,14 @@ scheduler@0.21.0-alpha-c96b78e0e:
   version "0.21.0-alpha-c96b78e0e"
   resolved "https://registry.yarnpkg.com/scheduler/-/scheduler-0.21.0-alpha-c96b78e0e.tgz#5420a16754a5a578231a708f504bf2cfcb860492"
   integrity sha512-WXlCB0O3SgfD+7PZECd+S76fb9i9xYmLfEF6ezTOUDJtp16swKOKycwoZSrYf7fLBSAVl20JQR5gMdTVgSpGCw==
+  dependencies:
+    loose-envify "^1.1.0"
+    object-assign "^4.1.1"
+
+scheduler@0.21.0-alpha-cb8afda18-20210708:
+  version "0.21.0-alpha-cb8afda18-20210708"
+  resolved "https://registry.yarnpkg.com/scheduler/-/scheduler-0.21.0-alpha-cb8afda18-20210708.tgz#0d0188d66bcca1fd946c7f32eaa732c43e1aa922"
+  integrity sha512-+3Z8HqJkwZxXkTOM2VQH1pM2GaOhQnODpMAJUXV20SC5uoW2dZm+mr/ym9INe3zI9cpo6/Hx4fg+qiifo1FGfQ==
   dependencies:
     loose-envify "^1.1.0"
     object-assign "^4.1.1"
