@@ -1,0 +1,47 @@
+import { resolve } from 'path'
+
+import { findPort, killServer, startServer } from '../../../test-utils'
+
+describe('Hello World', () => {
+  let serverHandle
+  let port
+
+  beforeAll(async () => {
+    port = await findPort()
+    serverHandle = await startServer(resolve(__dirname, '..'), port)
+  })
+
+  afterAll(async () => {
+    await killServer(serverHandle)
+  })
+
+  it('should request for dynamic component only during hydration', async () => {
+    await page.setRequestInterception(true)
+
+    let dynamicComponentRequested = false
+
+    page.on('request', (request) => {
+      if (request.url().includes('dynamic-component')) {
+        dynamicComponentRequested = true
+      }
+
+      request.continue()
+    })
+
+    await page.goto(`http://localhost:${port}/`)
+
+    let content = await page.content()
+
+    expect(content).toMatch('Hello from dynamic component')
+    expect(content).not.toMatch('dynamic-component.js')
+
+    expect(dynamicComponentRequested).toBe(false)
+
+    await page.waitForFunction('window.reactIsHydrated === true')
+
+    content = await page.content()
+
+    expect(dynamicComponentRequested).toBe(true)
+    expect(content).toMatch('dynamic-component.js')
+  })
+})

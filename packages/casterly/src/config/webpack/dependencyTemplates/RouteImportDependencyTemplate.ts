@@ -11,7 +11,7 @@ import type {
 // @ts-ignore
 import ImportDependency from 'webpack/lib/dependencies/ImportDependency'
 
-import paths from '../../../paths'
+import paths from '../../paths'
 
 export default class RouteImportDependencyTemplate extends ImportDependency.Template {
   private parentCompilation

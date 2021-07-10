@@ -43,7 +43,10 @@ export default async function startWatch() {
     const [clientCompiler, serverCompiler] = multiCompiler.compilers
 
     app.use(
-      whm(clientCompiler, { path: '/_casterly/__webpack-hmr', log: false })
+      whm(clientCompiler as any, {
+        path: '/_casterly/__webpack-hmr',
+        log: false,
+      })
     )
 
     const useTypescript = await fileExists(paths.appTsConfig)

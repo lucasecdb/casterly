@@ -39,12 +39,12 @@ export const parseRoutesAndAssets = (
   mainAssets: string[],
   routeComponentsAssets: Record<string, string[]>,
   routes: RouteAssetComponent[],
-  routeModuleIdMap: Map<string, string | number>
+  routeModuleIdMap: Record<string, string | number>
 ) => {
   const parseRouteComponents = (
     route: RouteAssetComponent
   ): RouteWithAssets => {
-    const moduleId = routeModuleIdMap.get(route.component())!
+    const moduleId = routeModuleIdMap[route.component()]!
 
     const routeWithComponents: RouteWithAssets = {
       caseSensitive: route.caseSensitive,

@@ -5,8 +5,8 @@ import ImportDependency from 'webpack/lib/dependencies/ImportDependency'
 // @ts-ignore: no declaration file
 import { getEntryRuntime, mergeRuntimeOwned } from 'webpack/lib/util/runtime'
 
-import paths from '../../../paths'
-import RouteImportDependencyTemplate from './RouteImportDependencyTemplate'
+import paths from '../../paths'
+import RouteImportDependencyTemplate from '../dependencyTemplates/RouteImportDependencyTemplate'
 
 const { ReplaceSource } = sources
 const { JavascriptModulesPlugin } = javascript
@@ -18,7 +18,8 @@ export default class RouteAssetsChildPlugin {
     compiler.hooks.compilation.tap(
       { name: PLUGIN_NAME, stage: Infinity },
       (compilation) => {
-        compilation.dependencyTemplates = compiler.parentCompilation!.dependencyTemplates.clone()
+        compilation.dependencyTemplates =
+          compiler.parentCompilation!.dependencyTemplates.clone()
 
         compilation.dependencyTemplates.set(
           ImportDependency,
