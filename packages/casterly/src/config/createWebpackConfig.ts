@@ -394,6 +394,12 @@ const getBaseWebpackConfig = async (
 
   const appSrcFiles = [paths.appSrc, serverEntry, browserEntry]
 
+  const webpackConfigPath = path.join(
+    paths.appPath,
+    constants.WEBPACK_CONFIG_FILE
+  )
+  const hasCustomWebpackConfig = await fileExists(webpackConfigPath)
+
   let config: Configuration = {
     mode: webpackMode,
     name: isServer ? 'server' : 'client',
@@ -411,8 +417,9 @@ const getBaseWebpackConfig = async (
           buildDependencies: {
             config: [
               __filename,
-              path.join(paths.appPath, constants.WEBPACK_CONFIG_FILE),
-            ],
+              hasCustomWebpackConfig &&
+                path.join(paths.appPath, constants.WEBPACK_CONFIG_FILE),
+            ].filter(filterBoolean),
           },
           version: isServer ? 'server' : 'client',
         }
