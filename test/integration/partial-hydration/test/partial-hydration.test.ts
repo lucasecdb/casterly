@@ -39,9 +39,10 @@ describe('Hello World', () => {
 
     await page.waitForFunction('window.reactIsHydrated === true')
 
+    expect(dynamicComponentRequested).toBe(true)
+
     content = await page.content()
 
-    expect(dynamicComponentRequested).toBe(true)
     expect(content).toMatch('dynamic-component.js')
   })
 })
