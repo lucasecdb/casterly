@@ -319,8 +319,6 @@ const getBaseWebpackConfig = async (
     (userConfig.userConfig.experiments?.esmExternals ??
       userConfig.defaultConfig.experiments.esmExternals) === 'loose'
 
-  console.log({ esmExternals, looseEsmExternals })
-
   const handleExternals = async (
     getResolve: (
       options: any
@@ -509,7 +507,7 @@ const getBaseWebpackConfig = async (
   let config: Configuration = {
     mode: webpackMode,
     name: isServer ? 'server' : 'client',
-    target: isServer ? 'node' : 'web',
+    target: isServer ? 'node12.17' : ['web', 'es5'],
     devtool:
       dev && !isServer ? 'eval-source-map' : !isServer ? 'source-map' : false,
     bail: webpackMode === 'production',

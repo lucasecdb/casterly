@@ -23,6 +23,9 @@
     "url": "git+https://github.com/lucasecdb/casterly.git",
     "directory": "packages/utils"
   },
+  "engines": {
+    "node": ">=12.0.0"
+  },
   "scripts": {
     "test": "echo \"Error: run tests from root\" && exit 1",
     "clean": "rimraf lib",
