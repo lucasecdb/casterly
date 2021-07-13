@@ -52,6 +52,34 @@ const WEBPACK_ESM_RESOLVE_OPTIONS = {
   symlinks: true,
 }
 
+const NODE_RESOLVE_OPTIONS = {
+  dependencyType: 'commonjs',
+  modules: ['node_modules'],
+  alias: false,
+  fallback: false,
+  exportsFields: ['exports'],
+  importsFields: ['imports'],
+  conditionNames: ['node', 'require', 'module'],
+  descriptionFiles: ['package.json'],
+  extensions: ['.js', '.json', '.node'],
+  enforceExtensions: false,
+  symlinks: true,
+  mainFields: ['main'],
+  mainFiles: ['index'],
+  roots: [],
+  fullySpecified: false,
+  preferRelative: false,
+  preferAbsolute: false,
+  restrictions: [],
+}
+
+const NODE_ESM_RESOLVE_OPTIONS = {
+  ...NODE_RESOLVE_OPTIONS,
+  dependencyType: 'esm',
+  conditionNames: ['node', 'import', 'module'],
+  fullySpecified: true,
+}
+
 const loadPostcssPlugins = async (dir: string) => {
   const postcssRc = userConfig.postcssRc
 
@@ -403,7 +431,10 @@ const getBaseWebpackConfig = async (
     let baseRes: string | null
     let baseIsEsm: boolean
     try {
-      ;[baseRes, baseIsEsm] = await resolve(dir, request)
+      const baseResolve = getResolve(
+        isEsm ? NODE_ESM_RESOLVE_OPTIONS : NODE_RESOLVE_OPTIONS
+      )
+      ;[baseRes, baseIsEsm] = await baseResolve(dir, request)
     } catch (_) {
       baseRes = null
       baseIsEsm = false
