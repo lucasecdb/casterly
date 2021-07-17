@@ -41,13 +41,13 @@ app.listen(3000, () => {
 This file is your app entrypoint, you have full control over the server and can add any other express middlewares you'd like or need.
 
 ```jsx
-// app-server.jsx
+// src/app-server.jsx
 import { Scripts, Styles } from '@casterly/components'
 import { RootServer } from '@casterly/components/server'
 import React from 'react'
-import { renderToNodeStream } from 'react-dom/server'
+import { pipeToNodeWritable } from 'react-dom/server'
 
-import App from './src/App'
+import App from './App'
 
 const Document = () => {
   return (
@@ -70,40 +70,66 @@ const Document = () => {
   )
 }
 
-export default function (request, statusCode, headers, context) {
-  const content = renderToNodeStream(
-    <RootServer context={context} url={request.url}>
-      <Document />
-    </RootServer>
-  )
+export default function handleRequest(
+  request,
+  statusCode,
+  headers,
+  context,
+  { responseStream }
+) {
+  let status = statusCode
+  let didError = false
 
-  content.unshift('<!doctype html>')
+  const startWriting = await new Promise((resolve) => {
+    const { startWriting } = pipeToNodeWritable(
+      <RootServer context={context} url={request.url}>
+        <Document />
+      </RootServer>,
+      {
+        onReadyToStream() {
+          if (didError) {
+          status = 500
+          }
 
-  return new Response(content, {
-    status: statusCode,
+          resolve(startWriting)
+        },
+        onError(error) {
+          console.error(error)
+          didError = true
+        }
+      }
+    )
+  })
+
+  return {
+    status,
     headers: {
       ...Object.fromEntries(headers),
       'content-type': 'text/html',
     },
-  })
+    body: responseStream,
+    onReadyToStream() {
+      startWriting()
+    }
+  }
 }
 ```
 
 This file contains your SSR entrypoint, you can render you HTML however you'd like and place your scripts in either the `<head>` or `<body>` section according to your needs. You should **always** render you root component in this file wrapped in the `<RootServer>` component, passing in the required props as above, else your app won't work correctly.
 
 ```jsx
-// app-browser.jsx
+// src/app-browser.jsx
 import { RootBrowser } from '@casterly/components/browser'
 import React from 'react'
 import ReactDOM from 'react-dom'
 
-import App from './src/App'
+import App from './App'
 
-ReactDOM.hydrate(
+ReactDOM.hydrateRoot(
+  document.getElementById('root'),
   <RootBrowser>
     <App />
-  </RootBrowser>,
-  document.getElementById('root')
+  </RootBrowser>
 )
 ```
 
