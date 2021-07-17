@@ -2,13 +2,15 @@ import * as fs from 'fs'
 
 import type { Headers, Request } from '../fetch'
 
+const WEBPACK_EXPORTS = Symbol('webpack exports')
+
 export const readJSON = (filePath: string) => {
   const file = fs.readFileSync(filePath)
   return JSON.parse(file.toString())
 }
 
 export function interopDefault(mod: any) {
-  return mod.default || mod
+  return mod[WEBPACK_EXPORTS] || mod.default || mod
 }
 
 export function requestHeadersToNodeHeaders(headers: Headers) {

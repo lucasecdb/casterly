@@ -271,7 +271,13 @@ class DefaultServer {
   > => {
     const handleRequest = await import(
       path.join(paths.appServerBuildFolder, STATIC_RUNTIME_MAIN)
-    ).then(interopDefault)
+    )
+      // TypeScript will wrap the above import call with an __importStar
+      // function, which will make the default exports the reference to the
+      // actual module, so we must interop twice to get the actual
+      // implementation
+      .then(interopDefault)
+      .then(interopDefault)
 
     return handleRequest
   }
