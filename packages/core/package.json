@@ -1,6 +1,6 @@
 {
   "name": "@casterly/core",
-  "version": "0.9.0-alpha.1",
+  "version": "0.9.0-alpha.3",
   "description": "Core package for Casterly",
   "author": "Lucas Cordeiro <ecdb.lucas@gmail.com>",
   "homepage": "https://github.com/lucasecdb/casterly#readme",
@@ -19,6 +19,9 @@
     "url": "git+https://github.com/lucasecdb/casterly.git",
     "directory": "packages/core"
   },
+  "engines": {
+    "node": ">=12.0.0"
+  },
   "scripts": {
     "clean": "rimraf lib",
     "ts": "tsc",
@@ -30,7 +33,7 @@
     "url": "https://github.com/lucasecdb/casterly/issues"
   },
   "dependencies": {
-    "@casterly/utils": "^0.9.0-alpha.1",
+    "@casterly/utils": "^0.9.0-alpha.3",
     "etag": "^1.8.1",
     "fresh": "^0.5.2",
     "history": "^5.0.0",
@@ -39,7 +42,7 @@
     "path-to-regexp": "^6.1.0"
   },
   "devDependencies": {
-    "@casterly/components": "^0.9.0-alpha.1",
+    "@casterly/components": "^0.9.0-alpha.3",
     "@types/etag": "^1.8.1",
     "@types/fresh": "^0.5.0",
     "@types/mime": "^2.0.3",
@@ -47,7 +50,7 @@
     "@types/node-fetch": "^2.5.11",
     "@types/react": "^17.0.14",
     "@types/react-dom": "^17.0.9",
-    "casterly": "^0.9.0-alpha.1",
+    "casterly": "^0.9.0-alpha.3",
     "cross-env": "^7.0.2"
   },
   "peerDependencies": {

@@ -19,6 +19,7 @@ interface BuildServerConfig {
 
 interface ExperimentsConfig {
   esbuildDependencies?: boolean
+  esmExternals?: boolean | 'loose'
 }
 
 export interface CasterlyConfig {
@@ -34,6 +35,7 @@ export const defaultConfig: RecursiveRequired<CasterlyConfig> = {
   buildFolder: '.dist',
   experiments: {
     esbuildDependencies: false,
+    esmExternals: false,
   },
 }
 

@@ -1,4 +1,3 @@
-import { realpathSync } from 'fs'
 import path from 'path'
 
 import { constants, fileExists } from '@casterly/utils'
@@ -17,7 +16,6 @@ import { warn } from '../output/log'
 import * as Log from '../output/log'
 import { getDependencyVersion } from '../utils/dependencies'
 import { filterBoolean } from '../utils/filterBoolean'
-import resolveRequest from '../utils/resolveRequest'
 import {
   STATIC_ASSETS_PATH,
   STATIC_CHUNKS_PATH,
@@ -43,6 +41,44 @@ import {
   sassRegex,
 } from './webpack/styles'
 import type { Options } from './webpack/types'
+
+const WEBPACK_RESOLVE_OPTIONS = {
+  dependencyType: 'commonjs',
+  symlinks: true,
+}
+
+const WEBPACK_ESM_RESOLVE_OPTIONS = {
+  dependencyType: 'esm',
+  symlinks: true,
+}
+
+const NODE_RESOLVE_OPTIONS = {
+  dependencyType: 'commonjs',
+  modules: ['node_modules'],
+  alias: false,
+  fallback: false,
+  exportsFields: ['exports'],
+  importsFields: ['imports'],
+  conditionNames: ['node', 'require', 'module'],
+  descriptionFiles: ['package.json'],
+  extensions: ['.js', '.json', '.node'],
+  enforceExtensions: false,
+  symlinks: true,
+  mainFields: ['main'],
+  mainFiles: ['index'],
+  roots: [],
+  fullySpecified: false,
+  preferRelative: false,
+  preferAbsolute: false,
+  restrictions: [],
+}
+
+const NODE_ESM_RESOLVE_OPTIONS = {
+  ...NODE_RESOLVE_OPTIONS,
+  dependencyType: 'esm',
+  conditionNames: ['node', 'import', 'module'],
+  fullySpecified: true,
+}
 
 const loadPostcssPlugins = async (dir: string) => {
   const postcssRc = userConfig.postcssRc
@@ -303,81 +339,180 @@ const getBaseWebpackConfig = async (
   const chunkFilename = dev ? '[name]' : '[name].[contenthash]'
   const extractedCssFilename = dev ? '[name]' : '[name].[contenthash:8]'
 
+  const esmExternals = !!(
+    userConfig.userConfig.experiments?.esmExternals ??
+    userConfig.defaultConfig.experiments.esmExternals
+  )
+  const looseEsmExternals =
+    (userConfig.userConfig.experiments?.esmExternals ??
+      userConfig.defaultConfig.experiments.esmExternals) === 'loose'
+
+  const handleExternals = async (
+    getResolve: (
+      options: any
+    ) => (
+      resolveContext: string,
+      resolveRequest: string
+    ) => Promise<[string | null, boolean]>,
+    context?: string,
+    request?: string,
+    dependencyType?: string
+  ) => {
+    if (!context || !request || !dependencyType) {
+      return
+    }
+
+    const isLocal: boolean =
+      request.startsWith('.') ||
+      // Always check for unix-style path, as webpack sometimes
+      // normalizes as posix.
+      path.posix.isAbsolute(request) ||
+      // When on Windows, we also want to check for Windows-specific
+      // absolute paths.
+      (process.platform === 'win32' && path.win32.isAbsolute(request))
+
+    if (!isLocal) {
+      if (/^(?:react(?:$|\/))/.test(request)) {
+        return `commonjs ${request}`
+      }
+
+      const notExternalModules = /^(?:string-hash$)/
+
+      if (notExternalModules.test(request)) {
+        return
+      }
+    }
+
+    const isEsmRequested = dependencyType === 'esm'
+    const preferEsm = isEsmRequested && esmExternals
+
+    const resolve = getResolve(
+      preferEsm ? WEBPACK_ESM_RESOLVE_OPTIONS : WEBPACK_RESOLVE_OPTIONS
+    )
+
+    let res: string | null
+    let isEsm = false
+
+    try {
+      // Resolve the import with the webpack provided context, this
+      // ensures we're resolving the correct version when multiple
+      // exist.
+      ;[res, isEsm] = await resolve(context, request)
+    } catch (_) {
+      res = null
+    }
+
+    // Same as above, if the request cannot be resolved we need to have
+    // webpack "bundle" it so it surfaces the not found error.
+    if (!res && (isEsmRequested || looseEsmExternals)) {
+      const resolveAlternative = getResolve(
+        preferEsm ? WEBPACK_RESOLVE_OPTIONS : WEBPACK_ESM_RESOLVE_OPTIONS
+      )
+
+      try {
+        ;[res, isEsm] = await resolveAlternative(context, request)
+      } catch {
+        res = null
+      }
+    }
+
+    if (!res) {
+      return
+    }
+
+    if (!isEsmRequested && isEsm && !looseEsmExternals) {
+      throw new Error(`ESM packages (${request}) needs to be imported.`)
+    }
+
+    // Bundled Node.js code is relocated without its node_modules tree.
+    // This means we need to make sure its request resolves to the same
+    // package that'll be available at runtime. If it's not identical,
+    // we need to bundle the code (even if it _should_ be external).
+    let baseRes: string | null
+    let baseIsEsm: boolean
+    try {
+      const baseResolve = getResolve(
+        isEsm ? NODE_ESM_RESOLVE_OPTIONS : NODE_RESOLVE_OPTIONS
+      )
+      ;[baseRes, baseIsEsm] = await baseResolve(dir, request)
+    } catch (_) {
+      baseRes = null
+      baseIsEsm = false
+    }
+
+    // Same as above: if the package, when required from the root,
+    // would be different from what the real resolution would use, we
+    // cannot externalize it.
+    if (baseRes !== res && isEsm !== baseIsEsm) {
+      return
+    }
+
+    const externalType = isEsm ? 'module' : 'commonjs'
+
+    if (res.match(/casterly[/\\]lib[/\\]/)) {
+      return
+    }
+
+    // Webpack itself has to be compiled because it doesn't always use module relative paths
+    if (
+      res.match(/node_modules[/\\]webpack/) ||
+      res.match(/node_modules[/\\]css-loader/)
+    ) {
+      return
+    }
+
+    // Anything else that is standard JavaScript within `node_modules`
+    // can be externalized.
+    if (res.match(/node_modules[/\\].*\.js$/)) {
+      return `${externalType} ${request}`
+    }
+
+    // Default behavior: bundle the code!
+    return
+  }
+
   const externals: ExternalsPlugin['externals'] | undefined = isServer
     ? [
-        ({ context, request }, callback) => {
-          const excludedModules: string[] = [
-            // add modules that should be transpiled here
-          ]
-
-          if (!request || excludedModules.indexOf(request) !== -1) {
-            return callback()
-          }
-
-          let res: string | undefined
-
-          try {
-            // Resolve the import with the webpack provided context, this
-            // ensures we're resolving the correct version when multiple
-            // exist.
-            res = resolveRequest(request, `${context}/`)
-          } catch (_) {
-            // If the request cannot be resolved, we need to tell webpack to
-            // "bundle" it so that webpack shows an error (that it cannot be
-            // resolved).
-            return callback()
-          }
-
-          // Same as above, if the request cannot be resolved we need to have
-          // webpack "bundle" it so it surfaces the not found error.
-          if (!res) {
-            callback()
-          }
-
-          // Bundled Node.js code is relocated without its node_modules tree.
-          // This means we need to make sure its request resolves to the same
-          // package that'll be available at runtime. If it's not identical,
-          // we need to bundle the code (even if it _should_ be external).
-          let baseRes
-          try {
-            baseRes = resolveRequest(request, `${dir}/`)
-          } catch (_) {
-            // ignore me
-          }
-
-          // Same as above: if the package, when required from the root,
-          // would be different from what the real resolution would use, we
-          // cannot externalize it.
-          if (
-            !baseRes ||
-            (baseRes !== res &&
-              // if res and baseRes are symlinks they could point to the the same file
-              realpathSync(baseRes) !== realpathSync(res))
-          ) {
-            return callback()
-          }
-
-          if (res.match(/casterly[/\\]lib[/\\]/)) {
-            return callback()
-          }
-
-          // Webpack itself has to be compiled because it doesn't always use module relative paths
-          if (
-            res.match(/node_modules[/\\]webpack/) ||
-            res.match(/node_modules[/\\]css-loader/)
-          ) {
-            return callback()
-          }
-
-          // Anything else that is standard JavaScript within `node_modules`
-          // can be externalized.
-          if (res.match(/node_modules[/\\].*\.js$/)) {
-            return callback(undefined, `commonjs ${request}`)
-          }
-
-          // Default behavior: bundle the code!
-          callback()
-        },
+        ({
+          context = '',
+          request = '',
+          dependencyType = '',
+          getResolve,
+        }: {
+          context?: string
+          request?: string
+          dependencyType?: string
+          getResolve?: (
+            options: any
+          ) => (
+            context: string,
+            request: string,
+            callback: (err?: Error, result?: string, resolveData?: any) => void
+          ) => void
+        }) =>
+          handleExternals(
+            (options) => {
+              const resolveFunction = getResolve?.(options)
+              return (resolveContext: string, requestToResolve: string) =>
+                new Promise((resolve, reject) => {
+                  resolveFunction?.(
+                    resolveContext,
+                    requestToResolve,
+                    (err, result, resolveData) => {
+                      if (err) return reject(err)
+                      if (!result) return resolve([null, false])
+                      const isEsm = /\.js$/i.test(result)
+                        ? resolveData?.descriptionFileData?.type === 'module'
+                        : /\.mjs$/i.test(result)
+                      resolve([result, isEsm])
+                    }
+                  )
+                })
+            },
+            context,
+            request,
+            dependencyType
+          ),
       ]
     : undefined
 
@@ -403,7 +538,7 @@ const getBaseWebpackConfig = async (
   let config: Configuration = {
     mode: webpackMode,
     name: isServer ? 'server' : 'client',
-    target: isServer ? 'node' : 'web',
+    target: isServer ? 'node12.17' : ['web', 'es5'],
     devtool:
       dev && !isServer ? 'eval-source-map' : !isServer ? 'source-map' : false,
     bail: webpackMode === 'production',

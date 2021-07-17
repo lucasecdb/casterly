@@ -1,6 +1,6 @@
 {
   "name": "@casterly/express",
-  "version": "0.9.0-alpha.1",
+  "version": "0.9.0-alpha.3",
   "description": "Casterly bindings for Express.js",
   "author": "Lucas Cordeiro <ecdb.lucas@gmail.com>",
   "homepage": "https://github.com/lucasecdb/casterly#readme",
@@ -23,6 +23,9 @@
     "type": "git",
     "url": "git+https://github.com/lucasecdb/casterly.git",
     "directory": "packages/express"
+  },
+  "engines": {
+    "node": ">=12.0.0"
   },
   "scripts": {
     "test": "echo \"Error: run tests from root\" && exit 1",
@@ -48,6 +51,6 @@
     "express": "^4.17.1"
   },
   "dependencies": {
-    "@casterly/core": "^0.9.0-alpha.1"
+    "@casterly/core": "^0.9.0-alpha.3"
   }
 }
