@@ -174,4 +174,4 @@ Now, you can start you server by running `node server.js` and, in another termin
 
 ## License
 
-MIT License &copy; 2020 Lucas Cordeiro
+For the license, check the [LICENSE](./LICENSE) file.
