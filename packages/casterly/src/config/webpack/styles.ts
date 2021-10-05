@@ -52,7 +52,7 @@ export const getStyleLoaders = ({
         ? {
             auto: /.*/,
             localIdentName: dev ? '[path][name]__[local]' : '[hash:base64]',
-            localIdentHashPrefix: 'css',
+            localIdentHashSalt: 'css',
             exportOnlyLocals: isServer,
           }
         : false,
