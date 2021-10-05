@@ -539,8 +539,7 @@ const getBaseWebpackConfig = async (
     mode: webpackMode,
     name: isServer ? 'server' : 'client',
     target: isServer ? 'node12.17' : ['web', 'es5'],
-    devtool:
-      dev && !isServer ? 'eval-source-map' : !isServer ? 'source-map' : false,
+    devtool: dev ? 'eval-source-map' : !isServer ? 'source-map' : false,
     bail: webpackMode === 'production',
     context: paths.appPath,
     externals,
