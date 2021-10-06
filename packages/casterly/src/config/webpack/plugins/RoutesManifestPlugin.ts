@@ -64,7 +64,7 @@ export class RoutesManifestPlugin {
       new RouteAssetsChildPlugin().apply(childCompiler)
       new EntryPlugin(compiler.context, paths.appRoutesJs, {
         name: STATIC_ENTRYPOINTS_ROUTES_ASSETS,
-        filename: STATIC_ENTRYPOINTS_ROUTES_ASSETS + '.js',
+        filename: routeAssetsFilename,
         library: {
           type: 'commonjs2',
         },

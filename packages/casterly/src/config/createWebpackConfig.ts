@@ -733,6 +733,7 @@ const getBaseWebpackConfig = async (
         filename: `${STATIC_CHUNKS_PATH}/${extractedCssFilename}.css`,
         chunkFilename: `${STATIC_CHUNKS_PATH}/${extractedCssFilename}.chunk.css`,
         ignoreOrder: true,
+        experimentalUseImportModule: true,
       }) as { apply: (compiler: Compiler) => void },
       // Makes some environment variables available to the JS code, for example:
       // if (process.env.NODE_ENV === 'development') { ... }. See `./env.ts`.
