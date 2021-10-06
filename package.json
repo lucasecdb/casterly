@@ -48,7 +48,8 @@
   },
   "scripts": {
     "lint": "eslint --ext js,jsx,ts,tsx .",
-    "dev": "yarn lerna run dev --parallel",
-    "test": "jest"
+    "dev": "lerna run dev --parallel",
+    "test": "jest",
+    "build": "lerna run build"
   }
 }

@@ -64,12 +64,7 @@ export const getStyleLoaders = ({
   }
 
   return [
-    !isServer && {
-      loader: MiniCssExtractPlugin.loader,
-      options: {
-        modules: cssModules ? { namedExport: false } : undefined,
-      },
-    },
+    !isServer && MiniCssExtractPlugin.loader,
     cssLoader,
     postcssLoader,
     ...loaders,
