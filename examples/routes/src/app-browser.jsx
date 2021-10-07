@@ -2,7 +2,7 @@ import { RootBrowser } from '@casterly/components/browser'
 import React from 'react'
 import ReactDOM from 'react-dom'
 
-import App from './src/App'
+import App from './App'
 
 ReactDOM.hydrate(
   <RootBrowser>

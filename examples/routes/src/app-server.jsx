@@ -3,7 +3,7 @@ import { RootServer } from '@casterly/components/server'
 import React from 'react'
 import { renderToNodeStream } from 'react-dom/server'
 
-import App from './src/App'
+import App from './App'
 
 const Document = () => {
   return (
