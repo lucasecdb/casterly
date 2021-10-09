@@ -1,34 +1,26 @@
 // eslint-disable-next-line
 /// <reference path="./global.d.ts" />
 
-import type { ChildProcess } from 'child_process'
-import { spawn } from 'child_process'
-import { dirname, join } from 'path'
+const { spawn } = require('child_process')
+const { dirname, join } = require('path')
 
-import getPort from 'get-port'
+const getPort = require('get-port')
 
-export function findPort() {
+function findPort() {
   return getPort()
 }
 
-interface RunOptions {
-  stdout?: boolean
-  stderr?: boolean
-  prod?: boolean
-  port?: number
-}
-
-export const runCasterlyCmd = async (
-  argv: string[],
-  directory: string,
-  { stdout = false, stderr = true, port, prod = false }: RunOptions = {}
+const runCasterlyCmd = async (
+  argv,
+  directory,
+  { stdout = false, stderr = true, port, prod = false } = {}
 ) => {
   const cwd = dirname(require.resolve('casterly/package.json'))
   const casterlyBin = join(cwd, 'lib', 'bin', 'casterly')
 
-  return new Promise<ChildProcess | void>((resolve, reject) => {
+  return new Promise((resolve, reject) => {
     let alreadyResolved = false
-    const serverProcess = spawn('node', [casterlyBin, ...argv], {
+    const casterlyProcess = spawn('node', [casterlyBin, ...argv], {
       cwd: directory,
       env: {
         ...process.env,
@@ -38,14 +30,12 @@ export const runCasterlyCmd = async (
       stdio: ['ignore', 'pipe', 'pipe'],
     })
 
-    const handleStdout = (data: any) => {
-      const message = data.toString() as string
+    const handleStdout = (data) => {
+      const message = data.toString()
 
-      if (/compiled successfully/.test(message)) {
-        if (!alreadyResolved) {
-          alreadyResolved = true
-          resolve(serverProcess)
-        }
+      if (/compiled successfully/.test(message) && !alreadyResolved) {
+        alreadyResolved = true
+        resolve(casterlyProcess)
       }
 
       if (stdout) {
@@ -53,28 +43,28 @@ export const runCasterlyCmd = async (
       }
     }
 
-    const handleStderr = (data: any) => {
+    const handleStderr = (data) => {
       if (stderr) {
         process.stderr.write(data)
       }
     }
 
-    serverProcess.stdout.on('data', handleStdout)
+    casterlyProcess.stdout.on('data', handleStdout)
 
-    serverProcess.stderr.on('data', handleStderr)
+    casterlyProcess.stderr.on('data', handleStderr)
 
-    serverProcess.on('close', () => {
-      serverProcess.stdout.removeListener('data', handleStdout)
-      serverProcess.stderr.removeListener('data', handleStderr)
+    casterlyProcess.on('close', () => {
+      casterlyProcess.stdout.removeListener('data', handleStdout)
+      casterlyProcess.stderr.removeListener('data', handleStderr)
 
       if (alreadyResolved) {
         return
       }
       alreadyResolved = true
-      resolve()
+      resolve(casterlyProcess)
     })
 
-    serverProcess.on('error', reject)
+    casterlyProcess.on('error', reject)
   })
 }
 
@@ -85,13 +75,6 @@ const startServerProcess = async ({
   directory,
   prod,
   debug = false,
-}: {
-  serverFilename: string
-  port: number
-  buildServerPort: number
-  directory: string
-  prod: boolean
-  debug?: boolean
 }) => {
   const serverProcess = spawn(
     'node',
@@ -107,11 +90,11 @@ const startServerProcess = async ({
     }
   )
 
-  await new Promise<void>((resolve, reject) => {
+  await new Promise((resolve, reject) => {
     let resolved = false
 
-    const handleStdout = (data: any) => {
-      const message = data.toString() as string
+    const handleStdout = (data) => {
+      const message = data.toString()
 
       if (/🎬 server started/.test(message) && !resolved) {
         resolved = true
@@ -125,7 +108,7 @@ const startServerProcess = async ({
 
     serverProcess.stdout.on('data', handleStdout)
 
-    const handleStderr = (data: any) => {
+    const handleStderr = (data) => {
       process.stderr.write(data)
     }
 
@@ -147,20 +130,7 @@ const startServerProcess = async ({
   return serverProcess
 }
 
-interface TestServerHandle {
-  casterlyProcess: ChildProcess | void
-  serverProcess: ChildProcess
-}
-
-interface StartServerOptions {
-  prod?: boolean
-}
-
-export const startServer = async (
-  projectDirectory: string,
-  port: number,
-  { prod = false }: StartServerOptions = {}
-): Promise<TestServerHandle> => {
+const startServer = async (projectDirectory, port, { prod = false } = {}) => {
   const casterlyPort = await findPort()
 
   const casterlyProcess = await runCasterlyCmd(
@@ -185,7 +155,23 @@ export const startServer = async (
   return { casterlyProcess, serverProcess }
 }
 
-export const killServer = async (handle?: TestServerHandle) => {
+const killProcess = (proc) => {
+  proc.kill('SIGTERM')
+
+  if (proc.exitCode != null) {
+    return Promise.resolve()
+  }
+
+  const closePromise = new Promise((resolve) => {
+    proc.on('close', () => {
+      resolve()
+    })
+  })
+
+  return closePromise
+}
+
+const killServer = async (handle) => {
   if (!handle) {
     return
   }
@@ -193,8 +179,15 @@ export const killServer = async (handle?: TestServerHandle) => {
   const { casterlyProcess, serverProcess } = handle
 
   if (casterlyProcess) {
-    casterlyProcess.kill('SIGTERM')
+    await killProcess(casterlyProcess)
   }
 
-  serverProcess.kill('SIGTERM')
+  await killProcess(serverProcess)
+}
+
+module.exports = {
+  findPort,
+  runCasterlyCmd,
+  killServer,
+  startServer,
 }

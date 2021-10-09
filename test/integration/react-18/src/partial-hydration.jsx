@@ -4,7 +4,7 @@ const DynamicComponent = lazy(() =>
   import(/* webpackChunkName: "dynamic-component" */ './DynamicComponent')
 )
 
-const IndexPage = () => {
+const PartialHydrationPage = () => {
   if (typeof window !== 'undefined') {
     window.reactIsHydrated = true
   }
@@ -19,4 +19,4 @@ const IndexPage = () => {
   )
 }
 
-export default IndexPage
+export default PartialHydrationPage

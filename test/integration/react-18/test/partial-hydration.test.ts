@@ -1,19 +1,18 @@
-import { resolve } from 'path'
+import type { Browser, Page } from 'puppeteer'
+import puppeteer from 'puppeteer'
 
-import { findPort, killServer, startServer } from '../../../test-utils'
+const port = 3002
 
-describe('Hello World', () => {
-  let serverHandle
-  let port
+describe('Partial hydration', () => {
+  let browser: Browser
+  let page: Page
 
-  beforeAll(async () => {
-    port = await findPort()
-    serverHandle = await startServer(resolve(__dirname, '..'), port)
+  beforeEach(async () => {
+    browser = await puppeteer.launch()
+    page = await browser.newPage()
   })
 
-  afterAll(async () => {
-    await killServer(serverHandle)
-  })
+  afterEach(() => browser.close())
 
   it('should request for dynamic component only during hydration', async () => {
     await page.setRequestInterception(true)
@@ -28,7 +27,7 @@ describe('Hello World', () => {
       request.continue()
     })
 
-    await page.goto(`http://localhost:${port}/`)
+    await page.goto(`http://localhost:${port}/partial-hydration`)
 
     let content = await page.content()
 
