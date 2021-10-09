@@ -48,7 +48,7 @@
   "scripts": {
     "lint": "eslint --ext js,jsx,ts,tsx .",
     "dev": "lerna run dev --parallel",
-    "test": "jest --forceExit",
+    "test": "jest",
     "build": "lerna run build"
   }
 }
