@@ -1,24 +1,20 @@
-import { resolve } from 'path'
 import { parse as parseUrl } from 'url'
 
-import { findPort, killServer, startServer } from '../../../test-utils'
+import type { Browser, Page } from 'puppeteer'
+import puppeteer from 'puppeteer'
+
+const port = 3001
 
 describe('Production usage', () => {
-  let serverHandle
-  let port
+  let browser: Browser
+  let page: Page
 
-  beforeAll(async () => {
-    jest.setTimeout(15000)
-
-    port = await findPort()
-    serverHandle = await startServer(resolve(__dirname, '..'), port, {
-      prod: true,
-    })
+  beforeEach(async () => {
+    browser = await puppeteer.launch()
+    page = await browser.newPage()
   })
 
-  afterAll(async () => {
-    await killServer(serverHandle)
-  })
+  afterEach(() => browser.close())
 
   it('should cache responses for route manifests', async () => {
     await page.goto(`http://localhost:${port}/`, {

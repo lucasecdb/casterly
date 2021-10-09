@@ -1,18 +1,19 @@
-import { resolve } from 'path'
+import type { Browser, Page } from 'puppeteer'
+import puppeteer from 'puppeteer'
 
-import { findPort, killServer, startServer } from '../../../test-utils'
+const port = 3000
 
 describe('Hello World', () => {
-  let serverHandle
-  let port
+  let browser: Browser
+  let page: Page
 
-  beforeAll(async () => {
-    port = await findPort()
-    serverHandle = await startServer(resolve(__dirname, '..'), port)
+  beforeEach(async () => {
+    browser = await puppeteer.launch()
+    page = await browser.newPage()
   })
 
-  afterAll(async () => {
-    await killServer(serverHandle)
+  afterEach(async () => {
+    await browser.close()
   })
 
   it('should render a hello world page', async () => {
