@@ -376,7 +376,8 @@ const getBaseWebpackConfig = async (
         return `commonjs ${request}`
       }
 
-      const notExternalModules = /^(?:string-hash$)/
+      const notExternalModules =
+        /^(?:(?:(?:react-router|react-router-dom)(\/.*)?)|string-hash$)/
 
       if (notExternalModules.test(request)) {
         return
@@ -538,7 +539,7 @@ const getBaseWebpackConfig = async (
   let config: Configuration = {
     mode: webpackMode,
     name: isServer ? 'server' : 'client',
-    target: isServer ? 'node12.17' : ['web', 'es5'],
+    target: isServer ? 'node12.17' : ['web', 'es6'],
     devtool: dev ? 'eval-source-map' : !isServer ? 'source-map' : false,
     bail: webpackMode === 'production',
     context: paths.appPath,
@@ -631,6 +632,7 @@ const getBaseWebpackConfig = async (
       ),
     },
     resolve: {
+      conditionNames: ['node', 'import', 'require'],
       modules: ['node_modules'].concat(
         process.env.NODE_PATH!.split(path.delimiter).filter(Boolean)
       ),
