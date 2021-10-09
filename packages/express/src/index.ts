@@ -1,7 +1,5 @@
 import './globals'
 
-import { Writable } from 'stream'
-
 import { createRequestHandler as defaultCreateRequestHandler } from '@casterly/core'
 import type { RequestHandler } from 'express'
 
@@ -24,18 +22,8 @@ export const createRequestHandler = (): RequestHandler => {
       ]) as Array<[string, string]>
     )
 
-    const writable = new Writable()
-
-    writable.write = res.write.bind(res)
-    writable.destroy = res.destroy.bind(res)
-    writable.end = res.end.bind(res)
-    writable.cork = res.cork.bind(res)
-    writable.uncork = res.uncork.bind(res)
-
     try {
-      const response = await handleRequest(request, responseHeaders, {
-        responseStream: writable,
-      })
+      const response = await handleRequest(request, responseHeaders)
 
       res.status(response.status)
 
@@ -49,10 +37,12 @@ export const createRequestHandler = (): RequestHandler => {
 
       if (response.body == null) {
         res.end()
-      } else if (typeof response.body === 'object' && 'pipe' in response.body) {
-        if (response.body !== writable) {
-          response.body.pipe(res)
-        }
+      } else if (
+        typeof response.body === 'object' &&
+        'pipe' in response.body &&
+        typeof response.body.pipe === 'function'
+      ) {
+        response.body.pipe(res)
 
         if (typeof response.onReadyToStream === 'function') {
           response.onReadyToStream()

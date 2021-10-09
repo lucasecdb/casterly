@@ -211,7 +211,7 @@ const InternalRoot: React.FC<RouterProps> = ({
     const handleRouteChange = async () => {
       try {
         const { routes } = await fetchRouteAssets(
-          location.pathname,
+          typeof location === 'string' ? location : location.pathname!,
           context.version
         )
 
