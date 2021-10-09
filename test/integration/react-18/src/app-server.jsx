@@ -1,19 +1,18 @@
 import { Routes, Scripts, Styles } from '@casterly/components'
 import { RootServer } from '@casterly/components/server'
-import { pipeToNodeWritable } from 'react-dom/server'
+import { renderToPipeableStream } from 'react-dom/server'
 
 export default async function handleRequest(
   request,
   statusCode,
   headers,
-  context,
-  { responseStream }
+  context
 ) {
   let status = statusCode
   let didError = false
 
-  const startWriting = await new Promise((resolve) => {
-    const { startWriting } = pipeToNodeWritable(
+  const responseStream = await new Promise((resolve) => {
+    const stream = renderToPipeableStream(
       <RootServer context={context} url={request.url}>
         <html>
           <head>
@@ -27,14 +26,13 @@ export default async function handleRequest(
           </body>
         </html>
       </RootServer>,
-      responseStream,
       {
-        onReadyToStream() {
+        onCompleteShell() {
           if (didError) {
             status = 500
           }
 
-          resolve(startWriting)
+          resolve(stream)
         },
         onError(error) {
           console.error(error)
@@ -51,8 +49,5 @@ export default async function handleRequest(
       'content-type': 'text/html',
     },
     body: responseStream,
-    onReadyToStream() {
-      startWriting()
-    },
   }
 }
