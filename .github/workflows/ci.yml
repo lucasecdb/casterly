@@ -45,7 +45,7 @@ jobs:
         yarn lerna exec 'yarn link'
         yarn --silent lerna ls | xargs yarn link
     - name: Run tests
-      run: yarn test
+      run: yarn test --runInBand
       env:
         CI: true
 
