@@ -6,12 +6,12 @@ describe('Hello World', () => {
   let serverHandle
   let port
 
-  beforeAll(async () => {
+  beforeEach(async () => {
     port = await findPort()
     serverHandle = await startServer(resolve(__dirname, '..'), port)
   })
 
-  afterAll(async () => {
+  afterEach(async () => {
     await killServer(serverHandle)
   })
 

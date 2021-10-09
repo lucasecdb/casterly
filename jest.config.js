@@ -6,5 +6,5 @@ module.exports = {
   transform: {
     '^.+\\.(js|ts)$': path.resolve(__dirname, 'jest', 'babelTransform.js'),
   },
-  testTimeout: 10000,
+  testTimeout: 15000,
 }
