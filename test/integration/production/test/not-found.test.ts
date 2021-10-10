@@ -42,15 +42,16 @@ describe('Not found', () => {
       page.waitForResponse((res) =>
         new URL(res.url()).pathname.startsWith('/_casterly/route-manifest')
       ),
-      page.waitForNavigation(),
       page.click('#click-me'),
     ])
 
     expect(manifestResponse.status()).toBe(404)
 
-    const reloadResponse = await page.waitForNavigation({
-      waitUntil: 'networkidle2',
-    })
+    let reloadResponse = await page.waitForNavigation()
+
+    if (reloadResponse == null) {
+      reloadResponse = await page.waitForNavigation()
+    }
 
     expect(reloadResponse.status()).toBe(404)
     await expect(page.content()).resolves.toMatch('you did not found me 😜')
