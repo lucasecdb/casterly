@@ -38,13 +38,18 @@ export class RoutesManifestPlugin {
     compiler: Compiler,
     assets: Compilation['assets']
   ) => {
-    const routes: RouteAssetComponent[] = evalModuleCode(
+    const exports = evalModuleCode(
       compiler.context,
       assets[routeAssetsFilename].source().toString(),
       routeAssetsFilename
-    ).default
+    )
 
-    return routes
+    const routes: RouteAssetComponent[] = exports.default
+    const notFoundRoute: RouteAssetComponent = exports.notFound
+      ? { ...exports.notFound, path: '*' }
+      : undefined
+
+    return { routes, notFoundRoute }
   }
 
   public getNumberOfRoutes = () => 0
@@ -85,12 +90,14 @@ export class RoutesManifestPlugin {
 
     compiler.hooks.thisCompilation.tap(PLUGIN_NAME, (compilation) => {
       this.getNumberOfRoutes = () => {
-        const routes = this.getRoutesFromCompilation(
+        const { routes, notFoundRoute } = this.getRoutesFromCompilation(
           compiler,
           compilation.assets
         )
 
-        return countNumberOfRoutes(routes)
+        return (
+          countNumberOfRoutes(routes) + (notFoundRoute != undefined ? 1 : 0)
+        )
       }
 
       compilation.hooks.processAssets.tap(
@@ -204,14 +211,18 @@ export class RoutesManifestPlugin {
               .filter(<T>(value: T | null): value is T => value != null)
           )
 
-          const routes = this.getRoutesFromCompilation(compiler, assets)
+          const { routes, notFoundRoute } = this.getRoutesFromCompilation(
+            compiler,
+            assets
+          )
 
-          const routesManifest = parseRoutesAndAssets(
+          const routesManifest = parseRoutesAndAssets({
             mainAssets,
             routeComponentsAssets,
             routes,
-            moduleIdMap
-          )
+            notFoundRoute,
+            routeModuleIdMap: moduleIdMap,
+          })
 
           assets[ROUTES_MANIFEST_FILE] = new RawSource(
             JSON.stringify(routesManifest, null, 2),

@@ -1,4 +1,4 @@
-import type { RoutesManifest } from 'casterly'
+import type { RouteWithAssets, RoutesManifest } from 'casterly'
 import * as React from 'react'
 import type { RouteMatch, RouteObject } from 'react-router'
 import { matchRoutes } from 'react-router'
@@ -31,6 +31,32 @@ export type RouteObjectWithAssets = RouteObject & {
 
 type RouteMatchWithKey = RouteMatch & { route: RouteObjectWithAssets }
 
+const mergeRoute = async ({
+  index,
+  route,
+  manifestRoute,
+  children = [],
+}: {
+  index: number
+  route: RoutePromiseComponent
+  manifestRoute: RouteWithAssets
+  children?: RouteObjectWithAssets[]
+}) => {
+  const routeComponentModule = await route.component()
+
+  return {
+    ...route,
+    path: manifestRoute.path,
+    caseSensitive: route.caseSensitive === true,
+    element: React.createElement(routeComponentModule.default, route.props),
+    headers: routeComponentModule.headers,
+    assets: manifestRoute.assets ?? [],
+    componentName: manifestRoute.componentName,
+    children,
+    key: index,
+  }
+}
+
 export const mergeRouteAssetsAndRoutes = (
   routesManifestRoutes: RoutesManifest['routes'],
   routePromises: RoutePromiseComponent[]
@@ -44,18 +70,12 @@ export const mergeRouteAssetsAndRoutes = (
           )
         : []
 
-      const routeComponentModule = await route.component()
-
-      return {
-        ...route,
-        caseSensitive: route.caseSensitive === true,
-        element: React.createElement(routeComponentModule.default, route.props),
-        headers: routeComponentModule.headers,
-        assets: routesManifestRoutes[index].assets ?? [],
-        componentName: routesManifestRoutes[index].componentName,
+      return mergeRoute({
+        index,
         children,
-        key: index,
-      }
+        route,
+        manifestRoute: routesManifestRoutes[index],
+      })
     })
   )
 }
@@ -64,18 +84,45 @@ export const getMatchedRoutes = async ({
   location,
   routesPromiseComponent,
   routesManifest,
+  notFoundRoutePromiseComponent,
 }: {
   location: string
   routesManifest: RoutesManifest
   routesPromiseComponent: RoutePromiseComponent[]
+  notFoundRoutePromiseComponent?: RoutePromiseComponent
 }) => {
   const routes = await mergeRouteAssetsAndRoutes(
     routesManifest.routes,
     routesPromiseComponent
   )
 
-  const matchedRoutes = (matchRoutes(routes, location) ??
-    []) as RouteMatchWithKey[]
+  const notFoundRoute =
+    notFoundRoutePromiseComponent && routesManifest.notFound
+      ? await mergeRoute({
+          route: notFoundRoutePromiseComponent,
+          manifestRoute: routesManifest.notFound,
+          index: -1,
+        })
+      : undefined
+
+  let status = 200
+
+  let matchedRoutes = matchRoutes(routes, location) as RouteMatchWithKey[]
+
+  if (matchedRoutes == null) {
+    status = 404
+
+    if (notFoundRoute) {
+      matchedRoutes = [
+        {
+          params: {},
+          pathname: location,
+          pathnameBase: '/',
+          route: notFoundRoute,
+        },
+      ]
+    }
+  }
 
   const routeHeaders = matchedRoutes.reduce(
     (headers, matchedRoute) =>
@@ -98,5 +145,11 @@ export const getMatchedRoutes = async ({
     )
   )
 
-  return { routes, matchedRoutes, matchedRoutesAssets, routeHeaders }
+  return {
+    routes,
+    matchedRoutes,
+    matchedRoutesAssets,
+    routeHeaders,
+    status,
+  }
 }

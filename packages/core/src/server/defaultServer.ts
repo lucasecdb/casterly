@@ -31,6 +31,7 @@ const {
 
 interface ServerContext extends RootContext {
   routeHeaders: Headers
+  status: number
 }
 
 export interface ServerOptions {
@@ -222,12 +223,14 @@ class DefaultServer {
     )
 
     const appRoutes = appRoutesModule.default || appRoutesModule
+    const appNotFoundRoute = appRoutesModule.notFound
 
-    const { routes, matchedRoutes, matchedRoutesAssets, routeHeaders } =
+    const { routes, matchedRoutes, matchedRoutesAssets, routeHeaders, status } =
       await getMatchedRoutes({
         location: url,
         routesPromiseComponent: appRoutes,
         routesManifest,
+        notFoundRoutePromiseComponent: appNotFoundRoute,
       })
 
     const serverContext: ServerContext = {
@@ -255,6 +258,7 @@ class DefaultServer {
       matchedRoutesAssets,
       mainAssets: routesManifest.main,
       routeHeaders,
+      status,
     }
 
     return serverContext
@@ -297,7 +301,7 @@ class DefaultServer {
 
     const handleRequest = await this.getAppRequestHandler()
 
-    let status = 200
+    let status = serverContext.status
 
     let response = handleRequest(
       request,
@@ -312,7 +316,6 @@ class DefaultServer {
     }
 
     let outgoingHeaders: Record<string, string> = {}
-    let onReadyToStream = undefined
 
     let body = null
 
@@ -333,10 +336,9 @@ class DefaultServer {
       status = recordResponse.status
       body = recordResponse.body
       outgoingHeaders = recordResponse.headers
-      onReadyToStream = recordResponse.onReadyToStream
     }
 
-    return { status, outgoingHeaders, body, onReadyToStream }
+    return { status, outgoingHeaders, body }
   }
 }
 

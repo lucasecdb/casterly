@@ -5,7 +5,7 @@ import puppeteer from 'puppeteer'
 
 const port = 3001
 
-describe('Production usage', () => {
+describe('Production caching', () => {
   let browser: Browser
   let page: Page
 

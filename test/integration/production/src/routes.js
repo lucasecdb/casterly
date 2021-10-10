@@ -1,3 +1,7 @@
+export const notFound = {
+  component: () => import('./not-found'),
+}
+
 export default [
   {
     path: '/',

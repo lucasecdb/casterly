@@ -35,12 +35,19 @@ export type RouteWithAssets = {
 
 export type RoutesManifest = ReturnType<typeof parseRoutesAndAssets>
 
-export const parseRoutesAndAssets = (
-  mainAssets: string[],
-  routeComponentsAssets: Record<string, string[]>,
-  routes: RouteAssetComponent[],
+export const parseRoutesAndAssets = ({
+  mainAssets,
+  routeComponentsAssets,
+  routes,
+  notFoundRoute,
+  routeModuleIdMap,
+}: {
+  mainAssets: string[]
+  routeComponentsAssets: Record<string, string[]>
+  routes: RouteAssetComponent[]
+  notFoundRoute?: RouteAssetComponent
   routeModuleIdMap: Record<string, string | number>
-) => {
+}) => {
   const parseRouteComponents = (
     route: RouteAssetComponent
   ): RouteWithAssets => {
@@ -66,5 +73,13 @@ export const parseRoutesAndAssets = (
 
   const routesWithAssets = routes.map(parseRouteComponents)
 
-  return { main: mainAssets, routes: routesWithAssets }
+  const notFoundRouteWithAssets = notFoundRoute
+    ? parseRouteComponents(notFoundRoute)
+    : undefined
+
+  return {
+    main: mainAssets,
+    routes: routesWithAssets,
+    notFound: notFoundRouteWithAssets,
+  }
 }
