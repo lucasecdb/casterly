@@ -2,7 +2,7 @@
   "packages": ["packages/*"],
   "npmClient": "yarn",
   "useWorkspaces": true,
-  "version": "0.9.0-alpha.7",
+  "version": "0.9.0-alpha.8",
   "registry": "https://registry.npmjs.org/",
   "ignoreChanges": [
     "CHANGELOG.md",
