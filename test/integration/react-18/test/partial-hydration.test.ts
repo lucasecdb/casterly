@@ -36,12 +36,17 @@ describe('Partial hydration', () => {
 
     expect(dynamicComponentRequested).toBe(false)
 
-    await page.waitForFunction('window.reactIsHydrated === true')
+    await page.waitForFunction('window.reactIsHydrated === true', {
+      timeout: 1000,
+    })
 
     expect(dynamicComponentRequested).toBe(true)
 
-    await page.waitForResponse((req) =>
-      req.url().includes('dynamic-component.js')
+    await page.waitForResponse(
+      (req) => req.url().includes('dynamic-component.js'),
+      {
+        timeout: 1000,
+      }
     )
 
     await page.click('button')
