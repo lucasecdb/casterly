@@ -107,7 +107,9 @@ export const getMatchedRoutes = async ({
 
   let status = 200
 
-  let matchedRoutes = matchRoutes(routes, location) as RouteMatchWithKey[]
+  let matchedRoutes = matchRoutes(routes, location) as
+    | RouteMatchWithKey[]
+    | null
 
   if (matchedRoutes == null) {
     status = 404
@@ -123,6 +125,8 @@ export const getMatchedRoutes = async ({
       ]
 
       routes.push(notFoundRoute)
+    } else {
+      matchedRoutes = []
     }
   }
 
