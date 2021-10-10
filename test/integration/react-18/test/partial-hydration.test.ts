@@ -27,12 +27,14 @@ describe('Partial hydration', () => {
       request.continue()
     })
 
-    await page.goto(`http://localhost:${port}/partial-hydration`)
+    const response = await page.goto(
+      `http://localhost:${port}/partial-hydration`
+    )
 
-    let content = await page.content()
+    const responseText = await response.text()
 
-    expect(content).toMatch('Hello from dynamic component!')
-    expect(content).not.toMatch('dynamic-component.js')
+    expect(responseText).toMatch('Hello from dynamic component!')
+    expect(responseText).not.toMatch('dynamic-component.js')
 
     expect(dynamicComponentRequested).toBe(false)
 
@@ -42,19 +44,16 @@ describe('Partial hydration', () => {
 
     expect(dynamicComponentRequested).toBe(true)
 
-    await page.waitForResponse(
-      (req) => req.url().includes('dynamic-component.js'),
-      {
-        timeout: 1000,
-      }
-    )
+    await page.waitForFunction('window.dynamicComponentLoaded === true', {
+      timeout: 1000,
+    })
 
     await page.click('button')
 
-    content = await page.content()
-
     // Make sure the component is hydrated and
     // event handlers work as expected
-    expect(content).toMatch('Hello from alternate message!')
+    await expect(page.content()).resolves.toMatch(
+      'Hello from alternate message!'
+    )
   })
 })
