@@ -56,4 +56,16 @@ describe('Not found', () => {
     expect(reloadResponse.status()).toBe(404)
     await expect(page.content()).resolves.toMatch('you did not found me 😜')
   })
+
+  it('should be able to navigate away from not found page', async () => {
+    await page.goto(`http://localhost:${port}/unexistent-route`, {
+      waitUntil: 'networkidle2',
+    })
+
+    await Promise.all([page.waitForNavigation(), page.click('a')])
+
+    await page.waitForSelector('#index-header')
+
+    await expect(page.content()).resolves.toMatch('Index page')
+  })
 })

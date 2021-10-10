@@ -77,7 +77,9 @@ const mergeRoutes = (
     routes.push(newRoute)
   })
 
-  return routes.sort((routeA, routeB) => routeA.key - routeB.key)
+  return routes.sort((routeA, routeB) => {
+    return routeA.key - routeB.key
+  })
 }
 
 const addScript = (scriptAsset: string) => {

@@ -362,12 +362,13 @@ const getBaseWebpackConfig = async (
       (process.platform === 'win32' && path.win32.isAbsolute(request))
 
     if (!isLocal) {
-      if (/^(?:react(?:$|\/))/.test(request)) {
+      if (
+        /^(?:(?:react-router|react-router-dom)|react(?:$|\/))/.test(request)
+      ) {
         return `commonjs ${request}`
       }
 
-      const notExternalModules =
-        /^(?:(?:(?:react-router|react-router-dom)(\/.*)?)|string-hash$)/
+      const notExternalModules = /^(?:string-hash$)/
 
       if (notExternalModules.test(request)) {
         return
