@@ -24,9 +24,7 @@ describe('Not found', () => {
 
     expect(response.status()).toBe(404)
 
-    const pageContent = await page.content()
-
-    expect(pageContent).toMatch("you didn't found me 😜")
+    await expect(response.text()).resolves.toMatch('you did not found me 😜')
   })
 
   it('should reload the page when transitioning to not found route', async () => {
@@ -55,6 +53,6 @@ describe('Not found', () => {
     })
 
     expect(reloadResponse.status()).toBe(404)
-    await expect(page.content()).resolves.toMatch("you didn't found me 😜")
+    await expect(page.content()).resolves.toMatch('you did not found me 😜')
   })
 })

@@ -121,6 +121,8 @@ export const getMatchedRoutes = async ({
           route: notFoundRoute,
         },
       ]
+
+      routes.push(notFoundRoute)
     }
   }
 
