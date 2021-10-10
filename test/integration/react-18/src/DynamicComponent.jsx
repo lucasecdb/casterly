@@ -3,6 +3,10 @@ import { useState } from 'react'
 const DynamicComponent = () => {
   const [changed, setChanged] = useState(false)
 
+  if (typeof window !== 'undefined') {
+    window.dynamicComponentLoaded = true
+  }
+
   return (
     <div>
       <p>
