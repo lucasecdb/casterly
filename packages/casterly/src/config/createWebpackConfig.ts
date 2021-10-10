@@ -34,10 +34,10 @@ import {
 } from './webpack/plugins/RoutesManifestPlugin'
 import SSRImportPlugin from './webpack/plugins/SSRImportPlugin'
 import {
-  cssGlobalRegex,
+  cssModuleRegex,
   cssRegex,
   getStyleLoaders,
-  sassGlobalRegex,
+  sassModuleRegex,
   sassRegex,
 } from './webpack/styles'
 import type { Options } from './webpack/types'
@@ -268,37 +268,27 @@ const getBaseWebpackConfig = async (
 
   const cssRules = [
     {
-      test: cssGlobalRegex,
+      test: cssRegex,
+      exclude: [cssModuleRegex],
       use: cssConfig,
       compiler: not(isRouteManifestChildCompiler),
     },
     {
-      test: cssRegex,
-      exclude: [cssGlobalRegex, /node_modules/],
+      test: cssModuleRegex,
+      exclude: [/node_modules/],
       use: cssModuleConfig,
       compiler: not(isRouteManifestChildCompiler),
     },
     {
-      test: cssRegex,
-      include: [{ not: [paths.appSrc] }],
-      use: cssConfig,
-      compiler: not(isRouteManifestChildCompiler),
-    },
-    {
-      test: sassGlobalRegex,
+      test: sassRegex,
+      exclude: [sassModuleRegex],
       use: sassConfig,
       compiler: not(isRouteManifestChildCompiler),
     },
     {
-      test: sassRegex,
-      exclude: [sassGlobalRegex, /node_modules/],
+      test: sassModuleRegex,
+      exclude: [/node_modules/],
       use: sassModuleConfig,
-      compiler: not(isRouteManifestChildCompiler),
-    },
-    {
-      test: sassRegex,
-      include: [{ not: [paths.appSrc] }],
-      use: sassConfig,
       compiler: not(isRouteManifestChildCompiler),
     },
     {

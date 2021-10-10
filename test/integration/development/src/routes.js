@@ -11,4 +11,8 @@ export default [
     path: '/back-link',
     component: () => import('./back-link'),
   },
+  {
+    path: '/css',
+    component: () => import('./css'),
+  },
 ]
