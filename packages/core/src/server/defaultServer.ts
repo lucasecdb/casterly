@@ -151,8 +151,14 @@ class DefaultServer {
           } else {
             const url = parseUrl(query.path)
 
-            const { routes, routeHeaders, ...clientContext } =
-              await this.getServerContextForRoute(url.pathname!)
+            const {
+              routes,
+              routeHeaders,
+              status: serverContextStatus,
+              ...clientContext
+            } = await this.getServerContextForRoute(url.pathname!)
+
+            status = serverContextStatus
 
             body = JSON.stringify(clientContext)
           }

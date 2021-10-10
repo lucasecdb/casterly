@@ -1,5 +1,3 @@
-import { parse as parseUrl } from 'url'
-
 import type { Browser, Page } from 'puppeteer'
 import puppeteer from 'puppeteer'
 
@@ -22,7 +20,7 @@ describe('Production caching', () => {
     })
 
     let manifestResponsePromise = page.waitForResponse((res) =>
-      parseUrl(res.url()).pathname.startsWith('/_casterly/route-manifest')
+      new URL(res.url()).pathname.startsWith('/_casterly/route-manifest')
     )
 
     await page.click('a[href="/back-link"]')
@@ -32,7 +30,7 @@ describe('Production caching', () => {
     expect(manifestResponse.fromCache()).toBe(false)
 
     manifestResponsePromise = page.waitForResponse((res) =>
-      parseUrl(res.url()).pathname.startsWith('/_casterly/route-manifest')
+      new URL(res.url()).pathname.startsWith('/_casterly/route-manifest')
     )
 
     await page.goBack()
@@ -45,7 +43,7 @@ describe('Production caching', () => {
     await expect(page.$('a[href="/back-link"]')).resolves.not.toBeNull()
 
     manifestResponsePromise = page.waitForResponse((res) =>
-      parseUrl(res.url()).pathname.startsWith('/_casterly/route-manifest')
+      new URL(res.url()).pathname.startsWith('/_casterly/route-manifest')
     )
 
     await page.goForward()
