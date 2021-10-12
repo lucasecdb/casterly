@@ -1,6 +1,6 @@
 {
   "name": "@casterly/express",
-  "version": "0.9.0-alpha.8",
+  "version": "0.9.0-alpha.9",
   "description": "Casterly bindings for Express.js",
   "author": "Lucas Cordeiro <ecdb.lucas@gmail.com>",
   "homepage": "https://github.com/lucasecdb/casterly#readme",
@@ -51,6 +51,6 @@
     "express": "^4.17.1"
   },
   "dependencies": {
-    "@casterly/core": "^0.9.0-alpha.8"
+    "@casterly/core": "^0.9.0-alpha.9"
   }
 }
