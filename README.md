@@ -45,7 +45,7 @@ This file is your app entrypoint, you have full control over the server and can 
 import { Scripts, Styles } from '@casterly/components'
 import { RootServer } from '@casterly/components/server'
 import React from 'react'
-import { pipeToNodeWritable } from 'react-dom/server'
+import { renderToPipeableStream } from 'react-dom/server'
 
 import App from './App'
 
@@ -74,24 +74,23 @@ export default function handleRequest(
   request,
   statusCode,
   headers,
-  context,
-  { responseStream }
+  context
 ) {
   let status = statusCode
   let didError = false
 
-  const startWriting = await new Promise((resolve) => {
-    const { startWriting } = pipeToNodeWritable(
+  const responseStream = await new Promise((resolve) => {
+    const stream = renderToPipeableStream(
       <RootServer context={context} url={request.url}>
         <Document />
       </RootServer>,
       {
-        onReadyToStream() {
+        onCompleteShell() {
           if (didError) {
-          status = 500
+            status = 500
           }
 
-          resolve(startWriting)
+          resolve(stream)
         },
         onError(error) {
           console.error(error)
@@ -108,9 +107,6 @@ export default function handleRequest(
       'content-type': 'text/html',
     },
     body: responseStream,
-    onReadyToStream() {
-      startWriting()
-    }
   }
 }
 ```
