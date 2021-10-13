@@ -8,7 +8,6 @@ type WebpackState =
   | { loading: true; fileName?: string }
   | {
       loading: false
-      typeChecking: boolean
       errors: WebpackError[] | null
       warnings: WebpackError[] | null
       buildDuration: number

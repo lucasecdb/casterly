@@ -18,7 +18,6 @@ type WebpackStatus =
   | { loading: true; fileName?: string }
   | ({
       loading: false
-      typeChecking: boolean
     } & CompilerDiagnostics)
 
 interface BuildStatusStore {
@@ -69,39 +68,22 @@ buildStore.subscribe((state) => {
       fileName: status.fileName,
     }
   } else {
-    const { errors, warnings, typeChecking, buildDuration } = status
+    const { errors, warnings, buildDuration } = status
 
-    if (errors == null && typeChecking) {
-      nextState = {
-        bootstrap: false,
-        port,
-        typeChecking: true,
-        loading: false,
-        errors,
-        warnings,
-        buildDuration,
-      }
-    } else {
-      nextState = {
-        bootstrap: false,
-        port,
-        loading: false,
-        typeChecking: false,
-        errors,
-        warnings,
-        buildDuration,
-      }
+    nextState = {
+      bootstrap: false,
+      port,
+      loading: false,
+      errors,
+      warnings,
+      buildDuration,
     }
   }
 
   logStore.setState(nextState, true)
 })
 
-export function watchCompilers(
-  client: Compiler,
-  server: Compiler,
-  hasTypeChecking: boolean
-) {
+export function watchCompilers(client: Compiler, server: Compiler) {
   buildStore.setState({
     client: { loading: true },
     server: { loading: true },
@@ -110,7 +92,6 @@ export function watchCompilers(
   function tapCompiler(
     key: string,
     compiler: Compiler,
-    enableTypecheck: boolean,
     onEvent: (status: WebpackStatus) => void
   ) {
     compiler.hooks.invalid.tap(
@@ -141,16 +122,15 @@ export function watchCompilers(
         loading: false,
         errors: hasErrors ? errors ?? null : null,
         warnings: hasWarnings ? warnings ?? null : null,
-        typeChecking: enableTypecheck,
         buildDuration,
       })
     })
   }
 
-  tapCompiler('client', client, hasTypeChecking, (status) =>
+  tapCompiler('client', client, (status) =>
     buildStore.setState({ client: status })
   )
-  tapCompiler('server', server, false, (status) =>
+  tapCompiler('server', server, (status) =>
     buildStore.setState({ server: status })
   )
 }
