@@ -1,6 +1,7 @@
 import crypto from 'crypto'
 import { sep } from 'path'
 
+// @ts-ignore
 import CssMinimizerPlugin from 'css-minimizer-webpack-plugin'
 // @ts-ignore: TODO: typings incompatible with webpack 5
 import TerserPlugin from 'terser-webpack-plugin'
