@@ -5,7 +5,6 @@ import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin'
 // @ts-ignore: typings not up-to-date
 import CaseSensitivePathsPlugin from 'case-sensitive-paths-webpack-plugin'
 import chalk from 'chalk'
-import ForkTsCheckerPlugin from 'fork-ts-checker-webpack-plugin'
 // @ts-ignore
 import MiniCssExtractPlugin from 'mini-css-extract-plugin'
 import semver from 'semver'
@@ -741,31 +740,6 @@ const getBaseWebpackConfig = async (
       // a plugin that prints an error when you attempt to do this.
       // See https://github.com/facebook/create-react-app/issues/240
       dev && new CaseSensitivePathsPlugin(),
-      !isServer &&
-        useTypescript &&
-        new ForkTsCheckerPlugin({
-          typescript: {
-            typescriptPath,
-            mode: 'readonly',
-            diagnosticOptions: {
-              syntactic: true,
-            },
-            configFile: paths.appTsConfig,
-            configOverwrite: {
-              compilerOptions: {
-                isolatedModules: true,
-                noEmit: true,
-                incremental: true,
-              },
-            },
-          },
-          async: dev,
-          logger: {
-            infrastructure: 'silent',
-            issues: 'silent',
-          },
-          formatter: 'codeframe',
-        }),
     ].filter(filterBoolean),
   }
 

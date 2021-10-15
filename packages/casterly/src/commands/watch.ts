@@ -1,10 +1,8 @@
-import { fileExists } from '@casterly/utils'
 import cors from 'cors'
 import express from 'express'
 import { webpack } from 'webpack'
 import whm from 'webpack-hot-middleware'
 
-import { paths } from '..'
 import createWebpackConfig from '../config/createWebpackConfig'
 import config from '../config/userConfig'
 import { logStore } from '../output/logger'
@@ -19,7 +17,7 @@ export default async function startWatch() {
 
   app.use(cors())
 
-  let setServerReady: null | (() => void) = null
+  let setServerReady: () => void
 
   const serverReadyPromise = new Promise<void>((resolve) => {
     setServerReady = resolve
@@ -49,9 +47,7 @@ export default async function startWatch() {
       })
     )
 
-    const useTypescript = await fileExists(paths.appTsConfig)
-
-    watchCompilers(clientCompiler, serverCompiler, useTypescript)
+    watchCompilers(clientCompiler, serverCompiler)
 
     await new Promise((resolve, reject) => {
       const watcher = multiCompiler.watch(
@@ -66,7 +62,7 @@ export default async function startWatch() {
       )
     })
 
-    setServerReady!()
+    setServerReady()
   }
 
   startWatch()
