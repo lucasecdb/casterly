@@ -5,6 +5,8 @@ export type RouteObjectWithKey = RouteObject & {
   key: number
   children?: RouteObjectWithKey[]
   props?: Record<string, unknown>
+  metadata?: unknown
+  preloadedData?: unknown
 }
 
 export type RouteMatchWithKey = RouteMatch & { route: RouteObjectWithKey }

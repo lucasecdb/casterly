@@ -633,12 +633,22 @@ const getBaseWebpackConfig = async (
         ...paths.moduleFileExtensions.map((ext) => `.${ext}`),
       ],
       alias: {
+        react: path.join(paths.appNodeModules, 'react'),
+        'react-dom': path.join(paths.appNodeModules, 'react-dom'),
+        'react-router': path.join(paths.appNodeModules, 'react-router'),
+        'react-router-dom': path.join(paths.appNodeModules, 'react-router-dom'),
         ...(!isServer && !dev && profile
           ? {
               'react-dom$': 'react-dom/profiling',
               'scheduler/tracing': 'scheduler/tracing-profiling',
             }
           : null),
+
+        ...(userConfig.userConfig.loaderRuntime && !isServer
+          ? {
+              'private-casterly-loader$': userConfig.userConfig.loaderRuntime,
+            }
+          : {}),
       },
     },
     module: {

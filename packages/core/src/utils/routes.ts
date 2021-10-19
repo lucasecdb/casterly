@@ -4,13 +4,18 @@ import type { RouteMatch, RouteObject } from 'react-router'
 import { matchRoutes } from 'react-router'
 
 import { Headers } from '../fetch'
+import { interopDefault } from '../server/utils'
 
 export type RouteModule = {
-  default: React.ComponentType
+  default: React.ComponentType<any>
   headers?: (headersParams: {
     params: RouteMatch['params']
     parentHeaders: Headers
   }) => Record<string, string>
+  loaderMetadata?: (options: {
+    params: RouteMatch['params']
+    context: unknown
+  }) => unknown
 }
 
 export type RoutePromiseComponent = {
@@ -26,6 +31,8 @@ export type RouteObjectWithAssets = RouteObject & {
   assets: string[]
   componentName: string | number
   headers: RouteModule['headers']
+  loaderMetadata: RouteModule['loaderMetadata']
+  metadata?: unknown
   key: number
 }
 
@@ -50,6 +57,7 @@ const mergeRoute = async ({
     caseSensitive: route.caseSensitive === true,
     element: React.createElement(routeComponentModule.default, route.props),
     headers: routeComponentModule.headers,
+    loaderMetadata: routeComponentModule.loaderMetadata,
     assets: manifestRoute.assets ?? [],
     componentName: manifestRoute.componentName,
     children,
@@ -85,11 +93,15 @@ export const getMatchedRoutes = async ({
   routesPromiseComponent,
   routesManifest,
   notFoundRoutePromiseComponent,
+  appContext,
+  loaderRuntimeModule,
 }: {
   location: string
   routesManifest: RoutesManifest
   routesPromiseComponent: RoutePromiseComponent[]
   notFoundRoutePromiseComponent?: RoutePromiseComponent
+  appContext: unknown
+  loaderRuntimeModule: string | undefined
 }) => {
   const routes = await mergeRouteAssetsAndRoutes(
     routesManifest.routes,
@@ -150,6 +162,57 @@ export const getMatchedRoutes = async ({
       ).filter((file) => !routesManifest.main.includes(file))
     )
   )
+
+  if (!loaderRuntimeModule) {
+    return {
+      routes,
+      matchedRoutes,
+      matchedRoutesAssets,
+      routeHeaders,
+      status,
+    }
+  }
+
+  const loaderModule = await import(loaderRuntimeModule).then(interopDefault)
+
+  const loadFn = loaderModule.createPreloadForContext(appContext)
+
+  let routesToPreload = routes
+
+  for (const matchedRoute of matchedRoutes) {
+    const route = routesToPreload.find((route) => route === matchedRoute.route)
+
+    if (!route) {
+      break
+    }
+
+    const metadata = route.loaderMetadata?.({
+      params: matchedRoute.params,
+      context: appContext,
+    })
+
+    if (!metadata && route.children) {
+      routesToPreload = route.children
+      continue
+    } else if (!metadata && !route.children) {
+      break
+    }
+
+    const preloadedData = loadFn(metadata)
+
+    route.element = React.cloneElement(route.element as React.ReactElement, {
+      ...(route.element as React.ReactElement).props,
+      preloadedData,
+    })
+
+    route.metadata = metadata
+
+    if (!route.children) {
+      break
+    }
+
+    routesToPreload = route.children
+  }
 
   return {
     routes,

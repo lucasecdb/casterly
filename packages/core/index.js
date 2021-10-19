@@ -1,7 +1,7 @@
 'use strict'
 
 if (process.env.NODE_ENV === 'production') {
-  module.exports = require('./lib/server/defaultServer')
+  module.exports = require('./lib/index')
 } else {
-  module.exports = require('./lib/server/devServer')
+  module.exports = require('./lib/index.development')
 }

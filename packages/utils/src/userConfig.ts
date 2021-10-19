@@ -25,6 +25,7 @@ interface ExperimentsConfig {
 export interface CasterlyConfig {
   buildServer?: BuildServerConfig
   buildFolder?: string
+  loaderRuntime?: string
   experiments?: ExperimentsConfig
 }
 
@@ -32,6 +33,7 @@ export const defaultConfig: RecursiveRequired<CasterlyConfig> = {
   buildServer: {
     port: 8081,
   },
+  loaderRuntime: '',
   buildFolder: '.dist',
   experiments: {
     esbuildDependencies: false,

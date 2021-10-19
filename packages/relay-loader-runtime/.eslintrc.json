@@ -1,0 +1,5 @@
+{
+  "parserOptions": {
+    "project": "./packages/relay-loader-runtime/tsconfig.json"
+  }
+}
