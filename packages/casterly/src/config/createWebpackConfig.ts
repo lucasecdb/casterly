@@ -20,6 +20,7 @@ import {
   STATIC_CHUNKS_PATH,
   STATIC_ENTRYPOINTS_ROUTES,
   STATIC_RUNTIME_HOT,
+  STATIC_RUNTIME_LOADER,
   STATIC_RUNTIME_MAIN,
   STATIC_WEBPACK_PATH,
 } from './constants'
@@ -509,6 +510,9 @@ const getBaseWebpackConfig = async (
 
   const entrypoints = {
     [STATIC_ENTRYPOINTS_ROUTES]: paths.appRoutesJs,
+    ...(isServer && userConfig.userConfig.loaderRuntime
+      ? { [STATIC_RUNTIME_LOADER]: userConfig.userConfig.loaderRuntime }
+      : {}),
   }
 
   const serverEntry = (await fileExists(paths.appServerEntry))

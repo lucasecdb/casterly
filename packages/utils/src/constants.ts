@@ -11,6 +11,7 @@ export const STATIC_ASSETS_PATH = path.join(STATIC_FOLDER, 'assets')
 export const STATIC_RUNTIME_MAIN = path.join(STATIC_RUNTIME_PATH, 'main')
 export const STATIC_RUNTIME_WEBPACK = path.join(STATIC_RUNTIME_PATH, 'webpack')
 export const STATIC_RUNTIME_HOT = path.join(STATIC_RUNTIME_PATH, 'hot')
+export const STATIC_RUNTIME_LOADER = path.join(STATIC_RUNTIME_PATH, 'loader')
 
 export const STATIC_ENTRYPOINTS_ROUTES = path.join(
   STATIC_ENTRYPOINTS_PATH,

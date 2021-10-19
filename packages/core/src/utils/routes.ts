@@ -1,3 +1,6 @@
+import path from 'path'
+
+import { constants, paths } from '@casterly/utils'
 import type { RouteWithAssets, RoutesManifest } from 'casterly'
 import * as React from 'react'
 import type { RouteMatch, RouteObject } from 'react-router'
@@ -5,6 +8,8 @@ import { matchRoutes } from 'react-router'
 
 import { Headers } from '../fetch'
 import { interopDefault } from '../server/utils'
+
+const { STATIC_RUNTIME_LOADER } = constants
 
 export type RouteModule = {
   default: React.ComponentType<any>
@@ -94,14 +99,14 @@ export const getMatchedRoutes = async ({
   routesManifest,
   notFoundRoutePromiseComponent,
   appContext,
-  loaderRuntimeModule,
+  hasLoaderRuntimeModule,
 }: {
   location: string
   routesManifest: RoutesManifest
   routesPromiseComponent: RoutePromiseComponent[]
   notFoundRoutePromiseComponent?: RoutePromiseComponent
   appContext: unknown
-  loaderRuntimeModule: string | undefined
+  hasLoaderRuntimeModule: boolean
 }) => {
   const routes = await mergeRouteAssetsAndRoutes(
     routesManifest.routes,
@@ -163,7 +168,7 @@ export const getMatchedRoutes = async ({
     )
   )
 
-  if (!loaderRuntimeModule) {
+  if (!hasLoaderRuntimeModule) {
     return {
       routes,
       matchedRoutes,
@@ -173,7 +178,9 @@ export const getMatchedRoutes = async ({
     }
   }
 
-  const loaderModule = await import(loaderRuntimeModule).then(interopDefault)
+  const loaderModule = await import(
+    path.join(paths.appServerBuildFolder, STATIC_RUNTIME_LOADER)
+  ).then(interopDefault)
 
   const loadFn = loaderModule.createPreloadForContext(appContext)
 

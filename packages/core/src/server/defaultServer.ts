@@ -254,7 +254,7 @@ class DefaultServer {
         routesManifest,
         notFoundRoutePromiseComponent: appNotFoundRoute,
         appContext,
-        loaderRuntimeModule: config.userConfig.loaderRuntime,
+        hasLoaderRuntimeModule: !!config.userConfig.loaderRuntime,
       })
 
     const serverContext: ServerContext = {
