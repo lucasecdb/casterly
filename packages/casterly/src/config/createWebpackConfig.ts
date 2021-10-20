@@ -512,7 +512,7 @@ const getBaseWebpackConfig = async (
     [STATIC_ENTRYPOINTS_ROUTES]: paths.appRoutesJs,
     ...(isServer && userConfig.userConfig.loaderRuntime
       ? { [STATIC_RUNTIME_LOADER]: userConfig.userConfig.loaderRuntime }
-      : {}),
+      : { [STATIC_RUNTIME_LOADER]: paths.serverNoopLoader }),
   }
 
   const serverEntry = (await fileExists(paths.appServerEntry))
@@ -637,10 +637,17 @@ const getBaseWebpackConfig = async (
         ...paths.moduleFileExtensions.map((ext) => `.${ext}`),
       ],
       alias: {
-        react: path.join(paths.appNodeModules, 'react'),
-        'react-dom': path.join(paths.appNodeModules, 'react-dom'),
-        'react-router': path.join(paths.appNodeModules, 'react-router'),
-        'react-router-dom': path.join(paths.appNodeModules, 'react-router-dom'),
+        react: require.resolve('react', { paths: [paths.appDirectory] }),
+        'react-dom': require.resolve('react-dom', {
+          paths: [paths.appDirectory],
+        }),
+        'react-router': require.resolve('react-router', {
+          paths: [paths.appDirectory],
+        }),
+        'react-router-dom': require.resolve('react-router-dom', {
+          paths: [paths.appDirectory],
+        }),
+
         ...(!isServer && !dev && profile
           ? {
               'react-dom$': 'react-dom/profiling',
@@ -652,7 +659,9 @@ const getBaseWebpackConfig = async (
           ? {
               'private-casterly-loader$': userConfig.userConfig.loaderRuntime,
             }
-          : {}),
+          : {
+              'private-casterly-loader$': paths.serverNoopLoader,
+            }),
       },
     },
     module: {
