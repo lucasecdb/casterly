@@ -1,4 +1,3 @@
-import type { RouteModule } from '@casterly/core'
 import type { BrowserHistory, Update } from 'history'
 import { createBrowserHistory } from 'history'
 import { createPreloadForContext } from 'private-casterly-loader'
@@ -10,7 +9,7 @@ import React, {
   useRef,
   useState,
 } from 'react'
-import type { RouterProps } from 'react-router'
+import type { RouteMatch, RouterProps } from 'react-router'
 import { Router } from 'react-router'
 
 import type {
@@ -20,6 +19,14 @@ import type {
 } from './RootContext'
 import { RootContextProvider } from './RootContext'
 import { RoutePendingContextProvider } from './RoutePendingContext'
+
+interface RouteModule {
+  default: React.ComponentType<any>
+  loaderMetadata?: (options: {
+    params: RouteMatch['params']
+    context: unknown
+  }) => unknown
+}
 
 declare global {
   interface Window {
