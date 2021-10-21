@@ -26,6 +26,7 @@ const runCasterlyCmd = async (
         ...process.env,
         PORT: port.toString(),
         NODE_ENV: prod ? 'production' : 'development',
+        IS_TEST: '1',
       },
       stdio: ['ignore', 'pipe', 'pipe'],
     })
