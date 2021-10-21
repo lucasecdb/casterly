@@ -181,7 +181,7 @@ const fetchRouteData = async (path: string, version: string | null) => {
 const fetchRouteAssets = async ({
   path,
   version,
-  reloadOnMismatch = false,
+  reloadOnMismatch = true,
   preload,
 }: {
   path: string
