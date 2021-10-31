@@ -4,3 +4,4 @@
 **/lib
 packages/*/*.js
 packages/*/*.d.ts
+packages/*/.eslintrc.js
