@@ -292,7 +292,7 @@ class DefaultServer {
   private getServerEntrypoint = async (): Promise<ServerEntrypointModule> => {
     let serverEntrypointModule = await import(
       path.join(paths.appServerBuildFolder, STATIC_RUNTIME_MAIN)
-    ).then((mod) => mod.default || mod)
+    )
 
     if (
       typeof serverEntrypointModule.default === 'object' &&
