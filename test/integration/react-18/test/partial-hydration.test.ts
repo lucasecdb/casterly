@@ -19,22 +19,34 @@ describe('Partial hydration', () => {
 
     let dynamicComponentRequested = false
 
+    let resolveMain: () => void
+
     page.on('request', (request) => {
       if (request.url().includes('dynamic-component.js')) {
         dynamicComponentRequested = true
+      }
+
+      if (request.url().includes('main.js')) {
+        resolveMain = () => request.continue()
+        return
       }
 
       request.continue()
     })
 
     const response = await page.goto(
-      `http://localhost:${port}/partial-hydration`
+      `http://localhost:${port}/partial-hydration`,
+      {
+        waitUntil: 'domcontentloaded',
+      }
     )
 
     const responseText = await response.text()
 
     expect(responseText).toMatch('Hello from dynamic component!')
     expect(responseText).not.toMatch('dynamic-component.js')
+
+    resolveMain()
 
     expect(dynamicComponentRequested).toBe(false)
 
