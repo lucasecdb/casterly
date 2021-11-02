@@ -42,6 +42,20 @@ import {
 } from './webpack/styles'
 import type { Options } from './webpack/types'
 
+const getResolvedLoaderRuntime = (loaderRuntimePath?: string) => {
+  if (!loaderRuntimePath) {
+    return undefined
+  }
+
+  const isLocal = loaderRuntimePath.startsWith('.')
+
+  if (isLocal) {
+    return path.resolve(paths.appDirectory, loaderRuntimePath)
+  }
+
+  return require.resolve(loaderRuntimePath, { paths: [paths.appDirectory] })
+}
+
 const NODE_RESOLVE_OPTIONS = {
   dependencyType: 'commonjs',
   modules: ['node_modules'],
@@ -530,6 +544,10 @@ const getBaseWebpackConfig = async (
   )
   const hasCustomWebpackConfig = await fileExists(webpackConfigPath)
 
+  const resolvedLoaderRuntime = getResolvedLoaderRuntime(
+    userConfig.userConfig.loaderRuntime
+  )
+
   let config: Configuration = {
     mode: webpackMode,
     name: isServer ? 'server' : 'client',
@@ -664,9 +682,9 @@ const getBaseWebpackConfig = async (
             }
           : null),
 
-        ...(userConfig.userConfig.loaderRuntime && !isServer
+        ...(resolvedLoaderRuntime && !isServer
           ? {
-              'private-casterly-loader$': userConfig.userConfig.loaderRuntime,
+              'private-casterly-loader$': resolvedLoaderRuntime,
             }
           : {
               'private-casterly-loader$': paths.serverNoopLoader,
