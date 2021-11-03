@@ -46,9 +46,11 @@ describe('Partial hydration', () => {
     expect(responseText).toMatch('Hello from dynamic component!')
     expect(responseText).not.toMatch('dynamic-component.js')
 
+    expect(dynamicComponentRequested).toBe(false)
+
     resolveMain()
 
-    expect(dynamicComponentRequested).toBe(false)
+    await page.waitForNetworkIdle()
 
     await page.waitForFunction('window.reactIsHydrated === true', {
       timeout: 1000,
