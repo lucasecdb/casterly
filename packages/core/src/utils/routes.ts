@@ -99,14 +99,12 @@ export const getMatchedRoutes = async ({
   routesManifest,
   notFoundRoutePromiseComponent,
   appContext,
-  hasLoaderRuntimeModule,
 }: {
   location: string
   routesManifest: RoutesManifest
   routesPromiseComponent: RoutePromiseComponent[]
   notFoundRoutePromiseComponent?: RoutePromiseComponent
   appContext: unknown
-  hasLoaderRuntimeModule: boolean
 }) => {
   const routes = await mergeRouteAssetsAndRoutes(
     routesManifest.routes,
@@ -167,16 +165,6 @@ export const getMatchedRoutes = async ({
       ).filter((file) => !routesManifest.main.includes(file))
     )
   )
-
-  if (!hasLoaderRuntimeModule) {
-    return {
-      routes,
-      matchedRoutes,
-      matchedRoutesAssets,
-      routeHeaders,
-      status,
-    }
-  }
 
   const loaderModule = await import(
     path.join(paths.appServerBuildFolder, STATIC_RUNTIME_LOADER)

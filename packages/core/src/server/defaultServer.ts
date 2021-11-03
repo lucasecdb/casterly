@@ -3,7 +3,6 @@ import * as path from 'path'
 
 import type { RootContext } from '@casterly/components'
 import { constants, paths } from '@casterly/utils'
-import * as config from '@casterly/utils/config'
 import type { RoutesManifest } from 'casterly'
 import fresh from 'fresh'
 
@@ -254,7 +253,6 @@ class DefaultServer {
         routesManifest,
         notFoundRoutePromiseComponent: appNotFoundRoute,
         appContext,
-        hasLoaderRuntimeModule: !!config.userConfig.loaderRuntime,
       })
 
     const serverContext: ServerContext = {
