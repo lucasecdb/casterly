@@ -237,9 +237,6 @@ const getBaseWebpackConfig = async (
     loader: require.resolve('sass-loader'),
     options: {
       implementation: require('sass'),
-      sassOptions: {
-        fiber: require('fibers'),
-      },
     },
   }
 

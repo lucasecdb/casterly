@@ -64,7 +64,6 @@
     "dotenv-expand": "^5.1.0",
     "esbuild-loader": "^2.16.0",
     "express": "^4.17.1",
-    "fibers": "^5.0.0",
     "filesize": "^6.1.0",
     "fs-extra": "^10.0.0",
     "gzip-size": "^6.0.0",
