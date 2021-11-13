@@ -1,21 +1,18 @@
 import * as fs from 'fs'
 import * as path from 'path'
-import { parse as parseUrl } from 'url'
 
 import type { RootContext } from '@casterly/components'
 import { constants, paths } from '@casterly/utils'
 import type { RoutesManifest } from 'casterly'
 import fresh from 'fresh'
 
-import type { Request } from '../fetch'
-import { Headers, Response } from '../fetch'
+import { Headers, Request, Response } from '../fetch'
 import { MAX_AGE_LONG } from '../utils/maxAge'
 import { getMatchedRoutes } from '../utils/routes'
 import matchRoute from './matchRoute'
 import type { ResponseObject } from './response'
 import { serveStatic } from './serveStatic'
 import {
-  interopDefault,
   isPreconditionFailure,
   readJSON,
   requestContainsPrecondition,
@@ -29,9 +26,21 @@ const {
   STATIC_RUNTIME_MAIN,
 } = constants
 
+interface ServerEntrypointModule {
+  default: (
+    req: Request,
+    status: number,
+    headers: Headers,
+    context: unknown,
+    adapterOptions?: any
+  ) => Response | Promise<Response>
+  getAppContext?: (req: Request) => unknown
+}
+
 interface ServerContext extends RootContext {
   routeHeaders: Headers
   status: number
+  appContext: unknown
 }
 
 export interface ServerOptions {
@@ -149,14 +158,15 @@ class DefaultServer {
               message: "Query parameter 'path' is required",
             })
           } else {
-            const url = parseUrl(query.path)
+            const urlRequest = new Request(query.path)
 
             const {
               routes,
               routeHeaders,
               status: serverContextStatus,
+              appContext,
               ...clientContext
-            } = await this.getServerContextForRoute(url.pathname!)
+            } = await this.getServerContextForRoute(urlRequest)
 
             status = serverContextStatus
 
@@ -221,8 +231,11 @@ class DefaultServer {
     return undefined
   }
 
-  private getServerContextForRoute = async (url: string) => {
+  private getServerContextForRoute = async (request: Request) => {
+    const url = request.url
+
     const routesManifest = this.getRoutesManifestFile()
+    const { getAppContext } = await this.getServerEntrypoint()
 
     const appRoutesModule = await import(
       path.join(paths.appServerBuildFolder, STATIC_ENTRYPOINTS_ROUTES)
@@ -231,12 +244,15 @@ class DefaultServer {
     const appRoutes = appRoutesModule.default || appRoutesModule
     const appNotFoundRoute = appRoutesModule.notFound
 
+    const appContext = getAppContext?.(request)
+
     const { routes, matchedRoutes, matchedRoutesAssets, routeHeaders, status } =
       await getMatchedRoutes({
         location: url,
         routesPromiseComponent: appRoutes,
         routesManifest,
         notFoundRoutePromiseComponent: appNotFoundRoute,
+        appContext,
       })
 
     const serverContext: ServerContext = {
@@ -265,31 +281,29 @@ class DefaultServer {
       mainAssets: routesManifest.main,
       routeHeaders,
       status,
+      appContext,
     }
 
     return serverContext
   }
 
-  private getAppRequestHandler = async (): Promise<
-    (
-      req: Request,
-      status: number,
-      headers: Headers,
-      context: unknown,
-      adapterOptions?: any
-    ) => Response | Promise<Response>
-  > => {
-    const handleRequest = await import(
+  private getServerEntrypoint = async (): Promise<ServerEntrypointModule> => {
+    let serverEntrypointModule = await import(
       path.join(paths.appServerBuildFolder, STATIC_RUNTIME_MAIN)
     )
+
+    if (
+      typeof serverEntrypointModule.default === 'object' &&
+      serverEntrypointModule.default.default
+    ) {
       // TypeScript will wrap the above import call with an __importStar
       // function, which will make the default exports the reference to the
       // actual module, so we must interop twice to get the actual
       // implementation
-      .then(interopDefault)
-      .then(interopDefault)
+      serverEntrypointModule = serverEntrypointModule.default
+    }
 
-    return handleRequest
+    return serverEntrypointModule
   }
 
   private renderDocument = async (
@@ -299,23 +313,21 @@ class DefaultServer {
   ): Promise<ResponseObject> => {
     const headers = new Headers(responseHeaders)
 
-    const serverContext = await this.getServerContextForRoute(request.url)
+    const { appContext, ...serverContext } =
+      await this.getServerContextForRoute(request)
 
     serverContext.routeHeaders?.forEach((value, key) => {
       headers.set(key, value)
     })
 
-    const handleRequest = await this.getAppRequestHandler()
+    const { default: handleRequest } = await this.getServerEntrypoint()
 
     let status = serverContext.status
 
-    let response = handleRequest(
-      request,
-      status,
-      headers,
-      serverContext,
-      adapterOptions
-    )
+    let response = handleRequest(request, status, headers, serverContext, {
+      ...adapterOptions,
+      appContext,
+    })
 
     if ('then' in response) {
       response = await response

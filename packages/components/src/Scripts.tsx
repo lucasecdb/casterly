@@ -1,6 +1,16 @@
 import React from 'react'
 
+import type { RootContext } from './RootContext'
 import { useRootContext } from './RootContext'
+
+export const getScriptsFromContext = (context: RootContext): string[] => {
+  const { matchedRoutesAssets, mainAssets } = context
+
+  return matchedRoutesAssets
+    .concat(mainAssets)
+    .filter((file) => file.endsWith('.js'))
+    .map((file) => process.env.ASSET_PATH + file.slice(1))
+}
 
 export const Scripts: React.FC<
   Omit<
@@ -8,7 +18,7 @@ export const Scripts: React.FC<
       React.ScriptHTMLAttributes<HTMLScriptElement>,
       HTMLScriptElement
     >,
-    'src' | 'type' | 'async'
+    'src' | 'type' | 'defer' | 'async'
   >
 > = ({
   nonce,
@@ -17,6 +27,8 @@ export const Scripts: React.FC<
   src,
   // @ts-ignore
   type,
+  // @ts-ignore
+  defer,
   // @ts-ignore
   async,
   ...props
@@ -58,7 +70,7 @@ export const Scripts: React.FC<
           <script
             key={scriptSource}
             {...props}
-            defer
+            async
             src={`/_casterly${scriptSource}`}
           />
         ))}

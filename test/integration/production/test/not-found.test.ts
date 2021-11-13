@@ -54,7 +54,9 @@ describe('Not found', () => {
     }
 
     expect(reloadResponse.status()).toBe(404)
-    await expect(page.content()).resolves.toMatch('you did not found me 😜')
+    await expect(reloadResponse.text()).resolves.toMatch(
+      'you did not found me 😜'
+    )
   })
 
   it('should be able to navigate away from not found page', async () => {

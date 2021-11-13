@@ -1,13 +1,15 @@
 import type { BrowserHistory, Update } from 'history'
 import { createBrowserHistory } from 'history'
+import { createPreloadForContext } from 'private-casterly-loader'
 import React, {
   useEffect,
   useLayoutEffect,
+  useMemo,
   useReducer,
   useRef,
   useState,
 } from 'react'
-import type { RouterProps } from 'react-router'
+import type { RouteMatch, RouterProps } from 'react-router'
 import { Router } from 'react-router'
 
 import type {
@@ -17,6 +19,14 @@ import type {
 } from './RootContext'
 import { RootContextProvider } from './RootContext'
 import { RoutePendingContextProvider } from './RoutePendingContext'
+
+interface RouteModule {
+  default: React.ComponentType<any>
+  loaderMetadata?: (options: {
+    params: RouteMatch['params']
+    context: unknown
+  }) => unknown
+}
 
 declare global {
   interface Window {
@@ -29,6 +39,23 @@ declare global {
   const __webpack_public_path__: string
 }
 
+const getRouteMatchWithPreloadedData = (
+  routeMatch: RouteMatchWithKey,
+  preload: (metadata: unknown) => unknown
+) => {
+  if (!routeMatch.route.metadata) {
+    return routeMatch
+  }
+
+  return {
+    ...routeMatch,
+    route: {
+      ...routeMatch.route,
+      preloadedData: preload(routeMatch.route.metadata),
+    },
+  }
+}
+
 const parseRouteMatch = (
   routes: RouteObjectWithKey[],
   routeMatch: RouteMatchWithKey
@@ -37,14 +64,21 @@ const parseRouteMatch = (
 
   const routeEntrypoint = (route as any).componentName as string
 
-  const { default: Component } = __webpack_require__(routeEntrypoint) as {
-    default: React.ComponentType
-  }
+  const routeEntrypointModule = __webpack_require__(
+    routeEntrypoint
+  ) as RouteModule
+
+  const Component = routeEntrypointModule.default
 
   return [
     {
       ...route,
-      element: <Component {...route.props} />,
+      element: (
+        <Component
+          {...route.props}
+          preloadedData={routeMatch.route.preloadedData}
+        />
+      ),
       children: routes,
     },
   ]
@@ -144,11 +178,17 @@ const fetchRouteData = async (path: string, version: string | null) => {
   return null
 }
 
-const fetchRouteAssets = async (
-  path: string,
-  version: string | null,
-  reloadOnMismatch = true
-) => {
+const fetchRouteAssets = async ({
+  path,
+  version,
+  reloadOnMismatch = true,
+  preload,
+}: {
+  path: string
+  version: string | null
+  reloadOnMismatch?: boolean
+  preload: (metadata: any) => unknown
+}) => {
   const routeClientContext = await fetchRouteData(path, version)
 
   if (!routeClientContext && reloadOnMismatch) {
@@ -157,6 +197,10 @@ const fetchRouteAssets = async (
   } else if (!routeClientContext) {
     return { routes: [] }
   }
+
+  routeClientContext.matchedRoutes = routeClientContext.matchedRoutes.map(
+    (routeMatch) => getRouteMatchWithPreloadedData(routeMatch, preload)
+  )
 
   const scriptAssets = routeClientContext.matchedRoutesAssets.filter((file) =>
     file.endsWith('.js')
@@ -169,24 +213,34 @@ const fetchRouteAssets = async (
     scriptAssets.map(addScript).concat(styleAssets.map(addStylesheet))
   )
 
-  const routes = routeClientContext.matchedRoutes.reduceRight(
-    parseRouteMatch,
-    []
-  )
+  const routes = routeClientContext.matchedRoutes.reduceRight<
+    RouteObjectWithKey[]
+  >((routeList, routeMatch) => parseRouteMatch(routeList, routeMatch), [])
 
   return { routes }
 }
 
-const InternalRoot: React.FC<RouterProps> = ({
+const InternalRoot: React.FC<RouterProps & { appContext: unknown }> = ({
   location,
   action,
   navigator,
+  appContext,
   children,
 }) => {
+  const preload = useMemo(() => {
+    return createPreloadForContext(appContext)
+  }, [])
+
   const [context, setContext] = useState(() => {
     const routes =
-      window.__serverContext?.matchedRoutes.reduceRight(parseRouteMatch, []) ??
-      []
+      window.__serverContext?.matchedRoutes.reduceRight<RouteObjectWithKey[]>(
+        (routeList, routeMatch) =>
+          parseRouteMatch(
+            routeList,
+            getRouteMatchWithPreloadedData(routeMatch, preload)
+          ),
+        []
+      ) ?? []
 
     return {
       ...(window.__serverContext as Omit<RootContext, 'routes'>),
@@ -212,10 +266,11 @@ const InternalRoot: React.FC<RouterProps> = ({
 
     const handleRouteChange = async () => {
       try {
-        const { routes } = await fetchRouteAssets(
-          typeof location === 'string' ? location : location.pathname!,
-          context.version
-        )
+        const { routes } = await fetchRouteAssets({
+          path: typeof location === 'string' ? location : location.pathname!,
+          version: context.version,
+          preload,
+        })
 
         if (cancelled) {
           return
@@ -238,7 +293,7 @@ const InternalRoot: React.FC<RouterProps> = ({
     return () => {
       cancelled = true
     }
-  }, [location, context.version])
+  }, [location, context.version, preload])
 
   return (
     <RootContextProvider value={context}>
@@ -251,7 +306,10 @@ const InternalRoot: React.FC<RouterProps> = ({
   )
 }
 
-export const RootBrowser: React.FC = ({ children }) => {
+export const RootBrowser: React.FC<{ appContext: unknown }> = ({
+  appContext,
+  children,
+}) => {
   const historyRef = useRef<BrowserHistory>()
   if (historyRef.current == null) {
     historyRef.current = createBrowserHistory()
@@ -270,6 +328,7 @@ export const RootBrowser: React.FC = ({ children }) => {
       action={state.action}
       location={state.location}
       navigator={history}
+      appContext={appContext}
     >
       {children}
     </InternalRoot>

@@ -1,7 +1,7 @@
 import type { Browser, Page } from 'puppeteer'
 import puppeteer from 'puppeteer'
 
-const port = 3002
+const port = 3003
 
 describe('Partial hydration', () => {
   let browser: Browser
@@ -19,16 +19,26 @@ describe('Partial hydration', () => {
 
     let dynamicComponentRequested = false
 
+    let resolveMain: () => void
+
     page.on('request', (request) => {
       if (request.url().includes('dynamic-component.js')) {
         dynamicComponentRequested = true
+      }
+
+      if (request.url().includes('main.js')) {
+        resolveMain = () => request.continue()
+        return
       }
 
       request.continue()
     })
 
     const response = await page.goto(
-      `http://localhost:${port}/partial-hydration`
+      `http://localhost:${port}/partial-hydration`,
+      {
+        waitUntil: 'domcontentloaded',
+      }
     )
 
     const responseText = await response.text()
@@ -37,6 +47,10 @@ describe('Partial hydration', () => {
     expect(responseText).not.toMatch('dynamic-component.js')
 
     expect(dynamicComponentRequested).toBe(false)
+
+    resolveMain()
+
+    await page.waitForNetworkIdle()
 
     await page.waitForFunction('window.reactIsHydrated === true', {
       timeout: 1000,

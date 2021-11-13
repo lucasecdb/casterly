@@ -20,6 +20,7 @@ import {
   STATIC_CHUNKS_PATH,
   STATIC_ENTRYPOINTS_ROUTES,
   STATIC_RUNTIME_HOT,
+  STATIC_RUNTIME_LOADER,
   STATIC_RUNTIME_MAIN,
   STATIC_WEBPACK_PATH,
 } from './constants'
@@ -41,24 +42,13 @@ import {
 } from './webpack/styles'
 import type { Options } from './webpack/types'
 
-const WEBPACK_RESOLVE_OPTIONS = {
-  dependencyType: 'commonjs',
-  symlinks: true,
-}
-
-const WEBPACK_ESM_RESOLVE_OPTIONS = {
-  dependencyType: 'esm',
-  symlinks: true,
-}
-
 const NODE_RESOLVE_OPTIONS = {
   dependencyType: 'commonjs',
   modules: ['node_modules'],
-  alias: false,
   fallback: false,
   exportsFields: ['exports'],
   importsFields: ['imports'],
-  conditionNames: ['node', 'require', 'module'],
+  conditionNames: ['node', 'require'],
   descriptionFiles: ['package.json'],
   extensions: ['.js', '.json', '.node'],
   enforceExtensions: false,
@@ -72,11 +62,22 @@ const NODE_RESOLVE_OPTIONS = {
   restrictions: [],
 }
 
+const NODE_BASE_RESOLVE_OPTIONS = {
+  ...NODE_RESOLVE_OPTIONS,
+  alias: false,
+}
+
 const NODE_ESM_RESOLVE_OPTIONS = {
   ...NODE_RESOLVE_OPTIONS,
+  alias: false,
   dependencyType: 'esm',
-  conditionNames: ['node', 'import', 'module'],
+  conditionNames: ['node', 'import'],
   fullySpecified: true,
+}
+
+const NODE_BASE_ESM_RESOLVE_OPTIONS = {
+  ...NODE_ESM_RESOLVE_OPTIONS,
+  alias: false,
 }
 
 const loadPostcssPlugins = async (dir: string) => {
@@ -378,7 +379,7 @@ const getBaseWebpackConfig = async (
     const preferEsm = isEsmRequested && esmExternals
 
     const resolve = getResolve(
-      preferEsm ? WEBPACK_ESM_RESOLVE_OPTIONS : WEBPACK_RESOLVE_OPTIONS
+      preferEsm ? NODE_ESM_RESOLVE_OPTIONS : NODE_RESOLVE_OPTIONS
     )
 
     let res: string | null
@@ -397,7 +398,7 @@ const getBaseWebpackConfig = async (
     // webpack "bundle" it so it surfaces the not found error.
     if (!res && (isEsmRequested || looseEsmExternals)) {
       const resolveAlternative = getResolve(
-        preferEsm ? WEBPACK_RESOLVE_OPTIONS : WEBPACK_ESM_RESOLVE_OPTIONS
+        preferEsm ? NODE_RESOLVE_OPTIONS : NODE_ESM_RESOLVE_OPTIONS
       )
 
       try {
@@ -423,7 +424,7 @@ const getBaseWebpackConfig = async (
     let baseIsEsm: boolean
     try {
       const baseResolve = getResolve(
-        isEsm ? NODE_ESM_RESOLVE_OPTIONS : NODE_RESOLVE_OPTIONS
+        isEsm ? NODE_BASE_ESM_RESOLVE_OPTIONS : NODE_BASE_RESOLVE_OPTIONS
       )
       ;[baseRes, baseIsEsm] = await baseResolve(dir, request)
     } catch (_) {
@@ -454,8 +455,8 @@ const getBaseWebpackConfig = async (
 
     // Anything else that is standard JavaScript within `node_modules`
     // can be externalized.
-    if (res.match(/node_modules[/\\].*\.js$/)) {
-      return `${externalType} ${request}`
+    if (/node_modules[/\\].*\.c?js$/.test(res)) {
+      return `${externalType} ${res}`
     }
 
     // Default behavior: bundle the code!
@@ -507,8 +508,13 @@ const getBaseWebpackConfig = async (
       ]
     : undefined
 
+  const loaderRuntime = (await fileExists(paths.appLoaderRuntime))
+    ? paths.appLoaderRuntime
+    : paths.serverNoopLoader
+
   const entrypoints = {
     [STATIC_ENTRYPOINTS_ROUTES]: paths.appRoutesJs,
+    [STATIC_RUNTIME_LOADER]: loaderRuntime,
   }
 
   const serverEntry = (await fileExists(paths.appServerEntry))
@@ -534,21 +540,22 @@ const getBaseWebpackConfig = async (
     bail: webpackMode === 'production',
     context: paths.appPath,
     externals,
-    cache: dev
-      ? {
-          type: 'filesystem',
-          allowCollectingMemory: true,
-          cacheDirectory: path.join(paths.appBuildFolder, 'cache'),
-          buildDependencies: {
-            config: [
-              __filename,
-              hasCustomWebpackConfig &&
-                path.join(paths.appPath, constants.WEBPACK_CONFIG_FILE),
-            ].filter(filterBoolean),
-          },
-          version: isServer ? 'server' : 'client',
-        }
-      : false,
+    cache:
+      dev && process.env.IS_TEST === undefined
+        ? {
+            type: 'filesystem',
+            allowCollectingMemory: true,
+            cacheDirectory: path.join(paths.appBuildFolder, 'cache'),
+            buildDependencies: {
+              config: [
+                __filename,
+                hasCustomWebpackConfig &&
+                  path.join(paths.appPath, constants.WEBPACK_CONFIG_FILE),
+              ].filter(filterBoolean),
+            },
+            version: isServer ? 'server' : 'client',
+          }
+        : false,
     entry: () => ({
       ...entrypoints,
       ...(!isServer
@@ -633,12 +640,33 @@ const getBaseWebpackConfig = async (
         ...paths.moduleFileExtensions.map((ext) => `.${ext}`),
       ],
       alias: {
+        react: path.dirname(
+          require.resolve('react/package.json', { paths: [paths.appDirectory] })
+        ),
+        'react-dom': path.dirname(
+          require.resolve('react-dom/package.json', {
+            paths: [paths.appDirectory],
+          })
+        ),
+        'react-router': path.dirname(
+          require.resolve('react-router/package.json', {
+            paths: [paths.appDirectory],
+          })
+        ),
+        'react-router-dom': path.dirname(
+          require.resolve('react-router-dom/package.json', {
+            paths: [paths.appDirectory],
+          })
+        ),
+
         ...(!isServer && !dev && profile
           ? {
               'react-dom$': 'react-dom/profiling',
               'scheduler/tracing': 'scheduler/tracing-profiling',
             }
           : null),
+
+        'private-casterly-loader$': loaderRuntime,
       },
     },
     module: {
