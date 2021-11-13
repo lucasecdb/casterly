@@ -1,7 +1,7 @@
 import type { Browser, Page } from 'puppeteer'
 import puppeteer from 'puppeteer'
 
-const port = 3002
+const port = 3003
 
 describe('Partial hydration', () => {
   let browser: Browser

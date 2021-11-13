@@ -1,5 +1,5 @@
-export const loaderMetadata = () => {
-  return 1
+export const loaderMetadata = ({ params }) => {
+  return { params }
 }
 
 export default function PreloadData({ preloadedData }) {
