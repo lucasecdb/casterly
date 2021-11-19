@@ -222,7 +222,7 @@ const fetchRouteAssets = async ({
 
 const InternalRoot: React.FC<RouterProps & { appContext: unknown }> = ({
   location,
-  action,
+  navigationType,
   navigator,
   appContext,
   children,
@@ -298,7 +298,11 @@ const InternalRoot: React.FC<RouterProps & { appContext: unknown }> = ({
   return (
     <RootContextProvider value={context}>
       <RoutePendingContextProvider value={routePending}>
-        <Router action={action} location={stateLocation} navigator={navigator}>
+        <Router
+          navigationType={navigationType}
+          location={stateLocation}
+          navigator={navigator}
+        >
           {children}
         </Router>
       </RoutePendingContextProvider>
@@ -325,7 +329,7 @@ export const RootBrowser: React.FC<{ appContext: unknown }> = ({
 
   return (
     <InternalRoot
-      action={state.action}
+      navigationType={state.action}
       location={state.location}
       navigator={history}
       appContext={appContext}
