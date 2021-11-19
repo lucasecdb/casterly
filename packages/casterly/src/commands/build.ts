@@ -63,11 +63,12 @@ async function build(
       multiStats?.toJson({ all: false, warnings: true, errors: true })
     )
   } catch (err) {
-    if (!err.message) {
+    if (!(err as Error).message) {
       throw err
     }
+
     messages = formatWebpackMessages({
-      errors: [{ message: err.message }],
+      errors: [{ message: (err as Error).message }],
       warnings: [],
     })
   }
