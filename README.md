@@ -4,7 +4,10 @@
 
 Isomorphic server rendering library for React apps.
 
-> **Disclaimer**: the API for this library is still experimental and should be considered unstable. For production apps it is advised to use other SSR libraries such as [Next.js](https://nextjs.org) or [Remix](https://remix.run).
+> **Disclaimer**: the API for this library is still experimental and should be 
+> considered unstable. For production apps it is advised to use other SSR 
+> libraries such as [Next.js](https://nextjs.org) or 
+> [Remix](https://remix.run).
 
 ## Installation
 
@@ -14,15 +17,16 @@ To install and start using Casterly, run the following commands
 npm i --save-dev casterly
 npm i --save react \
   react-dom \
-  react-router@next \
-  react-router-dom@next \
+  react-router \
+  react-router-dom \
   @casterly/components \
   @casterly/express
 ```
 
 ## Getting started
 
-To start developing with Casterly, you need to create a few files with the following content:
+To start developing with Casterly, you need to create a few files with the 
+following content:
 
 ```js
 // server.js
@@ -38,7 +42,8 @@ app.listen(3000, () => {
 })
 ```
 
-This file is your app entrypoint, you have full control over the server and can add any other express middlewares you'd like or need.
+This file is your app entrypoint, you have full control over the server and can 
+add any other express middlewares you'd like or need.
 
 ```jsx
 // src/app-server.jsx
@@ -111,7 +116,11 @@ export default function handleRequest(
 }
 ```
 
-This file contains your SSR entrypoint, you can render you HTML however you'd like and place your scripts in either the `<head>` or `<body>` section according to your needs. You should **always** render you root component in this file wrapped in the `<RootServer>` component, passing in the required props as above, else your app won't work correctly.
+This file contains your SSR entrypoint, you can render you HTML however you'd 
+like and place your scripts in either the `<head>` or `<body>` section 
+according to your needs. You should **always** render you root component in 
+this file wrapped in the `<RootServer>` component, passing in the required 
+props as above, else your app won't work correctly.
 
 ```jsx
 // src/app-browser.jsx
@@ -129,7 +138,12 @@ ReactDOM.hydrateRoot(
 )
 ```
 
-This is the same as the above, but for the browser. You can choose to use either `ReactDOM.hydrate` or the new (unstable) `ReactDOM.unstable_createRoot` to opt-in React's [concurrent mode](https://reactjs.org/docs/concurrent-mode-intro.html). Similar to its server counterpart, you should **always** render your app wrapped in the `<RootBrowser>` component.
+This is the same as the above, but for the browser. You can choose to use 
+either `ReactDOM.hydrate` or the new (unstable) `ReactDOM.hydrateRoot` to 
+opt-in React's [concurrent 
+mode](https://reactjs.org/docs/concurrent-mode-intro.html).  Similar to its 
+server counterpart, you should **always** render your app wrapped in the 
+`<RootBrowser>` component.
 
 ```jsx
 // src/App.jsx
@@ -142,7 +156,8 @@ const App = () => {
 export default App
 ```
 
-This is you root component, where you should place any components that is common in every page of your app, such as Redux or Apollo's context providers.
+This is you root component, where you should place any components that is 
+common in every page of your app, such as Redux or Apollo's context providers.
 
 ```js
 // src/routes.js
@@ -154,7 +169,14 @@ export default [
 ]
 ```
 
-The `routes.js` file is where you should add your app routes. It follows a similar format to [React Router's object-based routes config](https://github.com/ReactTraining/react-router/blob/dev/docs/api-reference.md#useroutes) (because we use React Router under the hood), but instead of adding your component directly into this file, you should pass in a *function* that returns a Promise that resolves to the module of that route's component. You can use React Router hooks to get routes parameters and to navigate to other routes. For more information, check their docs.
+The `routes.js` file is where you should add your app routes. It follows a 
+similar format to [React Router's object-based routes 
+config](https://reactrouter.com/docs/en/v6/examples/route-objects) (because we 
+use React Router under the hood), but instead of adding your component directly
+into this file, you should pass in a *function* that returns a Promise that 
+resolves to the module of that route's component. You can use React Router 
+hooks to get routes parameters and to navigate to other routes.  For more 
+information, check [their docs](https://reactrouter.com/docs/en/v6).
 
 ```jsx
 const IndexPage = () => {
@@ -164,9 +186,15 @@ const IndexPage = () => {
 export default IndexPage
 ```
 
-Last but not least, you have your index page component, which is now only rendering the default "hello world" message.
+Last but not least, you have your index page component, which is now only 
+rendering the default "hello world" message.
 
-Now, you can start you server by running `node server.js` and, in another terminal window, running `npm run casterly watch`. Your app will be running in localhost in the port 3000. The `casterly watch` command will spin up a *build server* that will build your app into a bundle that we can serve in the browser, which your app server (the one in `server.js`) will use during development and production to render the app.
+Now, you can start you server by running `node server.js` and, in another 
+terminal window, running `npm run casterly watch`. Your app will be running in 
+localhost in the port 3000. The `casterly watch` command will spin up a *build 
+server* that will build your app into a bundle that we can serve in the 
+browser, which your app server (the one in `server.js`) will use during 
+development and production to render the app.
 
 ## License
 
