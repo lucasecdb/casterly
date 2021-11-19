@@ -19,7 +19,7 @@ describe('Partial hydration', () => {
 
     let dynamicComponentRequested = false
 
-    let resolveMain: () => void
+    let resolveMain = () => Promise.resolve()
 
     page.on('request', (request) => {
       if (request.url().includes('dynamic-component.js')) {

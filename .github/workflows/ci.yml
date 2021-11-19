@@ -50,6 +50,8 @@ jobs:
         yarn lerna run --concurrency 1 build
         yarn lerna exec 'yarn link'
         yarn --silent lerna ls | xargs yarn link
+    - name: TS check
+      run: yarn tsc --noEmit -p tsconfig.test.json
     - name: Run tests
       run: yarn test
       env:

@@ -2,8 +2,8 @@
   "compilerOptions": {
     "types": ["jest", "node"],
     "strict": true,
-    "strictNullChecks": true,
-    "alwaysStrict": true
+    "alwaysStrict": true,
+    "allowSyntheticDefaultImports": true
   },
   "include": [
     "./test/**/*.ts",

@@ -39,7 +39,7 @@ describe('Hello World', () => {
       return rootElement.outerHTML
     }, rootHandle)
 
-    await rootHandle.dispose()
+    await rootHandle?.dispose()
 
     expect(rootHtml).toMatch(
       `<div id="root"><span role="link" tabindex="0">Go back</span></div>`
