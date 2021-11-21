@@ -5,7 +5,7 @@ module.exports = {
     jest: true,
   },
   parserOptions: {
-    project: path.resolve(__dirname, '..', 'tsconfig.test.json'),
+    project: path.resolve(__dirname, 'tsconfig.json'),
   },
   rules: {
     'react/react-in-jsx-scope': 'off',
