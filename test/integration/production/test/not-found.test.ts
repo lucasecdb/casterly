@@ -38,31 +38,51 @@ describe('Not found', () => {
 
     expect(response.status()).toBe(200)
 
-    const [manifestResponse] = await Promise.all([
-      page.waitForResponse((res) =>
-        new URL(res.url()).pathname.startsWith('/_casterly/route-manifest')
-      ),
-      page.click('#click-me'),
-    ])
+    await page.setRequestInterception(true)
+
+    let resolveManifest = () => Promise.resolve()
+
+    page.on('request', (request) => {
+      if (request.url().includes('/_casterly/route-manifest')) {
+        resolveManifest = () => request.continue()
+        return
+      }
+
+      request.continue()
+    })
+
+    const manifestResponsePromise = page.waitForResponse((res) =>
+      new URL(res.url()).pathname.startsWith('/_casterly/route-manifest')
+    )
+
+    await Promise.all([page.waitForNavigation(), page.click('#click-me')])
+
+    const reloadPromise = page.waitForNavigation()
+
+    resolveManifest()
+
+    const manifestResponse = await manifestResponsePromise
 
     expect(manifestResponse.status()).toBe(404)
 
-    let reloadResponse = await page.waitForNavigation()
+    const reloadResponse = await reloadPromise
 
-    if (reloadResponse == null) {
-      reloadResponse = await page.waitForNavigation()
-    }
+    expect(reloadResponse?.status()).toBe(404)
 
-    expect(reloadResponse.status()).toBe(404)
-    await expect(reloadResponse.text()).resolves.toMatch(
+    await expect(reloadResponse?.text()).resolves.toMatch(
       'you did not found me 😜'
     )
   })
 
   it('should be able to navigate away from not found page', async () => {
-    await page.goto(`http://localhost:${port}/unexistent-route`, {
-      waitUntil: 'networkidle2',
-    })
+    const response = await page.goto(
+      `http://localhost:${port}/unexistent-route`,
+      {
+        waitUntil: 'networkidle2',
+      }
+    )
+
+    expect(response.status()).toBe(404)
 
     await Promise.all([page.waitForNavigation(), page.click('a')])
 

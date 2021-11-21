@@ -24,7 +24,7 @@ describe('Hello World', () => {
     await expect(
       page.evaluate(() => {
         return window
-          .getComputedStyle(document.querySelector('.blue'))
+          .getComputedStyle(document.querySelector('.blue')!)
           .getPropertyValue('color')
       })
     ).resolves.toBe('rgb(0, 0, 255)')
@@ -32,7 +32,7 @@ describe('Hello World', () => {
     await expect(
       page.evaluate(() => {
         return window
-          .getComputedStyle(document.querySelector('p'))
+          .getComputedStyle(document.querySelector('p')!)
           .getPropertyValue('color')
       })
     ).resolves.toBe('rgb(255, 0, 0)')
