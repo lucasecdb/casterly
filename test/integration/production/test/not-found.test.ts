@@ -57,13 +57,15 @@ describe('Not found', () => {
 
     await Promise.all([page.waitForNavigation(), page.click('#click-me')])
 
+    const reloadPromise = page.waitForNavigation()
+
     resolveManifest()
 
     const manifestResponse = await manifestResponsePromise
 
     expect(manifestResponse.status()).toBe(404)
 
-    const reloadResponse = await page.waitForNavigation()
+    const reloadResponse = await reloadPromise
 
     expect(reloadResponse?.status()).toBe(404)
 
