@@ -1,6 +1,8 @@
 {
   "compilerOptions": {
     "types": ["jest", "node"],
+    "module": "esnext",
+    "target": "esnext",
     "strict": true,
     "alwaysStrict": true,
     "esModuleInterop": true,
