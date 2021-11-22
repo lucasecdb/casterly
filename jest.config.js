@@ -39,5 +39,18 @@ module.exports = {
       globalTeardown:
         '<rootDir>/test/integration/typescript/jest/global-teardown.js',
     },
+    {
+      displayName: 'async-modules-app',
+      testMatch: [
+        '<rootDir>/test/integration/async-modules/**/*.test.[jt]s?(x)',
+      ],
+      setupFilesAfterEnv: [
+        '<rootDir>/test/integration/async-modules/jest/setup.js',
+      ],
+      globalSetup:
+        '<rootDir>/test/integration/async-modules/jest/global-setup.js',
+      globalTeardown:
+        '<rootDir>/test/integration/async-modules/jest/global-teardown.js',
+    },
   ],
 }

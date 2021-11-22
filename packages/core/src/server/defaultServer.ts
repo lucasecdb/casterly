@@ -292,15 +292,11 @@ class DefaultServer {
       path.join(paths.appServerBuildFolder, STATIC_RUNTIME_MAIN)
     )
 
-    if (
-      typeof serverEntrypointModule.default === 'object' &&
-      serverEntrypointModule.default.default
-    ) {
-      // TypeScript will wrap the above import call with an __importStar
-      // function, which will make the default exports the reference to the
-      // actual module, so we must interop twice to get the actual
-      // implementation
-      serverEntrypointModule = serverEntrypointModule.default
+    if (typeof serverEntrypointModule.default?.then === 'function') {
+      // Async modules exports a promise instead of an object, so we must await
+      // the default export to get the actual module object
+      // https://webpack.js.org/blog/2020-10-10-webpack-5-release/#async-modules
+      serverEntrypointModule = await serverEntrypointModule.default
     }
 
     return serverEntrypointModule
