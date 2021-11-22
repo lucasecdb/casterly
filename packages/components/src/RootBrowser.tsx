@@ -220,7 +220,7 @@ const fetchRouteAssets = async ({
   return { routes }
 }
 
-const InternalRoot: React.FC<RouterProps & { appContext: unknown }> = ({
+const InternalRoot: React.FC<RouterProps & { appContext?: unknown }> = ({
   location,
   navigationType,
   navigator,
@@ -310,7 +310,7 @@ const InternalRoot: React.FC<RouterProps & { appContext: unknown }> = ({
   )
 }
 
-export const RootBrowser: React.FC<{ appContext: unknown }> = ({
+export const RootBrowser: React.FC<{ appContext?: unknown }> = ({
   appContext,
   children,
 }) => {

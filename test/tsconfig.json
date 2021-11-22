@@ -3,7 +3,8 @@
     "types": ["jest", "node"],
     "strict": true,
     "alwaysStrict": true,
-    "allowSyntheticDefaultImports": true
+    "esModuleInterop": true,
+    "jsx": "preserve"
   },
   "include": [
     "./**/*.ts",
