@@ -51,7 +51,7 @@ jobs:
         yarn lerna exec 'yarn link'
         yarn --silent lerna ls | xargs yarn link
     - name: TS check
-      run: yarn tsc --noEmit -p tsconfig.test.json
+      run: yarn tsc --noEmit -p test/tsconfig.json
     - name: Run tests
       run: yarn test
       env:
