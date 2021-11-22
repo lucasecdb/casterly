@@ -29,5 +29,15 @@ module.exports = {
       globalTeardown:
         '<rootDir>/test/integration/react-18/jest/global-teardown.js',
     },
+    {
+      displayName: 'typescript-app',
+      testMatch: ['<rootDir>/test/integration/typescript/**/*.test.[jt]s?(x)'],
+      setupFilesAfterEnv: [
+        '<rootDir>/test/integration/typescript/jest/setup.js',
+      ],
+      globalSetup: '<rootDir>/test/integration/typescript/jest/global-setup.js',
+      globalTeardown:
+        '<rootDir>/test/integration/typescript/jest/global-teardown.js',
+    },
   ],
 }

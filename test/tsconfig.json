@@ -1,9 +1,13 @@
 {
   "compilerOptions": {
     "types": ["jest", "node"],
+    "module": "esnext",
+    "target": "esnext",
+    "moduleResolution": "node",
     "strict": true,
     "alwaysStrict": true,
-    "allowSyntheticDefaultImports": true
+    "esModuleInterop": true,
+    "jsx": "preserve"
   },
   "include": [
     "./**/*.ts",
