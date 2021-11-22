@@ -3,6 +3,7 @@
     "types": ["jest", "node"],
     "module": "esnext",
     "target": "esnext",
+    "moduleResolution": "node",
     "strict": true,
     "alwaysStrict": true,
     "esModuleInterop": true,
