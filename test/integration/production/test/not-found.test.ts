@@ -51,21 +51,17 @@ describe('Not found', () => {
       request.continue()
     })
 
-    const manifestResponsePromise = page.waitForResponse((res) =>
-      new URL(res.url()).pathname.startsWith('/_casterly/route-manifest')
-    )
-
     await Promise.all([page.waitForNavigation(), page.click('#click-me')])
 
-    const reloadPromise = page.waitForNavigation()
-
-    resolveManifest()
-
-    const manifestResponse = await manifestResponsePromise
+    const [reloadResponse, manifestResponse] = await Promise.all([
+      page.waitForNavigation(),
+      page.waitForResponse((res) =>
+        new URL(res.url()).pathname.startsWith('/_casterly/route-manifest')
+      ),
+      resolveManifest(),
+    ])
 
     expect(manifestResponse.status()).toBe(404)
-
-    const reloadResponse = await reloadPromise
 
     expect(reloadResponse?.status()).toBe(404)
 
