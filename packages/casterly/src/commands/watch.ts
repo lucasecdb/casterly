@@ -1,17 +1,13 @@
+import * as config from '@casterly/utils/lib/userConfig'
 import cors from 'cors'
 import express from 'express'
-import { webpack } from 'webpack'
-import whm from 'webpack-hot-middleware'
+import { createServer } from 'vite'
 
-import createWebpackConfig from '../config/createWebpackConfig'
-import config from '../config/userConfig'
+import { viteConfig } from '../config/viteConfig'
 import { logStore } from '../output/logger'
-import { watchCompilers } from '../output/watcher'
 
 export default async function startWatch() {
   process.env.NODE_ENV = 'development'
-
-  const webpackConfigFn = config.loadWebpackConfig()
 
   const app = express()
 
@@ -24,44 +20,6 @@ export default async function startWatch() {
   })
 
   async function startWatch() {
-    const clientConfig = await createWebpackConfig({
-      dev: true,
-      isServer: false,
-      configFn: webpackConfigFn,
-    })
-
-    const serverConfig = await createWebpackConfig({
-      dev: true,
-      isServer: true,
-      configFn: webpackConfigFn,
-    })
-
-    const multiCompiler = webpack([clientConfig, serverConfig])
-
-    const [clientCompiler, serverCompiler] = multiCompiler.compilers
-
-    app.use(
-      whm(clientCompiler as any, {
-        path: '/_casterly/__webpack-hmr',
-        log: false,
-      })
-    )
-
-    watchCompilers(clientCompiler, serverCompiler)
-
-    await new Promise((resolve, reject) => {
-      const watcher = multiCompiler.watch(
-        [clientConfig.watchOptions!, serverConfig.watchOptions!],
-        (error) => {
-          if (error) {
-            return reject(error)
-          }
-
-          resolve(watcher)
-        }
-      )
-    })
-
     setServerReady()
   }
 
@@ -78,6 +36,10 @@ export default async function startWatch() {
     : undefined ??
       config.userConfig.buildServer?.port ??
       config.defaultConfig.buildServer.port
+
+  const vite = await createServer(viteConfig)
+
+  app.use(vite.middlewares)
 
   app.listen(port, () => {
     logStore.setState({ port })

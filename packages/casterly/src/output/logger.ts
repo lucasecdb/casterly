@@ -1,21 +1,19 @@
-import chalk from 'chalk'
 import createStore from 'unistore'
 
-import type { WebpackError } from '../build/utils'
 import * as Log from './log'
 
-type WebpackState =
+type State =
   | { loading: true; fileName?: string }
   | {
       loading: false
-      errors: WebpackError[] | null
-      warnings: WebpackError[] | null
+      errors: Error[] | null
+      warnings: Error[] | null
       buildDuration: number
     }
 
 export type LoggerStoreStatus =
   | { bootstrap: true; port: number | null }
-  | ({ bootstrap: false; port: number | null } & WebpackState)
+  | ({ bootstrap: false; port: number | null } & State)
 
 export const logStore = createStore<LoggerStoreStatus>({
   bootstrap: true,
@@ -34,14 +32,6 @@ function hasStoreChanged(nextStore: LoggerStoreStatus) {
 
   lastStore = nextStore
   return true
-}
-
-const transformWebpackError = (error: WebpackError) => {
-  const { message, moduleName, loc } = error
-
-  return `${moduleName ? chalk`{bold ${moduleName}}` : ''}${
-    loc ? chalk`:{dim ${loc}}` : ''
-  }\n\n  ${message}`
 }
 
 logStore.subscribe((state) => {
@@ -65,13 +55,13 @@ logStore.subscribe((state) => {
   }
 
   if (state.errors && state.errors.length > 0) {
-    Log.error(transformWebpackError(state.errors[0]))
+    Log.error(state.errors[0])
 
     return
   }
 
   if (state.warnings && state.warnings.length > 0) {
-    Log.warn(state.warnings.map(transformWebpackError).join('\n\n'))
+    Log.warn(state.warnings.map((e) => e.message).join('\n\n'))
 
     Log.ready('compiled with warnings')
     return

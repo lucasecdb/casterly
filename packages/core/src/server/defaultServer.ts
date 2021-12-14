@@ -3,7 +3,7 @@ import * as path from 'path'
 
 import type { RootContext } from '@casterly/components'
 import { constants, paths } from '@casterly/utils'
-import type { RoutesManifest } from 'casterly'
+// import type { RoutesManifest } from 'casterly'
 import fresh from 'fresh'
 
 import { Headers, Request, Response } from '../fetch'
@@ -225,7 +225,7 @@ class DefaultServer {
     }
   }
 
-  protected getRoutesManifestFile = (): RoutesManifest => this._routesManifest
+  protected getRoutesManifestFile = (): any => this._routesManifest
 
   protected getDevServerPort(): undefined | number {
     return undefined

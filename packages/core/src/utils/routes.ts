@@ -1,7 +1,7 @@
 import path from 'path'
 
 import { constants, paths } from '@casterly/utils'
-import type { RouteWithAssets, RoutesManifest } from 'casterly'
+// import type { RouteWithAssets, RoutesManifest } from 'casterly'
 import * as React from 'react'
 import type { RouteMatch, RouteObject } from 'react-router'
 import { matchRoutes } from 'react-router'
@@ -51,7 +51,7 @@ const mergeRoute = async ({
 }: {
   index: number
   route: RoutePromiseComponent
-  manifestRoute: RouteWithAssets
+  manifestRoute: any
   children?: RouteObjectWithAssets[]
 }) => {
   const routeComponentModule = await route.component()
@@ -71,7 +71,7 @@ const mergeRoute = async ({
 }
 
 export const mergeRouteAssetsAndRoutes = (
-  routesManifestRoutes: RoutesManifest['routes'],
+  routesManifestRoutes: any,
   routePromises: RoutePromiseComponent[]
 ): Promise<RouteObjectWithAssets[]> => {
   return Promise.all(
@@ -101,7 +101,7 @@ export const getMatchedRoutes = async ({
   appContext,
 }: {
   location: string
-  routesManifest: RoutesManifest
+  routesManifest: any
   routesPromiseComponent: RoutePromiseComponent[]
   notFoundRoutePromiseComponent?: RoutePromiseComponent
   appContext: unknown
