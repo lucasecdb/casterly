@@ -1,13 +1,17 @@
+import { basename, join, relative } from 'path'
+
+import { paths } from '@casterly/utils'
 import * as config from '@casterly/utils/lib/userConfig'
 import cors from 'cors'
 import express from 'express'
+import glob from 'fast-glob'
 import { Headers, Request, Response } from 'node-fetch'
 import * as React from 'react'
 import { matchRoutes } from 'react-router'
 import type { RouteMatch, RouteObject } from 'react-router'
 import { createServer } from 'vite'
 
-import { viteConfig } from '../config/viteConfig'
+import { createViteConfig } from '../config/viteConfig'
 import { logStore } from '../output/logger'
 
 declare global {
@@ -63,12 +67,49 @@ export default async function startWatch() {
       config.userConfig.buildServer?.port ??
       config.defaultConfig.buildServer.port
 
-  const vite = await createServer({
-    ...viteConfig,
-    server: { middlewareMode: 'ssr' },
+  const routeModules = await glob('src/routes/**/*.{jsx,tsx}', {
+    cwd: paths.appDirectory,
   })
 
-  const routes = await vite.ssrLoadModule('/src/routes.js')
+  const serverViteConfig = await createViteConfig({
+    dev: true,
+    isServer: true,
+    routeModules,
+  })
+
+  const vite = await createServer(serverViteConfig)
+
+  // const routes = await vite.ssrLoadModule('/src/routes.js')
+
+  // const routesModule = await vite.moduleGraph.getModuleByUrl('/src/routes.js')
+  // console.log(routesModule)
+
+  const routes: RouteObjectWithModuleName[] = []
+
+  for (const routeModulePath of routeModules) {
+    let routePath = relative('src/routes', routeModulePath).replace(
+      /\.[jt]sx$/,
+      ''
+    )
+
+    if (routePath === 'index') {
+      routePath = '/'
+    } else {
+      routePath = '/' + routePath
+    }
+
+    const loadedModule = (await vite.ssrLoadModule(
+      '/' + routeModulePath
+    )) as RouteModule
+
+    routes.push({
+      path: routePath,
+      element: React.createElement(loadedModule.default),
+      moduleName: routeModulePath,
+    })
+  }
+
+  console.log({ routes })
 
   app.use(vite.middlewares)
 
@@ -105,9 +146,11 @@ export default async function startWatch() {
         ]) as Array<[string, string]>
       )
 
+      // const routes = { default: [] }
+
       const matchedRoutesResult = await getMatchedRoutes({
         location: request.url,
-        routesPromiseComponent: routes.default,
+        routes,
       })
 
       const context = {
@@ -162,6 +205,10 @@ type RoutePromiseComponent = {
   path: string
   children?: RoutePromiseComponent[]
   props?: Record<string, unknown>
+}
+
+type RouteObjectWithModuleName = RouteObject & {
+  moduleName: string
 }
 
 type RouteObjectWithAssets = RouteObject & {
@@ -230,17 +277,19 @@ async function getMatchedRoutes({
   location,
   // routesManifest,
   // notFoundRoutePromiseComponent,
-  routesPromiseComponent,
+  routes,
 }: {
   location: string
   // routesManifest: any
-  routesPromiseComponent: RoutePromiseComponent[]
+  routes: RouteObjectWithModuleName[]
   notFoundRoutePromiseComponent?: RoutePromiseComponent
 }) {
+  /*
   const routes = await mergeRouteAssetsAndRoutes(
     // routesManifest.routes,
     routesPromiseComponent
   )
+  */
 
   /*
   const notFoundRoute =

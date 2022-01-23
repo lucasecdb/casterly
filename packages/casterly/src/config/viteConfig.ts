@@ -1,3 +1,5 @@
+import * as path from 'path'
+
 import { paths } from '@casterly/utils'
 import react from '@vitejs/plugin-react'
 import polyfillNode from 'rollup-plugin-polyfill-node'
@@ -9,7 +11,7 @@ export const viteConfig: InlineConfig = {
   plugins: [react(), polyfillNode()],
   build: {
     rollupOptions: {
-      input: [paths.appServerEntry, paths.appRoutesJs],
+      input: [paths.appServerEntry /*paths.appRoutesJs*/],
     },
     commonjsOptions: {
       transformMixedEsModules: true,
@@ -23,10 +25,13 @@ export interface Options {
   isServer?: boolean
   dev?: boolean
   profile?: boolean
+  routeModules: string[]
 }
 
-export const createViteConfig = (options?: Options): InlineConfig => {
-  const { isServer = false, dev = false } = options ?? {}
+export const createViteConfig = async (
+  options?: Options
+): Promise<InlineConfig> => {
+  const { isServer = false, dev = false, routeModules = [] } = options ?? {}
 
   return {
     root: paths.appDirectory,
@@ -38,7 +43,8 @@ export const createViteConfig = (options?: Options): InlineConfig => {
       rollupOptions: {
         input: [
           isServer ? paths.appServerEntry : paths.appBrowserEntry,
-          paths.appRoutesJs,
+          ...routeModules.map((p) => path.join(paths.appDirectory, p)),
+          // paths.appRoutesJs,
         ],
       },
       commonjsOptions: {
@@ -47,5 +53,12 @@ export const createViteConfig = (options?: Options): InlineConfig => {
       manifest: true,
       ssrManifest: isServer,
     },
+    ...(isServer
+      ? {
+          server: {
+            middlewareMode: 'ssr',
+          },
+        }
+      : null),
   }
 }

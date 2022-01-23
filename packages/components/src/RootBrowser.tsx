@@ -17,7 +17,23 @@ import { RootContextProvider } from './RootContext'
 import { RoutePendingContextProvider } from './RoutePendingContext'
 
 // @ts-ignore
-import routes from '/src/routes'
+// import routes from '/src/routes'
+
+const routesModules = import.meta.glob('/src/routes/**/*.{tsx,jsx}')
+
+const routes: RoutePromiseComponent[] = []
+
+for (const [routeModulePath, routeModuleFn] of Object.entries(routesModules)) {
+  const path = routeModulePath
+    .slice('/src/routes/'.length)
+    .replace(/\.[jt]sx$/, '')
+
+  routes.push({
+    path,
+    component: routeModuleFn as () => Promise<RouteModule>,
+    key: 0,
+  })
+}
 
 function addIndexToRoutes(routes: RouteObject[]) {
   routes.forEach((route, index) => {
