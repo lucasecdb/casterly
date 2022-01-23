@@ -1,1 +1,1 @@
-module.exports = require('./lib/server')
+export * from './lib/server'

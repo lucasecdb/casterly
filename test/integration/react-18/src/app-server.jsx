@@ -1,5 +1,5 @@
-import { Routes, Scripts, Styles } from '@casterly/components'
-import { RootServer } from '@casterly/components/server'
+import { Routes, Scripts, Styles } from '@casterly/components/src/index'
+import { RootServer } from '@casterly/components/src/server'
 import { renderToPipeableStream } from 'react-dom/server'
 
 export default async function handleRequest(

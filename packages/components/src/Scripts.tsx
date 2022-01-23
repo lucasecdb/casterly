@@ -1,3 +1,5 @@
+/// <reference types="vite/client" />
+
 import React from 'react'
 
 import type { RootContext } from './RootContext'
@@ -63,15 +65,29 @@ export const Scripts: React.FC<
             ')',
         }}
       />
+      {import.meta.env.DEV && (
+        <script
+          nonce={nonce}
+          type="module"
+          dangerouslySetInnerHTML={{
+            __html: `import RefreshRuntime from '/@react-refresh'
+RefreshRuntime.injectIntoGlobalHook(window)
+window.$RefreshReg$ = () => {}
+window.$RefreshSig$ = () => (type) => type
+window.__vite_plugin_react_preamble_installed__ = true`,
+          }}
+        />
+      )}
       {matchedRoutesAssets
         .concat(mainAssets)
-        .filter((file) => file.endsWith('.js'))
+        .filter((file) => /\.[jt]sx?$/.test(file))
         .map((scriptSource) => (
           <script
             key={scriptSource}
             {...props}
+            type="module"
             async
-            src={`/_casterly${scriptSource}`}
+            src={scriptSource}
           />
         ))}
     </>

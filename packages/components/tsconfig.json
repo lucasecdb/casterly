@@ -3,7 +3,7 @@
     "lib": ["ES6", "DOM"],
     "jsx": "react",
     "target": "es5",
-    "module": "commonjs",
+    "module": "esnext",
     "esModuleInterop": true,
     "moduleResolution": "node",
     "strict": true,

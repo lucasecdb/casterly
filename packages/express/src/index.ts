@@ -7,6 +7,7 @@ export const createRequestHandler = (): RequestHandler => {
   const handleRequest = defaultCreateRequestHandler()
 
   return async (req, res, next) => {
+    // @ts-ignore
     const request = new global.Request(req.url ?? '/', {
       method: req.method,
       headers: Object.entries(req.headers).map(([key, value]) => [
@@ -15,6 +16,7 @@ export const createRequestHandler = (): RequestHandler => {
       ]) as Array<[string, string]>,
     })
 
+    // @ts-ignore
     const responseHeaders = new global.Headers(
       Object.entries(res.getHeaders()).map(([key, value]) => [
         key,
