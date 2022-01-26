@@ -3,6 +3,8 @@ import type { RouteMatch, RouteObject } from 'react-router'
 
 export type RouteObjectWithKey = RouteObject & {
   key: number
+  routeId: string
+  module: string
   children?: RouteObjectWithKey[]
   props?: Record<string, unknown>
   metadata?: unknown

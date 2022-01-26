@@ -1,18 +1,28 @@
-import { basename, join, relative } from 'path'
+import * as path from 'path'
 
 import { paths } from '@casterly/utils'
 import * as config from '@casterly/utils/lib/userConfig'
 import cors from 'cors'
 import express from 'express'
-import glob from 'fast-glob'
 import { Headers, Request, Response } from 'node-fetch'
 import * as React from 'react'
-import { matchRoutes } from 'react-router'
-import type { RouteMatch, RouteObject } from 'react-router'
 import { createServer } from 'vite'
 
 import { createViteConfig } from '../config/viteConfig'
 import { logStore } from '../output/logger'
+import type { ConfigRoute } from '../routes'
+import { constructRoutesTree } from '../routes'
+import type { RouteModule, RouteObjectWithModuleName } from '../routesServer'
+import { getMatchedRoutes } from '../routesServer'
+
+const SECOND = 1
+const MINUTE_SECONDS = 60 * SECOND
+const HOUR_SECONDS = 60 * MINUTE_SECONDS
+const DAY_SECONDS = 24 * HOUR_SECONDS
+const YEAR_SECONDS = 365 * DAY_SECONDS
+
+export const MAX_AGE_SHORT = MINUTE_SECONDS
+export const MAX_AGE_LONG = YEAR_SECONDS
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -67,69 +77,132 @@ export default async function startWatch() {
       config.userConfig.buildServer?.port ??
       config.defaultConfig.buildServer.port
 
-  const routeModules = await glob('src/routes/**/*.{jsx,tsx}', {
-    cwd: paths.appDirectory,
-  })
+  const { routes, files } = constructRoutesTree(paths.appSrc)
 
   const serverViteConfig = await createViteConfig({
     dev: true,
     isServer: true,
-    routeModules,
+    routeModules: files.map((file) => path.join(paths.appSrc, file)),
   })
 
   const vite = await createServer(serverViteConfig)
 
-  // const routes = await vite.ssrLoadModule('/src/routes.js')
+  async function loadRouteModules(
+    routes: ConfigRoute[]
+  ): Promise<RouteObjectWithModuleName[]> {
+    const routeModules = []
 
-  // const routesModule = await vite.moduleGraph.getModuleByUrl('/src/routes.js')
-  // console.log(routesModule)
+    for (let i = 0; i < routes.length; i++) {
+      const route = routes[i]
 
-  const routes: RouteObjectWithModuleName[] = []
+      const moduleName = '/src/' + route.file
 
-  for (const routeModulePath of routeModules) {
-    let routePath = relative('src/routes', routeModulePath).replace(
-      /\.[jt]sx$/,
-      ''
-    )
+      const loadedModule = (await vite.ssrLoadModule(moduleName)) as RouteModule
 
-    if (routePath === 'index') {
-      routePath = '/'
-    } else {
-      routePath = '/' + routePath
+      let children
+
+      if (route.children) {
+        children = await loadRouteModules(route.children)
+      }
+
+      routeModules.push({
+        path: route.path,
+        element: React.createElement(loadedModule.default),
+        children,
+        key: i,
+        module: moduleName,
+        routeId: route.id,
+      })
     }
 
-    const loadedModule = (await vite.ssrLoadModule(
-      '/' + routeModulePath
-    )) as RouteModule
-
-    routes.push({
-      path: routePath,
-      element: React.createElement(loadedModule.default),
-      moduleName: routeModulePath,
-    })
+    return routeModules
   }
 
-  console.log({ routes })
+  const moduleRoutes = await loadRouteModules(routes)
 
   app.use(vite.middlewares)
+
+  const isDev = false
+
+  app.get('/_casterly/route-manifest.json', async (req, res) => {
+    const query = req.query
+
+    const buildId = 'development'
+
+    const etag = isDev ? '' : `W/"${buildId}"`
+
+    let status = 200
+
+    const headers: Record<string, string> = {}
+
+    headers['content-type'] = 'application/json'
+
+    if (!isDev) {
+      headers['etag'] = etag
+      headers['cache-control'] = 'public, max-age=' + MAX_AGE_LONG
+    }
+
+    // TODO: precondition
+
+    let body
+
+    if (typeof query.path !== 'string' || query.path.length === 0) {
+      status = 400
+      body = JSON.stringify({
+        message: "Query parameter 'path' is required",
+      })
+    } else {
+      const {
+        routes,
+        status: contextStatus,
+        ...clientContext
+      } = await getContext(query.path)
+
+      status = contextStatus
+      body = JSON.stringify(clientContext)
+    }
+
+    res.status(status)
+
+    for (const [key, value] of Object.entries(headers)) {
+      res.setHeader(key, value)
+    }
+
+    res.end(body)
+  })
+
+  async function getContext(url: string) {
+    const matchedRoutesResult = await getMatchedRoutes({
+      location: url,
+      routes: moduleRoutes,
+    })
+
+    const context = {
+      status: matchedRoutesResult.status,
+      version: null,
+      routes: matchedRoutesResult.routes,
+      matchedRoutes: matchedRoutesResult.matchedRoutes.map((match) => {
+        const { element, children, ...route } = match.route
+
+        return {
+          ...match,
+          route,
+        }
+      }),
+      // TODO: route assets, JS and CSS
+      matchedRoutesAssets: [],
+      mainAssets: ['/@vite/client', '/src/app-browser.jsx'],
+      devServerPort: 8081,
+    }
+
+    return context
+  }
 
   app.use('*', async (req, res) => {
     try {
       const { default: handleRequest } = await vite.ssrLoadModule(
         '/src/app-server.jsx'
       )
-
-      // console.log(vite.moduleGraph.fileToModulesMap)
-
-      /*
-      vite.moduleGraph
-        .getModulesByFile(
-          '/home/lucas/sources/casterly/test/integration/development/src/css.jsx'
-        )
-        ?.forEach((module) => {
-          console.log(module)
-        })
-      */
 
       const request = new Request(req.originalUrl, {
         method: req.method,
@@ -146,22 +219,7 @@ export default async function startWatch() {
         ]) as Array<[string, string]>
       )
 
-      // const routes = { default: [] }
-
-      const matchedRoutesResult = await getMatchedRoutes({
-        location: request.url,
-        routes,
-      })
-
-      const context = {
-        version: null,
-        routes: matchedRoutesResult.routes,
-        matchedRoutes: matchedRoutesResult.matchedRoutes,
-        // TODO: route assets, JS and CSS
-        matchedRoutesAssets: [],
-        mainAssets: ['/@vite/client', '/src/app-browser.jsx'],
-        devServerPort: 8081,
-      }
+      const context = await getContext(request.url)
 
       const response = await handleRequest(
         request,
@@ -185,178 +243,4 @@ export default async function startWatch() {
   app.listen(port, () => {
     logStore.setState({ port })
   })
-}
-
-type RouteModule = {
-  default: React.ComponentType<any>
-  headers?: (headersParams: {
-    params: RouteMatch['params']
-    parentHeaders: Headers
-  }) => Record<string, string>
-  loaderMetadata?: (options: {
-    params: RouteMatch['params']
-    context: unknown
-  }) => unknown
-}
-
-type RoutePromiseComponent = {
-  caseSensitive?: boolean
-  component: () => Promise<RouteModule>
-  path: string
-  children?: RoutePromiseComponent[]
-  props?: Record<string, unknown>
-}
-
-type RouteObjectWithModuleName = RouteObject & {
-  moduleName: string
-}
-
-type RouteObjectWithAssets = RouteObject & {
-  children?: RouteObjectWithAssets[]
-  // assets: string[]
-  // componentName: string | number
-  headers: RouteModule['headers']
-  loaderMetadata: RouteModule['loaderMetadata']
-  metadata?: unknown
-  key: number
-}
-
-type RouteMatchWithKey = RouteMatch & { route: RouteObjectWithAssets }
-
-async function mergeRoute({
-  index,
-  route,
-  // manifestRoute,
-  children = [],
-}: {
-  index: number
-  route: RoutePromiseComponent
-  // manifestRoute: any
-  children?: RouteObjectWithAssets[]
-}) {
-  const routeComponentModule = await route.component()
-
-  return {
-    ...route,
-    path: route.path,
-    caseSensitive: route.caseSensitive === true,
-    element: React.createElement(routeComponentModule.default, route.props),
-    headers: routeComponentModule.headers,
-    loaderMetadata: routeComponentModule.loaderMetadata,
-    // assets: manifestRoute.assets ?? [],
-    // componentName: manifestRoute.componentName,
-    children,
-    key: index,
-  }
-}
-
-function mergeRouteAssetsAndRoutes(
-  // routesManifestRoutes: any,
-  routePromises: RoutePromiseComponent[]
-): Promise<RouteObjectWithAssets[]> {
-  return Promise.all(
-    routePromises.map(async (route, index) => {
-      const children = route.children
-        ? await mergeRouteAssetsAndRoutes(
-            // routesManifestRoutes[index].children!,
-            route.children
-          )
-        : []
-
-      return mergeRoute({
-        index,
-        children,
-        route,
-        // manifestRoute: routesManifestRoutes[index],
-      })
-    })
-  )
-}
-
-async function getMatchedRoutes({
-  location,
-  // routesManifest,
-  // notFoundRoutePromiseComponent,
-  routes,
-}: {
-  location: string
-  // routesManifest: any
-  routes: RouteObjectWithModuleName[]
-  notFoundRoutePromiseComponent?: RoutePromiseComponent
-}) {
-  /*
-  const routes = await mergeRouteAssetsAndRoutes(
-    // routesManifest.routes,
-    routesPromiseComponent
-  )
-  */
-
-  /*
-  const notFoundRoute =
-    notFoundRoutePromiseComponent && routesManifest.notFound
-      ? await mergeRoute({
-          route: notFoundRoutePromiseComponent,
-          // manifestRoute: routesManifest.notFound,
-          index: -1,
-        })
-      : undefined
-  */
-
-  let status = 200
-
-  let matchedRoutes = matchRoutes(routes, location) as
-    | RouteMatchWithKey[]
-    | null
-
-  if (matchedRoutes == null) {
-    status = 404
-
-    /*
-    if (notFoundRoute) {
-      matchedRoutes = [
-        {
-          params: {},
-          pathname: location,
-          pathnameBase: '/',
-          route: notFoundRoute,
-        },
-      ]
-
-      routes.push(notFoundRoute)
-    } else {
-    */
-    matchedRoutes = []
-    // }
-  }
-
-  const routeHeaders = matchedRoutes.reduce(
-    (headers, matchedRoute) =>
-      new Headers(
-        matchedRoute.route.headers?.({
-          params: matchedRoute.params,
-          parentHeaders: headers,
-        }) ?? headers
-      ),
-    new Headers()
-  )
-
-  /*
-  const matchedRoutesAssets = Array.from(
-    new Set(
-      (
-        matchedRoutes.flatMap((routeMatched) => {
-          return (routeMatched.route as RouteObjectWithAssets).assets
-        }) ?? []
-      ).filter((file) => !routesManifest.main.includes(file))
-    )
-  )
-  */
-
-  return {
-    routes,
-    matchedRoutes,
-    // matchedRoutesAssets,
-    routeHeaders,
-    status,
-  }
 }

@@ -78,6 +78,26 @@ window.__vite_plugin_react_preamble_installed__ = true`,
           }}
         />
       )}
+      <script
+        type="module"
+        dangerouslySetInnerHTML={{
+          __html: `
+${matchedRoutes
+  .map((match, index) => {
+    return `import * as route${index} from '${match.route.module}'`
+  })
+  .join('\n')}
+
+window.__routeModules = {
+${matchedRoutes
+  .map((match, index) => {
+    return `"${match.route.routeId}": route${index}`
+  })
+  .join(',')}
+}
+`,
+        }}
+      />
       {matchedRoutesAssets
         .concat(mainAssets)
         .filter((file) => /\.[jt]sx?$/.test(file))

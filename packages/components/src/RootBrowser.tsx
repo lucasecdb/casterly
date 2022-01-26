@@ -1,134 +1,35 @@
 import type { BrowserHistory, Update } from 'history'
 import { createBrowserHistory } from 'history'
-// import { createPreloadForContext } from 'private-casterly-loader'
 import React, {
   Suspense,
+  createElement,
   useEffect,
   useLayoutEffect,
+  useMemo,
   useReducer,
   useRef,
   useState,
 } from 'react'
-import type { RouteMatch, RouteObject, RouterProps } from 'react-router'
-import { Router, matchRoutes } from 'react-router'
+import type { RouterProps } from 'react-router'
+import { Router } from 'react-router'
 
-import type { RouteMatchWithKey, RouteObjectWithKey } from './RootContext'
+import type {
+  RootContext,
+  RouteMatchWithKey,
+  RouteObjectWithKey,
+} from './RootContext'
 import { RootContextProvider } from './RootContext'
 import { RoutePendingContextProvider } from './RoutePendingContext'
 
-// @ts-ignore
-// import routes from '/src/routes'
-
-const routesModules = import.meta.glob('/src/routes/**/*.{tsx,jsx}')
-
-const routes: RoutePromiseComponent[] = []
-
-for (const [routeModulePath, routeModuleFn] of Object.entries(routesModules)) {
-  const path = routeModulePath
-    .slice('/src/routes/'.length)
-    .replace(/\.[jt]sx$/, '')
-
-  routes.push({
-    path,
-    component: routeModuleFn as () => Promise<RouteModule>,
-    key: 0,
-  })
-}
-
-function addIndexToRoutes(routes: RouteObject[]) {
-  routes.forEach((route, index) => {
-    ;(route as any).key = index
-
-    if (route.children) {
-      addIndexToRoutes(route.children)
-    }
-  })
-}
-
-addIndexToRoutes(routes)
-
-type RouteModule = {
-  default: React.ComponentType<any>
-}
-
-type RoutePromiseComponent = {
-  caseSensitive?: boolean
-  component: () => Promise<RouteModule>
-  path: string
-  children?: RoutePromiseComponent[]
-  props?: Record<string, unknown>
-  key: number
-}
-
-async function mergeRoute({
-  route,
-  children = [],
-}: {
-  route: RoutePromiseComponent
-  children?: RouteObjectWithKey[]
-}): Promise<RouteObjectWithKey> {
-  const routeComponentModule = await route.component()
-
-  return {
-    ...route,
-    path: route.path,
-    caseSensitive: route.caseSensitive === true,
-    element: React.createElement(routeComponentModule.default, route.props),
-    children,
+declare global {
+  interface Window {
+    __serverContext: Omit<RootContext, 'routes'>
+    __routeModules: Record<string, RouteModule>
   }
 }
 
-function mergeRouteAssetsAndRoutes(
-  routePromises: RoutePromiseComponent[]
-): Promise<RouteObjectWithKey[]> {
-  return Promise.all(
-    routePromises.map(async (route) => {
-      const children = route.children
-        ? await mergeRouteAssetsAndRoutes(route.children)
-        : []
-
-      return mergeRoute({
-        children,
-        route,
-      })
-    })
-  )
-}
-
-let initialRoutes: RouteObjectWithKey[] | null = null
-let initialRoutesError: Error | null = null
-
-type RouteMatchPromiseComponent = RouteMatch & {
-  route: RouteObject & RoutePromiseComponent
-}
-
-const initialRoutesPromise = mergeRouteAssetsAndRoutes(
-  (
-    (matchRoutes(routes, window.location.pathname) as
-      | RouteMatchPromiseComponent[]
-      | null) ?? []
-  ).reduceRight<RoutePromiseComponent[]>(
-    (routes, match) => [{ ...match.route, children: routes }],
-    []
-  )
-)
-  .then((matchedRoutes) => {
-    initialRoutes = matchedRoutes
-  })
-  .catch((err) => {
-    initialRoutesError = err
-  })
-
-function parseRouteMatch(
-  routes: RouteObjectWithKey[],
-  routeMatch: RouteMatchWithKey
-): RouteObjectWithKey[] {
-  return [
-    {
-      ...routeMatch.route,
-      children: routes,
-    },
-  ]
+type RouteModule = {
+  default: React.ComponentType<any>
 }
 
 const mergeRoutes = (
@@ -138,7 +39,7 @@ const mergeRoutes = (
   const routes: RouteObjectWithKey[] = []
 
   currentRoutes.forEach((route) => {
-    const newRoute = newRoutes.find(({ key }) => route.key === key)
+    const newRoute = newRoutes.find(({ routeId }) => route.routeId === routeId)
 
     const children = newRoute
       ? mergeRoutes(route.children ?? [], newRoute.children ?? [])
@@ -151,16 +52,14 @@ const mergeRoutes = (
   })
 
   newRoutes.forEach((newRoute) => {
-    if (currentRoutes.find(({ key }) => newRoute.key === key)) {
+    if (currentRoutes.find(({ routeId }) => newRoute.routeId === routeId)) {
       return
     }
 
     routes.push(newRoute)
   })
 
-  return routes.sort((routeA, routeB) => {
-    return routeA.key - routeB.key
-  })
+  return routes
 }
 
 const InternalRoot: React.FC<RouterProps & { appContext?: unknown }> = ({
@@ -169,22 +68,27 @@ const InternalRoot: React.FC<RouterProps & { appContext?: unknown }> = ({
   navigator,
   children,
 }) => {
-  if (initialRoutesError != null) {
-    throw initialRoutesError
-  }
-
-  if (initialRoutes == null) {
-    throw initialRoutesPromise
-  }
+  const initialRoutes = useMemo(() => {
+    return window.__serverContext.matchedRoutes.reduceRight<
+      RouteObjectWithKey[]
+    >(
+      (routes, match) => [
+        {
+          ...match.route,
+          element: createElement(
+            window.__routeModules[match.route.routeId].default
+          ),
+          children: routes,
+        },
+      ],
+      []
+    )
+  }, [])
 
   const [context, setContext] = useState(() => {
     return {
-      // ...(window.__serverContext as Omit<RootContext, 'routes'>),
-      routes: initialRoutes!,
-      version: '',
-      matchedRoutes: [],
-      matchedRoutesAssets: [],
-      mainAssets: [],
+      ...window.__serverContext,
+      routes: initialRoutes,
     }
   })
 
@@ -205,34 +109,45 @@ const InternalRoot: React.FC<RouterProps & { appContext?: unknown }> = ({
     setRoutePending(true)
 
     const handleRouteChange = async () => {
-      try {
-        const path =
-          typeof location === 'string' ? location : location.pathname!
+      const result = await fetch(
+        `/_casterly/route-manifest.json?path=${encodeURIComponent(
+          (location as Location).pathname
+        )}`
+      ).then((res) => res.json() as Promise<Omit<RootContext, 'routes'>>)
 
-        const matchedRoutes = (
-          (matchRoutes(routes, path) as RouteMatchPromiseComponent[] | null) ??
-          []
-        ).reduceRight<RoutePromiseComponent[]>(
-          (routes, match) => [{ ...match.route, children: routes }],
-          []
+      await Promise.all(
+        result.matchedRoutes.map((match) =>
+          import(/* @vite-ignore */ match.route.module).then((exports) => {
+            window.__routeModules[match.route.routeId] = exports
+          })
         )
+      )
 
-        const newRoutes = await mergeRouteAssetsAndRoutes(matchedRoutes)
+      const newRoutes = (
+        result.matchedRoutes as RouteMatchWithKey[]
+      ).reduceRight<RouteObjectWithKey[]>(
+        (routes, match) => [
+          {
+            ...match.route,
+            element: createElement(
+              window.__routeModules[match.route.routeId].default
+            ),
+            children: routes,
+          },
+        ],
+        []
+      )
 
-        if (cancelled) {
-          return
-        }
-
-        setContext((prevContext) => ({
-          ...prevContext,
-          routes: mergeRoutes(prevContext.routes, newRoutes),
-        }))
-        setStateLocation(location)
-        setRoutePending(false)
-      } catch {
-        setStateLocation(location)
-        setRoutePending(false)
+      if (cancelled) {
+        return
       }
+
+      setContext((prevContext) => ({
+        ...prevContext,
+        routes: mergeRoutes(prevContext.routes, newRoutes),
+      }))
+
+      setStateLocation(location)
     }
 
     handleRouteChange()
