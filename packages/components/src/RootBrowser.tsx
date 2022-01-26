@@ -117,9 +117,11 @@ const InternalRoot: React.FC<RouterProps & { appContext?: unknown }> = ({
 
       await Promise.all(
         result.matchedRoutes.map((match) =>
-          import(/* @vite-ignore */ match.route.module).then((exports) => {
-            window.__routeModules[match.route.routeId] = exports
-          })
+          import(/* @vite-ignore */ '/' + match.route.module).then(
+            (exports) => {
+              window.__routeModules[match.route.routeId] = exports
+            }
+          )
         )
       )
 

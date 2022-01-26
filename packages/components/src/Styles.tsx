@@ -26,14 +26,14 @@ export const Styles: React.FC<
     <>
       {matchedRoutesAssets
         .concat(mainAssets)
-        .filter((file) => file.endsWith('.css'))
-        .map((file) => (
+        .filter((asset) => asset.type === 'css')
+        .map((asset) => (
           <link
-            key={file}
+            key={asset.url}
             {...props}
             rel="stylesheet"
             type="text/css"
-            href={`/_casterly${file}`}
+            href={asset.url}
           />
         ))}
     </>

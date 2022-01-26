@@ -13,12 +13,14 @@ export type RouteObjectWithKey = RouteObject & {
 
 export type RouteMatchWithKey = RouteMatch & { route: RouteObjectWithKey }
 
+export type Asset = { url: string; type: 'js' | 'css' }
+
 export interface RootContext {
   version: string | null
   routes: RouteObjectWithKey[]
   matchedRoutes: RouteMatchWithKey[]
-  matchedRoutesAssets: string[]
-  mainAssets: string[]
+  matchedRoutesAssets: Asset[]
+  mainAssets: Asset[]
   devServerPort?: number
 }
 

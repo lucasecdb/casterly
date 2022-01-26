@@ -10,8 +10,8 @@ export const getScriptsFromContext = (context: RootContext): string[] => {
 
   return matchedRoutesAssets
     .concat(mainAssets)
-    .filter((file) => file.endsWith('.js'))
-    .map((file) => process.env.ASSET_PATH + file.slice(1))
+    .filter((file) => file.type === 'js')
+    .map((file) => process.env.ASSET_PATH + file.url.slice(1))
 }
 
 export const Scripts: React.FC<
@@ -84,7 +84,7 @@ window.__vite_plugin_react_preamble_installed__ = true`,
           __html: `
 ${matchedRoutes
   .map((match, index) => {
-    return `import * as route${index} from '${match.route.module}'`
+    return `import * as route${index} from '/${match.route.module}'`
   })
   .join('\n')}
 
@@ -100,14 +100,14 @@ ${matchedRoutes
       />
       {matchedRoutesAssets
         .concat(mainAssets)
-        .filter((file) => /\.[jt]sx?$/.test(file))
-        .map((scriptSource) => (
+        .filter((file) => file.type === 'js')
+        .map((asset) => (
           <script
-            key={scriptSource}
+            key={asset.url}
             {...props}
             type="module"
             async
-            src={scriptSource}
+            src={asset.url}
           />
         ))}
     </>

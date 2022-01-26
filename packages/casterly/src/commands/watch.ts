@@ -1,3 +1,4 @@
+import { promises as fsp } from 'fs'
 import * as path from 'path'
 
 import { paths } from '@casterly/utils'
@@ -6,7 +7,9 @@ import cors from 'cors'
 import express from 'express'
 import { Headers, Request, Response } from 'node-fetch'
 import * as React from 'react'
-import { createServer } from 'vite'
+import type { RollupWatcher, RollupWatcherEvent } from 'rollup'
+import type { Manifest } from 'vite'
+import { build, createServer } from 'vite'
 
 import { createViteConfig } from '../config/viteConfig'
 import { logStore } from '../output/logger'
@@ -79,30 +82,57 @@ export default async function startWatch() {
 
   const { routes, files } = constructRoutesTree(paths.appSrc)
 
-  const serverViteConfig = await createViteConfig({
+  const routeModules = files.map((file) => path.join('src', file))
+
+  const watcher = (await build(
+    createViteConfig({
+      dev: true,
+      isServer: true,
+      routeModules,
+    })
+  )) as RollupWatcher
+
+  await new Promise<void>((resolve) => {
+    const bundleListener = (evt: RollupWatcherEvent) => {
+      if (evt.code === 'BUNDLE_END') {
+        resolve()
+        watcher.removeListener('event', bundleListener)
+      }
+    }
+    watcher.addListener('event', bundleListener)
+  })
+
+  const serverViteConfig = createViteConfig({
     dev: true,
-    isServer: true,
-    routeModules: files.map((file) => path.join(paths.appSrc, file)),
+    isServer: false,
+    routeModules,
   })
 
   const vite = await createServer(serverViteConfig)
 
   async function loadRouteModules(
-    routes: ConfigRoute[]
+    routes: ConfigRoute[],
+    serverManifest: Manifest
   ): Promise<RouteObjectWithModuleName[]> {
     const routeModules = []
 
     for (let i = 0; i < routes.length; i++) {
       const route = routes[i]
 
-      const moduleName = '/src/' + route.file
+      const moduleName = 'src/' + route.file
 
-      const loadedModule = (await vite.ssrLoadModule(moduleName)) as RouteModule
+      const loadedModule = (await import(
+        path.join(
+          paths.appDirectory,
+          'dist/server',
+          serverManifest[moduleName].file
+        )
+      )) as RouteModule
 
       let children
 
       if (route.children) {
-        children = await loadRouteModules(route.children)
+        children = await loadRouteModules(route.children, serverManifest)
       }
 
       routeModules.push({
@@ -118,7 +148,15 @@ export default async function startWatch() {
     return routeModules
   }
 
-  const moduleRoutes = await loadRouteModules(routes)
+  const loadServerManifest = (): Promise<Manifest> =>
+    fsp
+      .readFile(path.join(paths.appDirectory, 'dist/server/manifest.json'))
+      .then((buf) => JSON.parse(buf.toString()))
+
+  const moduleRoutes = await loadRouteModules(
+    routes,
+    await loadServerManifest()
+  )
 
   app.use(vite.middlewares)
 
@@ -177,6 +215,16 @@ export default async function startWatch() {
       routes: moduleRoutes,
     })
 
+    const matchedRouteModules = matchedRoutesResult.matchedRoutes
+      .map((match) =>
+        vite.moduleGraph.getModulesByFile(
+          path.join(paths.appDirectory, match.route.module)
+        )
+      )
+      .filter(<T>(value: T | undefined): value is T => value != null)
+      .map((modules) => Array.from(modules.values()))
+      .reduce((modules, moduleSet) => [...modules, ...moduleSet], [])
+
     const context = {
       status: matchedRoutesResult.status,
       version: null,
@@ -189,9 +237,14 @@ export default async function startWatch() {
           route,
         }
       }),
-      // TODO: route assets, JS and CSS
-      matchedRoutesAssets: [],
-      mainAssets: ['/@vite/client', '/src/app-browser.jsx'],
+      matchedRoutesAssets: matchedRouteModules.map((module) => ({
+        url: module.url,
+        type: module.type,
+      })),
+      mainAssets: [
+        isDev && { url: '/@vite/client', type: 'js' },
+        { url: '/src/app-browser.jsx', type: 'js' },
+      ].filter(Boolean),
       devServerPort: 8081,
     }
 
@@ -200,8 +253,14 @@ export default async function startWatch() {
 
   app.use('*', async (req, res) => {
     try {
-      const { default: handleRequest } = await vite.ssrLoadModule(
-        '/src/app-server.jsx'
+      const serverManifest = await loadServerManifest()
+
+      const { default: handleRequest } = await import(
+        path.join(
+          paths.appDirectory,
+          'dist/server',
+          serverManifest['src/app-server.jsx'].file
+        )
       )
 
       const request = new Request(req.originalUrl, {
@@ -233,7 +292,6 @@ export default async function startWatch() {
 
       res.end(body)
     } catch (e) {
-      vite.ssrFixStacktrace(e as Error)
       console.error(e as any)
 
       res.status(500).send((e as Error).message)

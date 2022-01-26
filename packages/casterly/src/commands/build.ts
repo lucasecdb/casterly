@@ -10,8 +10,9 @@ import { build as buildVite } from 'vite'
 import { checkRequiredFiles, printBuildError } from '../build/utils'
 import { BUILD_ID_FILE } from '../config/constants'
 import paths from '../config/paths'
-import { viteConfig } from '../config/viteConfig'
+import { createViteConfig } from '../config/viteConfig'
 import * as Log from '../output/log'
+import { constructRoutesTree } from '../routes'
 
 // Makes the script crash on unhandled rejections instead of silently
 // ignoring them. In the future, promise rejections that are not handled will
@@ -27,7 +28,26 @@ async function build(previousFileSizes: {
 }) {
   Log.info('Creating an optimized production build...')
 
-  await buildVite(viteConfig)
+  const { files } = constructRoutesTree(paths.appSrc)
+
+  const routeModules = files.map((filePath) => join('src', filePath))
+
+  await Promise.all([
+    buildVite(
+      createViteConfig({
+        routeModules,
+        dev: false,
+        isServer: true,
+      })
+    ),
+    buildVite(
+      createViteConfig({
+        routeModules,
+        dev: false,
+        isServer: false,
+      })
+    ),
+  ])
 
   return {
     previousFileSizes,

@@ -1,25 +1,7 @@
-import * as path from 'path'
-
 import { paths } from '@casterly/utils'
 import react from '@vitejs/plugin-react'
 import polyfillNode from 'rollup-plugin-polyfill-node'
 import type { InlineConfig } from 'vite'
-
-export const viteConfig: InlineConfig = {
-  root: paths.appDirectory,
-  base: '/',
-  plugins: [react(), polyfillNode()],
-  build: {
-    rollupOptions: {
-      input: [paths.appServerEntry /*paths.appRoutesJs*/],
-    },
-    commonjsOptions: {
-      transformMixedEsModules: true,
-    },
-    manifest: true,
-    ssrManifest: true,
-  },
-}
 
 export interface Options {
   isServer?: boolean
@@ -28,37 +10,36 @@ export interface Options {
   routeModules: string[]
 }
 
-export const createViteConfig = async (
-  options?: Options
-): Promise<InlineConfig> => {
+export const createViteConfig = (options?: Options): InlineConfig => {
   const { isServer = false, dev = false, routeModules = [] } = options ?? {}
 
   return {
     root: paths.appDirectory,
     base: '/',
     plugins: [react(), polyfillNode()],
+    mode: dev ? 'development' : 'production',
+    clearScreen: false,
+    logLevel: 'silent',
     build: {
-      minify: dev ? false : undefined,
+      target: isServer ? 'node12' : 'modules',
+      minify: dev || isServer ? false : true,
       outDir: isServer ? 'dist/server' : 'dist/client',
       rollupOptions: {
         input: [
           isServer ? paths.appServerEntry : paths.appBrowserEntry,
-          ...routeModules.map((p) => path.join(paths.appDirectory, p)),
-          // paths.appRoutesJs,
+          ...routeModules,
         ],
       },
       commonjsOptions: {
         transformMixedEsModules: true,
       },
       manifest: true,
+      ssr: isServer,
       ssrManifest: isServer,
+      watch: isServer && dev ? {} : undefined,
     },
-    ...(isServer
-      ? {
-          server: {
-            middlewareMode: 'ssr',
-          },
-        }
-      : null),
+    server: {
+      middlewareMode: 'ssr',
+    },
   }
 }
