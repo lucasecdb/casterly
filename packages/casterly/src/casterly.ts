@@ -1,12 +1,26 @@
-#!/usr/bin/env node
-
 import chalk from 'chalk'
 
+import * as cli from './cli/commands'
+
 const commands: { [command: string]: () => Promise<void> } = {
-  build: async () =>
-    await import('../src/commands/build').then((i) => i.default()),
-  watch: async () =>
-    await import('../src/commands/watch').then((i) => i.default()),
+  dev: async () => {
+    console.error(
+      chalk`Command {bold dev} has been deprecated. Please use {bold casterly watch}`
+    )
+
+    process.exit(1)
+  },
+  start: async () => {
+    console.error(chalk`Command {bold start} has been deprecated.`)
+
+    process.exit(1)
+  },
+  build: async () => {
+    await cli.build()
+  },
+  watch: async () => {
+    await cli.watch()
+  },
 }
 
 const command = process.argv[2]
@@ -14,13 +28,6 @@ const command = process.argv[2]
 const hasCommand = Boolean(commands[command])
 
 if (!hasCommand) {
-  if (command === 'dev' || command === 'start') {
-    console.error(
-      chalk`Command {bold dev} and {bold start} have been deprecated.`
-    )
-    process.exit(1)
-  }
-
   // @ts-ignore
   const formatter = new Intl.ListFormat('en-GB')
 
@@ -32,7 +39,8 @@ if (!hasCommand) {
   process.exit(1)
 }
 
-const defaultEnv = command === 'dev' ? 'development' : 'production'
+const defaultEnv = command === 'watch' ? 'development' : 'production'
+
 process.env.NODE_ENV = process.env.NODE_ENV || defaultEnv
 
 // Make sure commands gracefully respect termination signals (e.g. from Docker)

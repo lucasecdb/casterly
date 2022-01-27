@@ -12,6 +12,6 @@
     "allowJs": true,
     "composite": true
   },
-  "include": ["./src/**/*.ts", "./src/**/*.js", "./bin/*"],
-  "exclude": ["lib/**/*", "./*.js", "./*.d.ts"]
+  "include": ["./src/**/*.ts", "./src/**/*.js"],
+  "exclude": ["lib/**/*"]
 }
