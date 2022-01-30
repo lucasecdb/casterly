@@ -1,5 +1,4 @@
 import * as fs from 'fs'
-import path from 'path'
 
 import * as compiler from '../compiler'
 import { readConfig } from '../config'
@@ -15,12 +14,8 @@ export async function watch() {
 export async function build() {
   const config = readConfig(fs.realpathSync(process.cwd()))
 
-  const { files } = constructRoutesTree(config.appSrc)
+  const { routeIdToFileMap } = constructRoutesTree(config.appSrc)
 
-  const routeModules = files.map((filePath) => path.join('src', filePath))
-
-  await Promise.all([
-    compiler.buildClient({ mode: 'production', routeModules, config }),
-    compiler.buildServer({ mode: 'production', routeModules, config }),
-  ])
+  await compiler.buildClient({ mode: 'production', routeIdToFileMap, config })
+  await compiler.buildServer({ mode: 'production', routeIdToFileMap, config })
 }

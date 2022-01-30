@@ -71,6 +71,7 @@
     "postcss-flexbugs-fixes": "^5.0.1",
     "postcss-preset-env": "^6.7.0",
     "postcss-safe-parser": "^6.0.0",
+    "pretty-ms": "^7.0.1",
     "react-refresh": "^0.10.0",
     "recursive-readdir": "^2.2.2",
     "resolve": "^1.18.1",

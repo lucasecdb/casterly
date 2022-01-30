@@ -83,7 +83,11 @@ export function constructRoutesTree(srcDir: string) {
     return routes
   }
 
-  return { routes: createRoutesTree(), files: Object.values(files) }
+  return {
+    routes: createRoutesTree(),
+    files: Object.values(files),
+    routeIdToFileMap: files,
+  }
 }
 
 function createRoutePath(routePath: string) {
