@@ -25,7 +25,7 @@
     "@types/expect-puppeteer": "^4.4.6",
     "@types/get-port": "^4.2.0",
     "@types/jest": "^26.0.24",
-    "@types/node": "^14.14.17",
+    "@types/node": "^17.0.14",
     "@types/react": "^17.0.14",
     "@types/react-dom": "^17.0.9",
     "babel-jest": "^27.2.5",

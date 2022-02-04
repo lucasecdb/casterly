@@ -3,8 +3,9 @@ import * as path from 'path'
 // @ts-ignore
 import virtual from '@rollup/plugin-virtual'
 import react from '@vitejs/plugin-react'
+import express from 'express'
 import polyfillNode from 'rollup-plugin-polyfill-node'
-import { build } from 'vite'
+import { build, createServer } from 'vite'
 import type { InlineConfig } from 'vite'
 
 import type { CasterlyConfig } from './config'
@@ -57,6 +58,35 @@ export async function buildClient({
   )
 
   return watcherOrBuildResult
+}
+
+export async function startClientAssetServer({ mode, config }: BuildOptions) {
+  const server = await createServer(
+    createViteConfig({
+      watch: false,
+      mode,
+      isServer: false,
+      config,
+    })
+  )
+
+  const expressServer = express()
+
+  expressServer.use(server.middlewares)
+
+  const httpServer = expressServer.listen(config.devServerPort)
+
+  return () => {
+    return Promise.all([
+      server.close(),
+      new Promise<void>((resolve, reject) => {
+        httpServer.close((err) => {
+          if (err) return reject(err)
+          resolve()
+        })
+      }),
+    ])
+  }
 }
 
 function createViteConfig(options: {

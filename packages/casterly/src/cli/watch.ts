@@ -60,6 +60,14 @@ export default async function startWatch(config: CasterlyConfig) {
     console.error(`  ${err.message}`)
   }
 
+  browserWatcher.close()
+
+  await compiler.startClientAssetServer({
+    mode: 'development',
+    config,
+  })
+
+  /*
   browserWatcher.addListener('event', (event) => {
     if (event.code === 'START') {
       console.log(
@@ -77,6 +85,7 @@ export default async function startWatch(config: CasterlyConfig) {
       console.error(`  ${event.error.message}`)
     }
   })
+  */
 }
 
 function waitForFirstBuild(watcher: RollupWatcher) {

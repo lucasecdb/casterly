@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "lib": ["ES6", "DOM"],
-    "jsx": "react",
+    "jsx": "preserve",
     "target": "es5",
     "module": "esnext",
     "esModuleInterop": true,
@@ -12,5 +12,5 @@
     "skipLibCheck": true
   },
   "include": ["./src/**/*.ts", "./src/**/*.tsx"],
-  "exclude": ["lib/**/*", "./*.js", "./*.d.ts"]
+  "exclude": ["./lib/**/*", "./*.js", "./*.d.ts"]
 }

@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "lib": ["esnext"],
+    "lib": ["esnext", "dom"],
     "target": "es2017",
     "module": "commonjs",
     "esModuleInterop": true,
@@ -10,6 +10,6 @@
     "outDir": "lib",
     "skipLibCheck": true
   },
-  "include": ["./src/**/*.ts"],
-  "exclude": ["lib", "./*.js", "./*.d.ts"]
+  "include": ["./**/*.ts"],
+  "exclude": ["./lib/**/*", "./*.js", "./*.d.ts"]
 }
