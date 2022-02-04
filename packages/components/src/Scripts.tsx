@@ -40,7 +40,7 @@ export const Scripts: React.FC<
     matchedRoutes,
     mainAssets,
     version,
-    devServerPort,
+    assetServerUrl,
   } = useRootContext()
 
   return (
@@ -59,7 +59,7 @@ export const Scripts: React.FC<
                 matchedRoutesAssets,
                 matchedRoutes,
                 mainAssets,
-                devServerPort,
+                assetServerUrl,
               })
             ) +
             ')',
@@ -70,7 +70,7 @@ export const Scripts: React.FC<
           nonce={nonce}
           type="module"
           dangerouslySetInnerHTML={{
-            __html: `import RefreshRuntime from '/@react-refresh'
+            __html: `import RefreshRuntime from '${assetServerUrl}/@react-refresh'
 RefreshRuntime.injectIntoGlobalHook(window)
 window.$RefreshReg$ = () => {}
 window.$RefreshSig$ = () => (type) => type
@@ -78,28 +78,7 @@ window.__vite_plugin_react_preamble_installed__ = true`,
           }}
         />
       )}
-      <script
-        type="module"
-        dangerouslySetInnerHTML={{
-          __html: `
-${matchedRoutes
-  .map((match, index) => {
-    return `import * as route${index} from '/${match.route.module}'`
-  })
-  .join('\n')}
-
-window.__routeModules = {
-${matchedRoutes
-  .map((match, index) => {
-    return `"${match.route.routeId}": route${index}`
-  })
-  .join(',')}
-}
-`,
-        }}
-      />
       {matchedRoutesAssets
-        .concat(mainAssets)
         .filter((file) => file.type === 'js')
         .map((asset) => (
           <script
@@ -107,7 +86,37 @@ ${matchedRoutes
             {...props}
             type="module"
             async
-            src={asset.url}
+            src={assetServerUrl + asset.url}
+          />
+        ))}
+      <script
+        type="module"
+        dangerouslySetInnerHTML={{
+          __html: `
+${matchedRoutes
+  .map((match, index) => {
+    return `import * as route${index} from '${assetServerUrl}/${match.route.file}'`
+  })
+  .join('\n')}
+
+window.__routeModules = {
+${matchedRoutes
+  .map((match, index) => {
+    return `"${match.route.id}": route${index}`
+  })
+  .join(',')}
+}
+`,
+        }}
+      />
+      {mainAssets
+        .filter((file) => file.type === 'js')
+        .map((asset) => (
+          <script
+            key={asset.url}
+            {...props}
+            type="module"
+            src={assetServerUrl + asset.url}
           />
         ))}
     </>
