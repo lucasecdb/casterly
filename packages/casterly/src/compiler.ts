@@ -114,7 +114,7 @@ function createViteConfig(options: {
     configFile: false,
     assetsInclude: ['client/manifest.json'],
     build: {
-      emptyOutDir: false,
+      emptyOutDir: mode === 'production' && !isServer,
       target: isServer ? 'node12' : 'es2020',
       minify: mode === 'production' && !isServer,
       outDir: isServer ? 'dist/' : 'dist/client',
@@ -128,12 +128,13 @@ function createViteConfig(options: {
             ])
           ),
         },
+        preserveEntrySignatures: 'allow-extension',
       },
       commonjsOptions: {
         transformMixedEsModules: true,
       },
       manifest: true,
-      ssr: true,
+      ssr: isServer,
       ssrManifest: !isServer,
       watch: watch ? {} : undefined,
     },
