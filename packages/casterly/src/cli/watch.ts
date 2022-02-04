@@ -4,20 +4,16 @@ import type { RollupWatcher, RollupWatcherEvent } from 'rollup'
 
 import * as compiler from '../compiler'
 import type { CasterlyConfig } from '../config'
-import { constructRoutesTree } from '../routes'
 
 export default async function startWatch(config: CasterlyConfig) {
   process.env.NODE_ENV = 'development'
 
   console.log(chalk`{dim casterly}  {magenta wait} Starting build`)
 
-  const { routeIdToFileMap } = constructRoutesTree(config.appSrc)
-
   const browserWatcher = (await compiler.buildClient({
     config,
     watch: true,
     mode: 'development',
-    routeIdToFileMap,
   })) as RollupWatcher
 
   const browserResult = await Promise.allSettled([
@@ -28,7 +24,6 @@ export default async function startWatch(config: CasterlyConfig) {
     config,
     watch: true,
     mode: 'development',
-    routeIdToFileMap,
   })) as RollupWatcher
 
   const serverResult = await Promise.allSettled([

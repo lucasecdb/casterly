@@ -10,7 +10,7 @@ function isRouteModule(file: string) {
 export interface ConfigRoute {
   path: string
   file: string
-  children?: ConfigRoute[]
+  children?: Record<string, ConfigRoute>
   id: string
   parentId?: string
   index?: boolean
@@ -22,19 +22,21 @@ export interface ConfigRoute {
  *
  * Example:
  *
- *   let routes = contructRoutesTree(
- *      [
- *        'src/routes/index.tsx',
- *        'src/routes/links.tsx',
- *      ],
- *      'src/routes'
- *   )
+ * ```js
+ * let routes = contructRoutesTree(
+ *    [
+ *      'src/routes/index.tsx',
+ *      'src/routes/links.tsx',
+ *    ],
+ *    'src/routes'
+ * )
  *
- *   console.log(routes)
- *   // [
- *   //   { path: '/', file: 'src/routes/index.tsx' },
- *   //   { path: '/links', file: 'src/routes/links.tsx' },
- *   // ]
+ * console.log(routes)
+ * // [
+ * //   { path: '/', file: 'src/routes/index.tsx' },
+ * //   { path: '/links', file: 'src/routes/links.tsx' },
+ * // ]
+ * ```
  */
 export function constructRoutesTree(srcDir: string) {
   const files: Record<string, string> = {}
@@ -49,45 +51,47 @@ export function constructRoutesTree(srcDir: string) {
 
   const routeIds = Object.keys(files)
 
-  function createRoutesTree(parentId?: string | undefined): ConfigRoute[] {
+  function createRoutesTree(
+    parentId?: string | undefined
+  ): Record<string, ConfigRoute> {
     const childRoutes = routeIds.filter(
       (id) => findParentRoute(routeIds, id) === parentId
     )
 
-    const routes = []
+    const routes: Record<string, ConfigRoute> = {}
 
     for (const routeId of childRoutes) {
       const routePath = createRoutePath(
         routeId.slice((parentId || 'routes').length + 1)
       )
 
+      const childrenRoutes = createRoutesTree(routeId)
+
       const route: ConfigRoute = {
         id: routeId,
         parentId,
         path: routePath,
         file: files[routeId],
-        children: createRoutesTree(routeId),
+        children: childrenRoutes,
       }
+
+      Object.assign(routes, childrenRoutes)
 
       const isIndexFile = routeId.endsWith('/index')
 
       if (isIndexFile) {
         route.index = true
 
-        routes.push(route)
+        routes[routeId] = route
       } else {
-        routes.push(route)
+        routes[routeId] = route
       }
     }
 
     return routes
   }
 
-  return {
-    routes: createRoutesTree(),
-    files: Object.values(files),
-    routeIdToFileMap: files,
-  }
+  return createRoutesTree()
 }
 
 function createRoutePath(routePath: string) {

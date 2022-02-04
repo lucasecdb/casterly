@@ -11,11 +11,6 @@ import type { CasterlyConfig } from './config'
 
 interface BuildOptions {
   /**
-   * Map with the routeId as key, and the corresponding file for that route,
-   * relative to the application `src` directory
-   */
-  routeIdToFileMap: Record<string, string>
-  /**
    * Whether to continuously watch for file changes
    */
   watch?: boolean
@@ -31,7 +26,6 @@ interface BuildOptions {
 }
 
 export async function buildServer({
-  routeIdToFileMap,
   watch = false,
   mode,
   config,
@@ -41,7 +35,6 @@ export async function buildServer({
       watch,
       mode,
       isServer: true,
-      routeIdToFileMap,
       config,
     })
   )
@@ -50,7 +43,6 @@ export async function buildServer({
 }
 
 export async function buildClient({
-  routeIdToFileMap,
   watch = false,
   mode,
   config,
@@ -60,7 +52,6 @@ export async function buildClient({
       watch,
       mode,
       isServer: false,
-      routeIdToFileMap,
       config,
     })
   )
@@ -73,17 +64,16 @@ function createViteConfig(options: {
   mode: 'production' | 'development'
   watch: boolean
   profile?: boolean
-  routeIdToFileMap: Record<string, string>
   config: CasterlyConfig
 }): InlineConfig {
-  const { isServer, mode, routeIdToFileMap = {}, watch, config } = options
+  const { isServer, mode, watch, config } = options
 
   return {
     root: config.appDirectory,
     base: '/',
     plugins: [
       virtual({
-        '/server-entry': getServerEntrypointContent(routeIdToFileMap, config),
+        '/server-entry': getServerEntrypointContent(config),
       }),
       react(),
       polyfillNode(),
@@ -102,9 +92,9 @@ function createViteConfig(options: {
         input: {
           index: isServer ? '/server-entry' : config.appBrowserEntry,
           ...Object.fromEntries(
-            Object.entries(routeIdToFileMap).map(([routeId, fileName]) => [
+            Object.entries(config.routes).map(([routeId, configRoute]) => [
               routeId,
-              path.join('src', fileName),
+              path.join('src', configRoute.file),
             ])
           ),
         },
@@ -123,29 +113,43 @@ function createViteConfig(options: {
   }
 }
 
-function getServerEntrypointContent(
-  routeIdToFileMap: Record<string, string>,
-  config: CasterlyConfig
-) {
+function getServerEntrypointContent(config: CasterlyConfig) {
   return `
 import * as server from '${config.appServerEntry}'
-${Object.values(routeIdToFileMap)
+${Object.values(config.routes)
   .map(
     (module, index) =>
-      `import * as route${index} from '${path.join(config.appSrc, module)}'`
+      `import * as route${index} from '${path.join(
+        config.appSrc,
+        module.file
+      )}'`
   )
   .join('\n')}
-import manifest from '${path.join(
+
+export { default as manifest } from '${path.join(
     config.appBuildFolder,
     'client/manifest.json'
   )}'
 
-const routes = {
-  ${Object.keys(routeIdToFileMap)
-    .map((routeId, index) => `'${routeId}': route${index},`)
+export const routes = {
+  ${Object.keys(config.routes)
+    .map(
+      (routeId, index) => `'${routeId}': {
+    id: ${JSON.stringify(routeId)},
+    path: ${JSON.stringify(config.routes[routeId].path)},
+    parentId: ${JSON.stringify(config.routes[routeId].parentId)},
+    index: ${config.routes[routeId].index},
+    file: ${JSON.stringify(path.join('src', config.routes[routeId].file))},
+    module: route${index},
+  },`
+    )
     .join('\n')}
 }
 
-export { server, routes, manifest }
+export const assetServerUrl = import.meta.env.DEV ? 'http://localhost:${
+    config.devServerPort
+  }' : ''
+
+export { server }
 `
 }
