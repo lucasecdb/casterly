@@ -113,6 +113,7 @@ function createViteConfig(options: {
     logLevel: 'silent',
     configFile: false,
     assetsInclude: ['client/manifest.json'],
+    cacheDir: config.appCacheDir,
     build: {
       emptyOutDir: mode === 'production' && !isServer,
       target: isServer ? 'node12' : 'es2020',

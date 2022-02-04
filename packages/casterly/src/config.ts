@@ -18,6 +18,7 @@ export interface CasterlyConfig {
   appPublic: string
   appServerEntry: string
   appSrc: string
+  appCacheDir: string
 
   devServerPort: number
   buildFolder: string
@@ -63,6 +64,7 @@ export function readConfig(dir: string): CasterlyConfig {
   const appServerEntry = resolveModule(resolveApp, 'src/app-server')
   const appBrowserEntry = resolveModule(resolveApp, 'src/app-browser')
   const appSrc = resolveApp('src')
+  const appCacheDir = resolveApp('dist/.cache')
 
   const routes = constructRoutesTree(appSrc)
 
@@ -75,6 +77,7 @@ export function readConfig(dir: string): CasterlyConfig {
     appPublic,
     appServerEntry,
     appSrc,
+    appCacheDir,
     devServerPort: 8081,
     buildFolder: 'dist',
     experiments: {
