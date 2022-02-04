@@ -1,27 +1,31 @@
-import React, { useContext } from 'react'
-import type { RouteMatch, RouteObject } from 'react-router'
+import type { RouteModule } from '@casterly/core'
+import React, { createElement, useContext, useMemo } from 'react'
+import type { RouteMatch } from 'react-router'
 
-export type RouteObjectWithKey = RouteObject & {
-  key: number
-  routeId: string
-  module: string
-  children?: RouteObjectWithKey[]
-  props?: Record<string, unknown>
-  metadata?: unknown
-  preloadedData?: unknown
+/**
+ * NOTE: change this in @casterly/core whenever this changes
+ */
+export type RouteObject = {
+  id: string
+  path: string
+  file: string
+  parentId: string
+  index?: boolean
+  module: RouteModule
+  children?: RouteObject[]
 }
 
-export type RouteMatchWithKey = RouteMatch & { route: RouteObjectWithKey }
+export type RouteMatchWithKey = RouteMatch & { route: RouteObject }
 
 export type Asset = { url: string; type: 'js' | 'css' }
 
 export interface RootContext {
   version: string | null
-  routes: RouteObjectWithKey[]
+  routes: ClientRoute[]
   matchedRoutes: RouteMatchWithKey[]
   matchedRoutesAssets: Asset[]
   mainAssets: Asset[]
-  devServerPort?: number
+  assetServerUrl: string
 }
 
 const ctx = React.createContext<RootContext | null>(null)
@@ -38,9 +42,37 @@ export const useRootContext = () => {
   return value
 }
 
-export const RootContextProvider: React.FC<{ value: RootContext }> = ({
+export interface RootContextProps {
+  value: Omit<RootContext, 'routes'> & { routes: RouteObject[] }
+}
+
+export const RootContextProvider: React.FC<RootContextProps> = ({
   value,
   children,
 }) => {
-  return <ctx.Provider value={value}>{children}</ctx.Provider>
+  const contextValue = useMemo(() => {
+    const routes = createClientRoutes(value.routes)
+
+    return {
+      ...value,
+      routes,
+    }
+  }, [value])
+
+  return <ctx.Provider value={contextValue}>{children}</ctx.Provider>
+}
+
+export type ClientRoute = Omit<
+  RouteObject,
+  'id' | 'file' | 'parentId' | 'module' | 'children'
+> & {
+  children?: ClientRoute[]
+}
+
+function createClientRoutes(routes: RouteObject[]): ClientRoute[] {
+  return routes.map((route) => ({
+    path: route.path,
+    element: createElement(route.module.default),
+    children: createClientRoutes(route.children ?? []),
+  }))
 }

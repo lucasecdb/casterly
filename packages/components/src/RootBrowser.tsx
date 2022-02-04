@@ -1,8 +1,7 @@
+import type { RouteModule } from '@casterly/core'
 import type { BrowserHistory, Update } from 'history'
 import { createBrowserHistory } from 'history'
 import React, {
-  Suspense,
-  createElement,
   useEffect,
   useLayoutEffect,
   useMemo,
@@ -13,11 +12,7 @@ import React, {
 import type { RouterProps } from 'react-router'
 import { Router } from 'react-router'
 
-import type {
-  RootContext,
-  RouteMatchWithKey,
-  RouteObjectWithKey,
-} from './RootContext'
+import type { RootContext, RouteMatchWithKey, RouteObject } from './RootContext'
 import { RootContextProvider } from './RootContext'
 import { RoutePendingContextProvider } from './RoutePendingContext'
 
@@ -28,18 +23,14 @@ declare global {
   }
 }
 
-type RouteModule = {
-  default: React.ComponentType<any>
-}
-
 const mergeRoutes = (
-  currentRoutes: RouteObjectWithKey[],
-  newRoutes: RouteObjectWithKey[]
+  currentRoutes: RouteObject[],
+  newRoutes: RouteObject[]
 ) => {
-  const routes: RouteObjectWithKey[] = []
+  const routes: RouteObject[] = []
 
   currentRoutes.forEach((route) => {
-    const newRoute = newRoutes.find(({ routeId }) => route.routeId === routeId)
+    const newRoute = newRoutes.find(({ id }) => route.id === id)
 
     const children = newRoute
       ? mergeRoutes(route.children ?? [], newRoute.children ?? [])
@@ -52,7 +43,7 @@ const mergeRoutes = (
   })
 
   newRoutes.forEach((newRoute) => {
-    if (currentRoutes.find(({ routeId }) => newRoute.routeId === routeId)) {
+    if (currentRoutes.find(({ id }) => newRoute.id === id)) {
       return
     }
 
@@ -69,15 +60,11 @@ const InternalRoot: React.FC<RouterProps & { appContext?: unknown }> = ({
   children,
 }) => {
   const initialRoutes = useMemo(() => {
-    return window.__serverContext.matchedRoutes.reduceRight<
-      RouteObjectWithKey[]
-    >(
+    return window.__serverContext.matchedRoutes.reduceRight<RouteObject[]>(
       (routes, match) => [
         {
           ...match.route,
-          element: createElement(
-            window.__routeModules[match.route.routeId].default
-          ),
+          module: window.__routeModules[match.route.id],
           children: routes,
         },
       ],
@@ -117,23 +104,19 @@ const InternalRoot: React.FC<RouterProps & { appContext?: unknown }> = ({
 
       await Promise.all(
         result.matchedRoutes.map((match) =>
-          import(/* @vite-ignore */ '/' + match.route.module).then(
-            (exports) => {
-              window.__routeModules[match.route.routeId] = exports
-            }
-          )
+          import(/* @vite-ignore */ '/' + match.route.file).then((exports) => {
+            window.__routeModules[match.route.id] = exports
+          })
         )
       )
 
       const newRoutes = (
         result.matchedRoutes as RouteMatchWithKey[]
-      ).reduceRight<RouteObjectWithKey[]>(
+      ).reduceRight<RouteObject[]>(
         (routes, match) => [
           {
             ...match.route,
-            element: createElement(
-              window.__routeModules[match.route.routeId].default
-            ),
+            module: window.__routeModules[match.route.id],
             children: routes,
           },
         ],
@@ -192,15 +175,13 @@ export const RootBrowser: React.FC<{ appContext?: unknown }> = ({
   useLayoutEffect(() => history.listen(dispatch), [history])
 
   return (
-    <Suspense fallback={null}>
-      <InternalRoot
-        navigationType={state.action}
-        location={state.location}
-        navigator={history}
-        appContext={appContext}
-      >
-        {children}
-      </InternalRoot>
-    </Suspense>
+    <InternalRoot
+      navigationType={state.action}
+      location={state.location}
+      navigator={history}
+      appContext={appContext}
+    >
+      {children}
+    </InternalRoot>
   )
 }
